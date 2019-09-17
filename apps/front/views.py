@@ -9,9 +9,9 @@ host = 'http://www.ljsb.top:5000'
 def index():
     return 'front index'
 
-@bp.route('/gender')
+@bp.route('/channels')
 def gender():
-    gender = request.args.get('gender')  # 1 男 0 女
+    gender = request.args.get('channel')  # 1 男 0 女
     if gender == '1':
         gender = 1
     elif gender == '0':
@@ -21,9 +21,13 @@ def gender():
     type_list = []
     types = NovelType.query.filter_by(gender=gender).all()
     for type in types:
-        cover = host + type.cover
+        if not type.cover:
+            cover_str = ""
+        else:
+            cover_str = type.cover
+        cover = host + cover_str
         type_list.append(
-            {'id': type.id, 'type': type.type, 'cover': cover}
+            {'id': type.id, 'type': type.type, 'cover': cover, 'channelId': gender}
         )
     # {"retCode": 200, "msg": "success", "result": type_list}
     return jsonify({"retCode": 200, "msg": "success", "result": type_list})
