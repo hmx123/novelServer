@@ -24,6 +24,7 @@ class NovelType(db.Model):
     __tablename__ = 'novel_type'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     type = db.Column(db.String(64))
+    cover = db.Column(db.String(255), comment='分类封面')
     addtime = db.Column(db.DateTime)
     gender = db.Column(db.Integer, comment='1男频 0女频')
 

@@ -4,7 +4,7 @@ from flask import Blueprint, request, jsonify
 from apps.common.models import NovelType, Novels, Chapters, Contents, Author
 
 bp = Blueprint("front", __name__, url_prefix='/front')
-
+host = 'http://www.ljsb.top:5000'
 @bp.route('/')
 def index():
     return 'front index'
@@ -21,17 +21,26 @@ def gender():
     type_list = []
     types = NovelType.query.filter_by(gender=gender).all()
     for type in types:
+        cover = host + type.cover
         type_list.append(
-            {'id': type.id, 'type': type.type}
+            {'id': type.id, 'type': type.type, 'cover': cover}
         )
     # {"retCode": 200, "msg": "success", "result": type_list}
     return jsonify({"retCode": 200, "msg": "success", "result": type_list})
-
+# page页码、limit：返回数量
 @bp.route('/classify')
 def classify():
     classify = request.args.get('classify')
+    page = request.args.get('page')
+    if not page or not page.isdigit():
+        page = 1
+
+    limit = request.args.get('limit')
+    if not limit or not limit.isdigit():
+        limit = 10
+    offset = (int(page) - 1) * int(limit)
     if classify and classify.isdigit():
-        novels = Novels.query.filter_by(label=classify).all()
+        novels = Novels.query.filter_by(label=classify).limit(limit).offset(offset).all()
     else:
         return jsonify({"retCode": 400, "msg": "args error", "result": []})
     novel_list = []
@@ -72,8 +81,16 @@ def author():
 @bp.route('/chapter')
 def chapter():
     bookId = request.args.get('book')
+    page = request.args.get('page')
+    if not page or not page.isdigit():
+        page = 1
+
+    limit = request.args.get('limit')
+    if not limit or not limit.isdigit():
+        limit = 10
+    offset = (int(page)-1)*int(limit)
     if bookId and bookId.isdigit():
-        chapters = Chapters.query.filter_by(novelId=bookId).order_by(Chapters.chapterId).all()
+        chapters = Chapters.query.filter_by(novelId=bookId).order_by(Chapters.chapterId).limit(limit).offset(offset).all()
     else:
         return jsonify({"retCode": 400, "msg": "args error", "result": []})
     chapter_list = []
@@ -81,7 +98,6 @@ def chapter():
         chapter_list.append({
             "id": chapter.id,
             "name": chapter.name,
-            "number": chapter.number,
             "state": chapter.state,
             "created": chapter.created,
             "updated": chapter.updated,
@@ -100,7 +116,6 @@ def content():
         return jsonify({"retCode": 400, "msg": "args error", "result": []})
     content_detail = {
         'title': content.title,
-        "number": content.number,
         "content": content.content,
         "state": content.state,
         "created": content.created,
@@ -115,11 +130,19 @@ es = Elasticsearch()
 @bp.route('/search')
 def search():
     keyword = request.args.get('keyword')
+    page = request.args.get('page')
+    if not page or not page.isdigit():
+        page = 1
+    limit = request.args.get('limit')
+    if not limit or not limit.isdigit():
+        limit = 2
+    start = (int(page) - 1) * int(limit)  # 开始的文章
+    end = start + int(limit)
     if keyword:
         body = {"query": {"match": {"title": keyword}}}
         result = es.search(index="novel-index", body=body)
         novels = []
-        for item in result["hits"]["hits"]:
+        for item in result["hits"]["hits"][start:end]:
             novelid = item['_id']
             novel = Novels.query.get(novelid)
             novels.append({
