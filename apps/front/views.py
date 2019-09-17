@@ -1,6 +1,7 @@
+from elasticsearch import Elasticsearch
 from flask import Blueprint, request, jsonify
 
-from apps.common.models import NovelType, Novels, Chapters, Contents
+from apps.common.models import NovelType, Novels, Chapters, Contents, Author
 
 bp = Blueprint("front", __name__, url_prefix='/front')
 
@@ -53,6 +54,21 @@ def classify():
         )
     return jsonify({"retCode": 200, "msg": "success", "result": novel_list})
 
+@bp.route('/author')
+def author():
+    authorId = request.args.get('author')
+    if authorId and authorId.isdigit():
+        author = Author.query.get(authorId)
+    else:
+        return jsonify({"retCode": 400, "msg": "args error", "result": []})
+    author = {
+        "id": author.id,
+        "name": author.name,
+        "avatar": author.avatar,
+        "summary": author.summary
+    }
+    return jsonify({"retCode": 200, "msg": "success", "result": author})
+
 @bp.route('/chapter')
 def chapter():
     bookId = request.args.get('book')
@@ -95,7 +111,33 @@ def content():
     return jsonify({"retCode": 200, "msg": "success", "result": content_detail})
 
 # 搜索功能
+es = Elasticsearch()
 @bp.route('/search')
 def search():
-    pass
+    keyword = request.args.get('keyword')
+    if keyword:
+        body = {"query": {"match": {"title": keyword}}}
+        result = es.search(index="novel-index", body=body)
+        novels = []
+        for item in result["hits"]["hits"]:
+            novelid = item['_id']
+            novel = Novels.query.get(novelid)
+            novels.append({
+                "id": novel.id,
+                "name": novel.name,
+                "cover": novel.cover,
+                "summary": novel.summary,
+                "label": novel.label,
+                "state": novel.state,
+                "enabled": novel.enabled,
+                "words": novel.words,
+                "created": novel.created,
+                "updated": novel.updated,
+                "authorId": novel.authorId,
+                "extras": ""
+            })
+        return jsonify({"retCode": 200, "msg": "success", "result": novels})
+    else:
+        return jsonify({"retCode": 400, "msg": "args error", "result": []})
+
 
