@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch
 from flask import Blueprint, request, jsonify
 
-from apps.common.models import NovelType, Novels, Chapters, Contents, Author
+from apps.common.models import NovelType, Novels, Chapters, Contents, Author, Monthly, MonthlyNovel
 
 bp = Blueprint("front", __name__, url_prefix='/front')
 host = 'http://www.ljsb.top:5000'
@@ -49,13 +49,15 @@ def classify():
         return jsonify({"retCode": 400, "msg": "args error", "result": []})
     novel_list = []
     for novel in novels:
+        # 根据分类id获取分类
+        novel_type = NovelType.query.get(novel.label)
         novel_list.append(
             {
                 "id": novel.id,
                 "name": novel.name,
                 "cover": novel.cover,
                 "summary": novel.summary,
-                "label": novel.label,
+                "label": novel_type.type,
                 "state": novel.state,
                 "enabled": novel.enabled,
                 "words": novel.words,
@@ -139,22 +141,26 @@ def search():
         page = 1
     limit = request.args.get('limit')
     if not limit or not limit.isdigit():
-        limit = 2
+        limit = 10
     start = (int(page) - 1) * int(limit)  # 开始的文章
     end = start + int(limit)
     if keyword:
         body = {"query": {"match": {"title": keyword}}}
         result = es.search(index="novel-index", body=body)
-        novels = []
+        novel_list = []
+        novelId_list = []
         for item in result["hits"]["hits"][start:end]:
-            novelid = item['_id']
-            novel = Novels.query.get(novelid)
-            novels.append({
+            novelId_list.append(item['_id'])
+        novels = Novels.query.filter(Novels.id.in_(novelId_list)).all()
+        for novel in novels:
+            # 根据分类id获取分类
+            novel_type = NovelType.query.get(novel.label)
+            novel_list.append({
                 "id": novel.id,
                 "name": novel.name,
                 "cover": novel.cover,
                 "summary": novel.summary,
-                "label": novel.label,
+                "label": novel_type.type,
                 "state": novel.state,
                 "enabled": novel.enabled,
                 "words": novel.words,
@@ -163,8 +169,86 @@ def search():
                 "authorId": novel.authorId,
                 "extras": ""
             })
-        return jsonify({"retCode": 200, "msg": "success", "result": novels})
+        return jsonify({"retCode": 200, "msg": "success", "result": novel_list})
     else:
         return jsonify({"retCode": 400, "msg": "args error", "result": []})
 
+# 榜单列表返回
+@bp.route('/monthly')
+def monthly():
+    results = Monthly.query.all()
+    result_list = []
+    for result in results:
+        result_list.append({
+            'id': result.id,
+            'monthly': result.monthly
+        })
+    return jsonify({"retCode": 200, "msg": "success", "result": result_list})
+
+# 根据榜单id获取小说
+@bp.route('/monthnov')
+def monthnov():
+    monthId = request.args.get('monthly')
+    page = request.args.get('page')
+    if not page or not page.isdigit():
+        page = 1
+    limit = request.args.get('limit')
+    if not limit or not limit.isdigit():
+        limit = 10
+    offset = (int(page) - 1) * int(limit)
+    if monthId and monthId.isdigit():
+        monthly_novel_list = MonthlyNovel.query.filter_by(monthlyId=monthId).limit(limit).offset(offset).all()
+    else:
+        return jsonify({"retCode": 400, "msg": "args error", "result": []})
+    novelId_list = []
+    for novel in monthly_novel_list:
+        novelId_list.append({
+            novel.novelId
+        })
+    novel_list = []
+    novels = Novels.query.filter(Novels.id.in_(novelId_list)).all()
+    for novel in novels:
+        # 根据分类id获取分类
+        novel_type = NovelType.query.get(novel.label)
+        novel_list.append({
+            "id": novel.id,
+            "name": novel.name,
+            "cover": novel.cover,
+            "summary": novel.summary,
+            "label": novel_type.type,
+            "state": novel.state,
+            "enabled": novel.enabled,
+            "words": novel.words,
+            "created": novel.created,
+            "updated": novel.updated,
+            "authorId": novel.authorId,
+            "extras": ""
+        })
+    return jsonify({"retCode": 200, "msg": "success", "result": novel_list})
+
+# 根据小说id获取小说
+@bp.route('/book')
+def book():
+    bookId = request.args.get('bookId')
+    if bookId and bookId.isdigit():
+        novel = Novels.query.get(bookId)
+    else:
+        return jsonify({"retCode": 400, "msg": "args error", "result": []})
+    # 根据分类id获取分类
+    novel_type = NovelType.query.get(novel.label)
+    novel_dict = {
+        "id": novel.id,
+        "name": novel.name,
+        "cover": novel.cover,
+        "summary": novel.summary,
+        "label": novel_type.type,
+        "state": novel.state,
+        "enabled": novel.enabled,
+        "words": novel.words,
+        "created": novel.created,
+        "updated": novel.updated,
+        "authorId": novel.authorId,
+        "extras": ""
+    }
+    return jsonify({"retCode": 200, "msg": "success", "result": novel_dict})
 

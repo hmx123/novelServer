@@ -79,4 +79,16 @@ class Author(db.Model):
     summary = db.Column(db.Text, comment='简介')
     addtime = db.Column(db.DateTime)
 
+class Monthly(db.Model):
+    __tablename__ = 'monthly'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    monthly = db.Column(db.String(64), comment='榜单')
+    addtime = db.Column(db.DateTime)
+
+class MonthlyNovel(db.Model):
+    __tablename__ = 'monthly_novel'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    novelId = db.Column(db.Integer, comment='小说id')
+    monthlyId = db.Column(db.Integer, comment='榜单id')
+
 
