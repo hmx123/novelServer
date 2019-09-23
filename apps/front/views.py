@@ -51,6 +51,9 @@ def classify():
     for novel in novels:
         # 根据分类id获取分类
         novel_type = NovelType.query.get(novel.label)
+        # 根据作者id获取作者
+        authorId = novel.authorId
+        author = Author.query.get(authorId)
         novel_list.append(
             {
                 "id": novel.id,
@@ -63,7 +66,8 @@ def classify():
                 "words": novel.words,
                 "created": novel.created,
                 "updated": novel.updated,
-                "authorId": novel.authorId,
+                "authorId": authorId,
+                "author": author.name,
                 "extras": ""
              }
         )
@@ -155,6 +159,9 @@ def search():
         for novel in novels:
             # 根据分类id获取分类
             novel_type = NovelType.query.get(novel.label)
+            # 根据作者id获取作者
+            authorId = novel.authorId
+            author = Author.query.get(authorId)
             novel_list.append({
                 "id": novel.id,
                 "name": novel.name,
@@ -166,7 +173,8 @@ def search():
                 "words": novel.words,
                 "created": novel.created,
                 "updated": novel.updated,
-                "authorId": novel.authorId,
+                "authorId": authorId,
+                "author": author.name,
                 "extras": ""
             })
         return jsonify({"retCode": 200, "msg": "success", "result": novel_list})
@@ -210,6 +218,9 @@ def monthnov():
     for novel in novels:
         # 根据分类id获取分类
         novel_type = NovelType.query.get(novel.label)
+        # 根据作者id获取作者
+        authorId = novel.authorId
+        author = Author.query.get(authorId)
         novel_list.append({
             "id": novel.id,
             "name": novel.name,
@@ -221,7 +232,8 @@ def monthnov():
             "words": novel.words,
             "created": novel.created,
             "updated": novel.updated,
-            "authorId": novel.authorId,
+            "authorId": authorId,
+            "author": author.name,
             "extras": ""
         })
     return jsonify({"retCode": 200, "msg": "success", "result": novel_list})
@@ -236,6 +248,9 @@ def book():
         return jsonify({"retCode": 400, "msg": "args error", "result": []})
     # 根据分类id获取分类
     novel_type = NovelType.query.get(novel.label)
+    # 根据作者id获取作者
+    authorId = novel.authorId
+    author = Author.query.get(authorId)
     novel_dict = {
         "id": novel.id,
         "name": novel.name,
@@ -247,7 +262,8 @@ def book():
         "words": novel.words,
         "created": novel.created,
         "updated": novel.updated,
-        "authorId": novel.authorId,
+        "authorId": authorId,
+        "author": author.name,
         "extras": ""
     }
     return jsonify({"retCode": 200, "msg": "success", "result": novel_dict})
