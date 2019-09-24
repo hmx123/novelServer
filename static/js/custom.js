@@ -30,11 +30,17 @@ $("#typespider").click(function () {
         }, 1000);
         return
     }
+    var tip = $("#tip");
     $.post({
         url: "/cms/ftypespider/",
         data: {page: page.val(), limit: limit.val(), typeId: typeId},
         success: function (data) {
-            console.log(data)
+            tip.text(data.msg);
+            tip.css("display", "block");
+            setTimeout(function () {
+            tip.text("");
+            tip.css("display", "none");
+        }, 2000);
         },
     });
 });
@@ -47,3 +53,26 @@ function isNumber(value) {         //验证是否为数字
         return true
     }
 }
+
+$("#namespider").click(function () {
+    //获取搜索名字
+    var novelname = $("input[name='novelname']");
+    var tip = $("#tip");
+    $.post({
+        url: "/cms/fsearchspider/",
+        data: {keyword: novelname.val()},
+        success: function (data) {
+            tip.text(data.msg);
+            tip.css("display", "block");
+            setTimeout(function () {
+            tip.text("");
+            tip.css("display", "none");
+        }, 2000);
+        },
+    });
+
+});
+
+
+
+

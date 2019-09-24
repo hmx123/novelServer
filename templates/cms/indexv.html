@@ -1,4 +1,5 @@
 {% extends 'cms/cms_base.html' %}
+{% from 'cms/macro.html' import show_pagination %}
 
 {% block head %}
     <style>
@@ -20,11 +21,21 @@
 
     <div class="my_header">
     {% for boy in boys %}
-        <button type="button" class="btn btn-w-m btn-default" id="{{ boy.id }}">{{ boy.type }}</button>
+        {% if boy.id == typeId %}
+            <a href="{{ url_for('cms.indexv') }}?type={{ boy.id }}"><button type="button" class="btn btn-w-m btn-default active" id="{{ boy.id }}">{{ boy.type }}</button></a>
+        {% else %}
+            <a href="{{ url_for('cms.indexv') }}?type={{ boy.id }}"><button type="button" class="btn btn-w-m btn-default" id="{{ boy.id }}">{{ boy.type }}</button></a>
+        {% endif %}
+
     {% endfor %}
         <br>
     {% for girl in girls %}
-        <button type="button" class="btn btn-w-m btn-default" id="{{ girl.id }}">{{ girl.type }}</button>
+        {% if girl.id == typeId %}
+            <a href="{{ url_for('cms.indexv') }}?type={{ girl.id }}"><button type="button" class="btn btn-w-m btn-default active" id="{{ girl.id }}">{{ girl.type }}</button></a>
+        {% else %}
+            <a href="{{ url_for('cms.indexv') }}?type={{ girl.id }}"><button type="button" class="btn btn-w-m btn-default" id="{{ girl.id }}">{{ girl.type }}</button></a>
+        {% endif %}
+
     {% endfor %}
     </div>
     <hr/>
@@ -73,51 +84,27 @@
                 </thead>
                 <tbody>
 
-
-                <tr class="gradeA odd">
-                    <td class="sorting_1">Gecko</td>
-                    <td class=" ">Firefox 1.0</td>
-                    <td class=" ">Win 98+ / OSX.2+</td>
-                    <td class="center ">1.7</td>
-                    <td class="center ">A</td>
-                    <td class="center ">A</td>
-                    <td class="center ">A</td>
-                    <td class="center ">A</td>
-                    <td class="center ">A</td>
-                    <td class="center ">A</td>
-                    <td class="center ">A</td>
-                </tr>
+                {% for novel in novels %}
+                    <tr class="gradeA odd">
+                        <td class="sorting_1">{{ novel.id }}</td>
+                        <td class=" ">{{ novel.name }}</td>
+                        <td class=" "><img style="width: 50px; height: 50px" src="{{ novel.cover }}" alt=""></td>
+                        <td class="center ">{{ novel.summary }}</td>
+                        <td class="center ">{{ novel.label }}</td>
+                        <td class="center ">{{ novel.words }}</td>
+                        <td class="center ">{{ novel.state }}</td>
+                        <td class="center ">{{ novel.created }}</td>
+                        <td class="center ">{{ novel.updated }}</td>
+                        <td class="center ">{{ novel.target }}</td>
+                        <td class="center ">{{ novel.score }}</td>
+                    </tr>
+                {% endfor %}
                 </tbody>
 
             </table>
             <div class="row">
-                <div class="col-sm-6">
-                    <div class="dataTables_info" id="DataTables_Table_0_info" role="alert" aria-live="polite"
-                         aria-relevant="all">显示 1 到 10 项，共 57 项
-                    </div>
-                </div>
-                <div class="col-sm-6">
-                    <div class="dataTables_paginate paging_simple_numbers" id="DataTables_Table_0_paginate">
-                        <ul class="pagination">
-                            <li class="paginate_button previous disabled" aria-controls="DataTables_Table_0"
-                                tabindex="0" id="DataTables_Table_0_previous"><a href="#">上一页</a></li>
-                            <li class="paginate_button active" aria-controls="DataTables_Table_0" tabindex="0"><a
-                                    href="#">1</a></li>
-                            <li class="paginate_button " aria-controls="DataTables_Table_0" tabindex="0"><a
-                                    href="#">2</a></li>
-                            <li class="paginate_button " aria-controls="DataTables_Table_0" tabindex="0"><a
-                                    href="#">3</a></li>
-                            <li class="paginate_button " aria-controls="DataTables_Table_0" tabindex="0"><a
-                                    href="#">4</a></li>
-                            <li class="paginate_button " aria-controls="DataTables_Table_0" tabindex="0"><a
-                                    href="#">5</a></li>
-                            <li class="paginate_button " aria-controls="DataTables_Table_0" tabindex="0"><a
-                                    href="#">6</a></li>
-                            <li class="paginate_button next" aria-controls="DataTables_Table_0" tabindex="0"
-                                id="DataTables_Table_0_next"><a href="#">下一页</a></li>
-                        </ul>
-                    </div>
-                </div>
+                {# 显示分页，若需要携带额外的参数，请以关键字参数的方式传递给宏 #}
+                {{ show_pagination(pagination, 'cms.indexv', type=typeId ) }}
             </div>
         </div>
 

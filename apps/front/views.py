@@ -54,6 +54,8 @@ def classify():
         # 根据作者id获取作者
         authorId = novel.authorId
         author = Author.query.get(authorId)
+        # 根据小说id获取章节总数
+        countchapter = Chapters.query.filter_by(novelId=novel.id).count()
         novel_list.append(
             {
                 "id": novel.id,
@@ -68,7 +70,8 @@ def classify():
                 "updated": novel.updated,
                 "authorId": authorId,
                 "author": author.name,
-                "extras": ""
+                "extras": "",
+                "countchapter": countchapter
              }
         )
     return jsonify({"retCode": 200, "msg": "success", "result": novel_list})
@@ -162,6 +165,8 @@ def search():
             # 根据作者id获取作者
             authorId = novel.authorId
             author = Author.query.get(authorId)
+            # 根据小说id获取章节总数
+            countchapter = Chapters.query.filter_by(novelId=novel.id).count()
             novel_list.append({
                 "id": novel.id,
                 "name": novel.name,
@@ -175,7 +180,8 @@ def search():
                 "updated": novel.updated,
                 "authorId": authorId,
                 "author": author.name,
-                "extras": ""
+                "extras": "",
+                "countchapter": countchapter
             })
         return jsonify({"retCode": 200, "msg": "success", "result": novel_list})
     else:
@@ -221,6 +227,8 @@ def monthnov():
         # 根据作者id获取作者
         authorId = novel.authorId
         author = Author.query.get(authorId)
+        # 根据小说id获取章节总数
+        countchapter = Chapters.query.filter_by(novelId=novel.id).count()
         novel_list.append({
             "id": novel.id,
             "name": novel.name,
@@ -234,7 +242,8 @@ def monthnov():
             "updated": novel.updated,
             "authorId": authorId,
             "author": author.name,
-            "extras": ""
+            "extras": "",
+            "countchapter": countchapter
         })
     return jsonify({"retCode": 200, "msg": "success", "result": novel_list})
 
@@ -251,6 +260,8 @@ def book():
     # 根据作者id获取作者
     authorId = novel.authorId
     author = Author.query.get(authorId)
+    # 根据小说id获取章节总数
+    countchapter = Chapters.query.filter_by(novelId=novel.id).count()
     novel_dict = {
         "id": novel.id,
         "name": novel.name,
@@ -264,7 +275,8 @@ def book():
         "updated": novel.updated,
         "authorId": authorId,
         "author": author.name,
-        "extras": ""
+        "extras": "",
+        "countchapter": countchapter
     }
     return jsonify({"retCode": 200, "msg": "success", "result": novel_dict})
 
