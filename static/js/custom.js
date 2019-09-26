@@ -73,6 +73,54 @@ $("#namespider").click(function () {
 
 });
 
+//根据小说分类更新
+$("#typespiderup").click(function () {
+    //获取小说分类id
+    var typeId = $("select[name='noveltype']").val();
+    if (typeId === "0") {
+        var type_msg = $("#type_msg");
+        type_msg.text("请选择小说分类!");
+        setTimeout(function () {
+            type_msg.text("");
+        }, 1000);
+        return
+    }
+    var tip = $("#tip");
+    $.post({
+        url: "/cms/ftspiderup/",
+        data: {typeId: typeId},
+        success: function (data) {
+            tip.text(data.msg);
+            tip.css("display", "block");
+            setTimeout(function () {
+            tip.text("");
+            tip.css("display", "none");
+        }, 2000);
+        },
+    });
+
+});
+
+//根据小说名字更新
+$("#namespiderup").click(function () {
+    //获取小说名字
+    var novelname = $("input[name='novelname']");
+    var tip = $("#tip");
+    $.post({
+        url: "/cms/fnspiderup/",
+        data: {name: novelname.val()},
+        success: function (data) {
+            tip.text(data.msg);
+            tip.css("display", "block");
+            setTimeout(function () {
+            tip.text("");
+            tip.css("display", "none");
+        }, 2000);
+        },
+    });
+});
+
+
 
 
 

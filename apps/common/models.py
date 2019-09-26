@@ -1,5 +1,5 @@
 from exts import db
-
+from datetime import datetime
 
 class Novels(db.Model):
     __tablename__ = 'novels'
@@ -19,6 +19,7 @@ class Novels(db.Model):
     target = db.Column(db.String(32), comment='小说标签')
     score = db.Column(db.Float, comment='小说评分')
     bookId = db.Column(db.Integer)
+    addtime = db.Column(db.DATETIME, default=datetime.now)
 
 class NovelType(db.Model):
     __tablename__ = 'novel_type'

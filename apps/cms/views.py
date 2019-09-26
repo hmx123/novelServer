@@ -60,11 +60,13 @@ def indexv():
     limit = request.args.get('limit')
     if not limit or not limit.isdigit():
         limit = 10
-    if not typeId or not typeId.isdigit():
-        pagination = Novels.query.paginate(page=int(page), per_page=5, error_out=False)
+    if not typeId or not typeId.isdigit() or int(typeId) == 0:
+        pagination = Novels.query.paginate(page=int(page), per_page=10, error_out=False)
+        novelcount = pagination.total
         typeId = 0
     else:
         pagination = Novels.query.filter_by(label=typeId).paginate(page=int(page), per_page=5, error_out=False)
+        novelcount = pagination.total
     # 获取小说分类
     novel_type = NovelType.query.all()
     boy_type = []
@@ -105,10 +107,11 @@ def indexv():
             'words': novel.words,
             'created': created,
             'updated': updated,
+            'addtime': novel.addtime,
             'target': target,
             'score': novel.score
         })
-    return render_template('cms/indexv.html', boys=boy_type, girls=girl_type, novels=novel_list, pagination=pagination, typeId=int(typeId))
+    return render_template('cms/indexv.html', boys=boy_type, girls=girl_type, novels=novel_list, pagination=pagination, typeId=int(typeId), novelcount=novelcount)
 
 
 # js获取分类信息
@@ -120,6 +123,21 @@ def indexv():
 def freespider():
     novel_type = NovelType.query.all()
     return render_template('cms/freespider.html', novel_type=novel_type)
+
+# 免费小说之王更新
+@bp.route('/freespiderup/')
+@login_required
+def freespiderup():
+    novel_type = NovelType.query.all()
+    return render_template('cms/freespider_update.html', novel_type=novel_type)
+
+
+# 笔趣阁小说采集
+@bp.route('/biquspider/')
+@login_required
+def biquspider():
+    novel_type = NovelType.query.all()
+    return render_template('cms/biquspider.html', novel_type=novel_type)
 
 @bp.route('/ftypespider/', methods=['POST'])
 @login_required
@@ -146,6 +164,7 @@ def ftypespider():
 
 # 免费小说之王搜索采集
 @bp.route('/fsearchspider/', methods=['POST'])
+@login_required
 def fsearchspider():
     keyword = request.form.get('keyword')
     goon = request.form.get('goon')
@@ -158,11 +177,44 @@ def fsearchspider():
         return jsonify({'code': 200, 'msg': '未匹配到小说'})
     # 获取小说id添加到redis任务队列
     bookId = results['result']['id']
+    # 判断小说id是否存在
+    novel = Novels.query.get(bookId)
+    if novel:
+        return jsonify({'code': 200, 'msg': '小说已存在'})
     book_url = 'https://reader.browser.duokan.com/api/v2/book/%s' % bookId
     redis_key = 'freesearch:start_urls'
     my_lpush(redis_key, book_url)
     return jsonify({'code': 200, 'msg': '添加采集任务成功，已在后台采集'})
 
+# 免费小说之王根据分类更新
+@bp.route('/ftspiderup/', methods=['POST'])
+def ftspiderup():
+    typeId = str(request.form.get('typeId'))
+    type_list = ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+    # 判断typeId是否存在数据库
+    if typeId not in type_list:
+        return jsonify({'code': 400, 'msg': '分类不存在'})
+    # 根据typeid获取小说
+    novels = Novels.query.filter_by(label=typeId).all()
+    for novel in novels:
+        book_url = 'https://reader.browser.duokan.com/api/v2/book/%s' % novel.bookId
+        redis_key = 'freesearch:start_urls'
+        my_lpush(redis_key, book_url)
+    return jsonify({'code': 200, 'msg': '添加更新任务成功，已在后台更新'})
+
+# 免费小说之王根据小说名字更新
+@bp.route('/fnspiderup/', methods=['POST'])
+def fnspiderup():
+    novelname = request.form.get('name')
+    # 判断小说是否存在
+    novels = Novels.query.filter_by(name=novelname).all()
+    if not novels:
+        return jsonify({'code': 200, 'msg': '小说不存在'})
+    for novel in novels:
+        book_url = 'https://reader.browser.duokan.com/api/v2/book/%s' % novel.bookId
+        redis_key = 'freesearch:start_urls'
+        my_lpush(redis_key, book_url)
+    return jsonify({'code': 200, 'msg': '添加更新任务成功，已在后台更新'})
 
 
 

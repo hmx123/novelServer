@@ -115,7 +115,8 @@ def chapter():
             "created": chapter.created,
             "updated": chapter.updated,
             "words": chapter.words,
-            "novelId": chapter.novelId
+            "novelId": chapter.novelId,
+            "num": chapter.chapterId
         })
     return jsonify({"retCode": 200, "msg": "success", "result":chapter_list})
 
@@ -279,4 +280,30 @@ def book():
         "countchapter": countchapter
     }
     return jsonify({"retCode": 200, "msg": "success", "result": novel_dict})
+
+
+# 根据bookid 采集章节id获取 内容
+@bp.route('/contentv')
+def contentv():
+    num = request.args.get('num')
+    novelId = request.args.get('book')
+    if num and novelId and num.isdigit() and novelId.isdigit():
+        # 获取chapterId
+        chapter = Chapters.query.filter_by(novelId=novelId, chapterId=num).first()
+        if not chapter:
+            return jsonify({"retCode": 200, "msg": "The content doesn't exist", "result": []})
+        content = Contents.query.filter_by(chapterId=chapter.id, novelId=novelId).first()
+    else:
+        return jsonify({"retCode": 400, "msg": "args error", "result": []})
+    content_detail = {
+        'title': content.title,
+        "content": content.content,
+        "state": content.state,
+        "created": content.created,
+        "updated": content.updated,
+        "words": content.words,
+        "chapterId": content.chapterId
+    }
+    return jsonify({"retCode": 200, "msg": "success", "result": content_detail})
+
 

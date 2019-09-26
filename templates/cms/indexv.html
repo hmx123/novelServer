@@ -48,53 +48,57 @@
                 <thead>
                 <tr role="row">
                     <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
-                        aria-sort="ascending" aria-label="渲染引擎：激活排序列升序" >小说id
+                        aria-sort="ascending" aria-label="渲染引擎：激活排序列升序" style="width: 40px;">id
                     </th>
                     <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
-                        aria-sort="ascending" aria-label="渲染引擎：激活排序列升序" >小说名字
+                        aria-sort="ascending" aria-label="渲染引擎：激活排序列升序" style="width: 80px;">小说名字
                     </th>
                     <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
-                        aria-sort="ascending" aria-label="浏览器：激活排序列升序" >图片
+                        aria-sort="ascending" aria-label="浏览器：激活排序列升序" style="width: 60px;">图片
                     </th>
                     <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
-                        aria-sort="ascending" aria-label="平台：激活排序列升序" >简介
+                        aria-sort="ascending" aria-label="平台：激活排序列升序" style="width: 150px;">简介
                     </th>
                     <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
-                        aria-sort="ascending" aria-label="引擎版本：激活排序列升序" >分类
+                        aria-sort="ascending" aria-label="引擎版本：激活排序列升序" style="width: 50px;">分类
                     </th>
                     <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
-                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" >字数
+                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 30px;">字数
                     </th>
                     <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
-                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" >状态
+                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 50px;">状态
                     </th>
                     <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
-                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" >开始时间
+                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 70px;">开始时间
                     </th>
                     <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
-                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" >更新时间
+                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 70px;">更新时间
                     </th>
                     <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
-                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" >标签
+                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 70px;">采集时间
                     </th>
                     <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
-                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" >评分
+                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 70px;">标签
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 30px;">评分
                     </th>
                 </tr>
                 </thead>
                 <tbody>
 
                 {% for novel in novels %}
-                    <tr class="gradeA odd">
+                    <tr class="gradeA odd" style="height: 70px">
                         <td class="sorting_1">{{ novel.id }}</td>
                         <td class=" ">{{ novel.name }}</td>
                         <td class=" "><img style="width: 50px; height: 50px" src="{{ novel.cover }}" alt=""></td>
-                        <td class="center ">{{ novel.summary }}</td>
+                        <td class="center " style="overflow: hidden;text-overflow: ellipsis;">{{ novel.summary }}</td>
                         <td class="center ">{{ novel.label }}</td>
                         <td class="center ">{{ novel.words }}</td>
                         <td class="center ">{{ novel.state }}</td>
                         <td class="center ">{{ novel.created }}</td>
                         <td class="center ">{{ novel.updated }}</td>
+                        <td class="center ">{{ novel.addtime }}</td>
                         <td class="center ">{{ novel.target }}</td>
                         <td class="center ">{{ novel.score }}</td>
                     </tr>
@@ -102,6 +106,7 @@
                 </tbody>
 
             </table>
+            <span>当前共有{{ novelcount }}本小说</span>
             <div class="row">
                 {# 显示分页，若需要携带额外的参数，请以关键字参数的方式传递给宏 #}
                 {{ show_pagination(pagination, 'cms.indexv', type=typeId ) }}
