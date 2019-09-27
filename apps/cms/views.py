@@ -65,7 +65,7 @@ def indexv():
         novelcount = pagination.total
         typeId = 0
     else:
-        pagination = Novels.query.filter_by(label=typeId).paginate(page=int(page), per_page=5, error_out=False)
+        pagination = Novels.query.filter_by(label=typeId).paginate(page=int(page), per_page=10, error_out=False)
         novelcount = pagination.total
     # 获取小说分类
     novel_type = NovelType.query.all()
@@ -153,7 +153,7 @@ def ftypespider():
         # 判断typeId是否存在数据库
         if typeId not in type_list:
             return jsonify({'code': 400, 'msg': '分类不存在'})
-        categoryId = {'3': '7', '4': '3', '5': '6', '6': '12', '7': '10', '8': '11', '9': '75', '10': '74', '11': '76', '12': '72'}
+        categoryId = {'3': '7', '4': '3', '5': '6', '6': '8', '7': '10', '8': '11', '9': '75', '10': '74', '11': '76', '12': '72'}
         # 拼接字符串
         url = 'https://reader.browser.duokan.com/api/v2/book/list2?len=%s&page=%s&sex=2&bookStatus=0&categoryId=%s&wordCountsInterval=0&hotChoice=0' % (limit, page, categoryId[typeId])
         redis_key = 'freespider:start_urls'

@@ -11,4 +11,6 @@ SECRET_KEY = os.urandom(24)
 
 REDIS_URL = "redis://:@localhost:6379/0"
 
+SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+SQLALCHEMY_TRACK_MODIFICATIONS = False
 

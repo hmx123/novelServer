@@ -307,3 +307,13 @@ def contentv():
     return jsonify({"retCode": 200, "msg": "success", "result": content_detail})
 
 
+#版本
+@bp.route('/versions')
+def versions():
+    return jsonify({"retCode": 200, "msg": "success", "result": {'url': 'https://orzppu.oss-cn-shenzhen.aliyuncs.com/%E6%8E%A8%E5%B9%BF/book.apk', 'version': '1'}})
+
+# 根据性别随机推荐小说
+@bp.route('/recommend')
+def recommend():
+    gender = request.args.get('gender')
+

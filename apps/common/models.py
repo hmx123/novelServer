@@ -1,3 +1,5 @@
+from werkzeug.security import generate_password_hash, check_password_hash
+
 from exts import db
 from datetime import datetime
 
@@ -91,5 +93,41 @@ class MonthlyNovel(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     novelId = db.Column(db.Integer, comment='小说id')
     monthlyId = db.Column(db.Integer, comment='榜单id')
+
+class User(db.Model):
+    __tablename__ = 'user'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(50), nullable=True)
+    _password = db.Column(db.String(100), nullable=True)
+    phone = db.Column(db.String(50), nullable=True)
+    gender = db.Column(db.Integer, nullable=True)
+    token = db.Column(db.String(128))
+    join_time = db.Column(db.DATETIME, default=datetime.now)
+
+    def __init__(self, username, password, phone, token, gender):
+        self.username = username
+        self.password = password
+        self.phone = phone
+        self.token = token
+        self.gender = gender
+
+    @property
+    def password(self):
+        return self._password
+
+    @password.setter
+    def password(self, rew_password):
+        self._password = generate_password_hash(rew_password)
+
+    def check_password(self, rew_password):
+        result = check_password_hash(self.password, rew_password)
+        return result
+
+class BookCollect(db.Model):
+    __tablename__ = 'book_collect'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    userId = db.Column(db.Integer)
+    bookId = db.Column(db.Integer)
+    addtime = db.Column(db.DATETIME, default=datetime.now)
 
 

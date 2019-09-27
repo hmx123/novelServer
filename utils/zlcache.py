@@ -6,6 +6,7 @@ def set(key, value, timeout=60):
 def get(key):
     return redis_store.get(key)
 
+
 def delete(key):
     return redis_store.delete(key)
 
