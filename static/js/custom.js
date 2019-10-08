@@ -120,7 +120,57 @@ $("#namespiderup").click(function () {
     });
 });
 
+$("#bqgtypespider").click(function () {
+    //获取小说分类id
+    var typeId = $("select[name='noveltype']").val();
+    if (typeId === "0") {
+        var type_msg = $("#type_msg");
+        type_msg.text("请选择小说分类!");
+        setTimeout(function () {
+            type_msg.text("");
+        }, 1000);
+        return
+    }
+    //获取页码 限制
+    var page = $("input[name='page']");
 
+
+    if (isNumber(page.val()) === false) {
+        var page_msg = $("#page_msg");
+        page_msg.text("请输入int类型!");
+        setTimeout(function () {
+            page_msg.text("");
+            page.val(null);
+        }, 1000);
+        return
+    }
+    var tip = $("#tip");
+    $.post({
+        url: "/cms/bqgspider/",
+        data: {page: page.val(), typeId: typeId},
+        success: function (data) {
+            tip.text(data.msg);
+            tip.css("display", "block");
+            setTimeout(function () {
+            tip.text("");
+            tip.css("display", "none");
+        }, 2000);
+        },
+    });
+});
+
+
+$("select[name='noveltype']").change(function () {
+    var page = $("input[name='page']");
+    var typeId = $("select[name='noveltype']").val();
+    if (typeId === "1") {
+        page.val(1);
+        page.attr('disabled',true);
+    }else {
+        page.val(null);
+        page.attr('disabled',false);
+    }
+});
 
 
 

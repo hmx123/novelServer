@@ -28,14 +28,13 @@ def process_request():
 
     # 检查用户 IP 是否被封禁
     if zlcache.get(block_key):
-        print('你已被封禁')
         return jsonify({"retCode": 400, "msg": "Too many requests", "result": []})
 
     # 取出当前时间，及历史访问时间
     now = time.time()
     request_history = zlcache.get(request_key)
     if not request_history:
-        request_history = [0, 0, 0]
+        request_history = [0, 0, 0, 0, 0, 0]
     else:
         request_history = eval(request_history.decode())
     # 检查与最早访问时间的间隔

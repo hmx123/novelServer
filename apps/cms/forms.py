@@ -12,3 +12,6 @@ class TypeSpiderForm(Form):
     page = IntegerField(validators=[InputRequired(message='page')])
     limit = IntegerField(validators=[InputRequired(message='limit')])
 
+class BqgSpiderForm(Form):
+    typeId = IntegerField(validators=[InputRequired(message='typeId')])
+    page = IntegerField(validators=[InputRequired(message='page')])

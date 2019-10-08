@@ -4,14 +4,18 @@ from flask import Blueprint, render_template, views, session, request, redirect,
 
 import config
 from apps.cms.decorators import login_required
-from apps.cms.forms import LoginForm, TypeSpiderForm
+from apps.cms.forms import LoginForm, TypeSpiderForm, BqgSpiderForm
 from apps.cms.models import CMSUser
 from apps.common.models import NovelType, Novels, NovelTag
 from utils.zlcache import my_lpush
 from urllib import parse
 import requests
+from lxml import etree
 
 bp = Blueprint('cms', __name__, url_prefix='/cms')
+
+
+
 
 
 @bp.route('/')
@@ -195,7 +199,7 @@ def ftspiderup():
     if typeId not in type_list:
         return jsonify({'code': 400, 'msg': '分类不存在'})
     # 根据typeid获取小说
-    novels = Novels.query.filter_by(label=typeId).all()
+    novels = Novels.query.filter_by(label=typeId, novel_web=1).all()
     for novel in novels:
         book_url = 'https://reader.browser.duokan.com/api/v2/book/%s' % novel.bookId
         redis_key = 'freesearch:start_urls'
@@ -207,7 +211,7 @@ def ftspiderup():
 def fnspiderup():
     novelname = request.form.get('name')
     # 判断小说是否存在
-    novels = Novels.query.filter_by(name=novelname).all()
+    novels = Novels.query.filter_by(name=novelname, novel_web=1).all()
     if not novels:
         return jsonify({'code': 200, 'msg': '小说不存在'})
     for novel in novels:
@@ -217,8 +221,136 @@ def fnspiderup():
     return jsonify({'code': 200, 'msg': '添加更新任务成功，已在后台更新'})
 
 
+# 笔趣阁采集
+@bp.route('/bqgspider/', methods=['POST'])
+@login_required
+def bqgspider():
+    form = BqgSpiderForm(request.form)
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.80 Safari/537.36'
+    }
+
+    if form.validate():
+        typeId = str(form.typeId.data)
+        page = form.page.data
+        # 最新小说 http://www.xbiquge.la/
+        if typeId == '1':
+            # 采集最新小说
+            url = 'http://www.xbiquge.la/'
+            response = requests.get(url=url, headers=headers, verify=False)
+            response.encoding = 'utf-8'
+            html = etree.HTML(response.text)
+            new_a_list = html.xpath('//div[@id="newscontent"]/div[@class="r"]/ul/li/span/a/@href')
+            for a in new_a_list:
+                redis_key = 'xbiquspider:start_urls'
+                my_lpush(redis_key, a)
+            return jsonify({'code': 200, 'msg': '添加采集任务成功，已在后台采集'})
+
+        type_list = {'4': '1', '5': '2', '3': '3', '7': '4', '8': '6'}
+        # http://www.xbiquge.la/fenlei/6_2.html 根据分类 页码请求小说
+        # 判断typeId是否存在数据库
+        if typeId not in type_list:
+            return jsonify({'code': 400, 'msg': '分类不存在'})
+        bqg_type = type_list[typeId]
+        # 拼接url
+        url = 'http://www.xbiquge.la/fenlei/%s_%s.html' % (bqg_type, page)
+        response = requests.get(url=url, headers=headers, verify=False)
+        response.encoding = 'utf-8'
+        html = etree.HTML(response.text)
+        new_a_list = html.xpath('//div[@id="newscontent"]/div[@class="l"]/ul/li/span[1]/a/@href')
+        for a in new_a_list:
+            redis_key = 'xbiquspider:start_urls'
+            my_lpush(redis_key, a)
+        return jsonify({'code': 200, 'msg': '添加采集任务成功，已在后台采集'})
+
+
+    msg = form.errors.popitem()[1][0]
+    return jsonify({'code': 400, 'msg': msg})
+
+# 笔趣阁根据分类更新
+class BqgUpdateView(views.MethodView):
+    decorators = [login_required]
+    def get(self, message=None):
+        # 获取笔趣阁下的小说
+        typeId = request.args.get('type')
+
+        page = request.args.get('page')
+        if not page or not page.isdigit():
+            page = 1
+        limit = request.args.get('limit')
+        if not limit or not limit.isdigit():
+            limit = 10
+        if not typeId or not typeId.isdigit() or int(typeId) == 0:
+            pagination = Novels.query.filter_by(novel_web=2).paginate(page=int(page), per_page=10, error_out=False)
+            novelcount = pagination.total
+            typeId = 0
+        else:
+            pagination = Novels.query.filter_by(label=typeId,novel_web=2).paginate(page=int(page), per_page=10, error_out=False)
+            novelcount = pagination.total
+        # 获取小说分类
+        novel_type = NovelType.query.all()
+        boy_type = []
+        girl_type = []
+        for novel_t in novel_type:
+            if novel_t.gender == 1:
+                boy_type.append(novel_t)
+            elif novel_t.gender == 0:
+                girl_type.append(novel_t)
+        # 获取所有的小说
+        novels = pagination.items
+        # 修改分类 状态 开始时间 更新时间 标签
+        novel_list = []
+        for novel in novels:
+            novel_type = NovelType.query.get(novel.label).type
+            if novel.state == 1:
+                state = '连载'
+            else:
+                state = '完本'
+            timeArray = time.localtime(novel.created)
+            otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+            created = otherStyleTime
+            timeArray = time.localtime(novel.updated)
+            otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+            updated = otherStyleTime
+            if novel.target == '':
+                target_list = []
+            else:
+                target_list = novel.target.split(',')
+
+            tag_list = []
+            for tag in target_list:
+                tag_list.append(NovelTag.query.get(tag).target)
+            target = tag_list
+            novel_list.append({
+                'id': novel.id,
+                'name': novel.name,
+                'cover': novel.cover,
+                'summary': novel.summary,
+                'label': novel_type,
+                'state': state,
+                'words': novel.words,
+                'created': created,
+                'updated': updated,
+                'addtime': novel.addtime,
+                'target': target,
+                'score': novel.score
+            })
+        return render_template('cms/biquupdate.html', boys=boy_type, novels=novel_list, pagination=pagination, typeId=int(typeId), novelcount=novelcount)
+
+    def post(self):
+        novels_id_list = request.values.getlist("novels_id")
+        # 获取小说笔趣阁id 添加到redis队列
+        # http://www.xbiquge.la/36/45532/
+        for novelId in novels_id_list:
+            novel = Novels.query.get(novelId)
+            bookId = novel.bookId
+            url = 'http://www.xbiquge.la/36/%s/' % bookId
+            redis_key = 'xbiquspider:start_urls'
+            my_lpush(redis_key, url)
+        return '已添加到后台更新'
 
 bp.add_url_rule('/login/', view_func=LoginView.as_view('login'))
+bp.add_url_rule('/bqgupdate/', view_func=BqgUpdateView.as_view('bqgupdate'))
 
 
 

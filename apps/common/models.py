@@ -22,7 +22,7 @@ class Novels(db.Model):
     score = db.Column(db.Float, comment='小说评分')
     bookId = db.Column(db.Integer)
     addtime = db.Column(db.DATETIME, default=datetime.now)
-
+    novel_web = db.Column(db.Integer, comment='小说采集网站id')
 class NovelType(db.Model):
     __tablename__ = 'novel_type'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -129,5 +129,12 @@ class BookCollect(db.Model):
     userId = db.Column(db.Integer)
     bookId = db.Column(db.Integer)
     addtime = db.Column(db.DATETIME, default=datetime.now)
+
+class NovelWeb(db.Model):
+    __tablename__ = 'novel_web'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(128))
+    url = db.Column(db.String(255))
+
 
 

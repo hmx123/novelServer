@@ -34,9 +34,12 @@
                 <span>小说分类</span>
                 <select name="noveltype">
                     <option value="0">请选择小说分类</option>
-                    {% for type in novel_type %}
-                        <option value="{{ type.id }}">{{ type.type }}</option>
-                    {% endfor %}
+                    <option value="1">最新小说</option>
+                    <option value="4">玄幻小说</option>
+                    <option value="5">修真小说</option>
+                    <option value="3">都市小说</option>
+                    <option value="7">穿越小说</option>
+                    <option value="8">科幻小说</option>
                 </select>
                 <span style="color: red" id="type_msg"></span>
             </div>
@@ -45,23 +48,10 @@
                 <input type="text" name="page">
                 <span style="color: red" id="page_msg"></span>
             </div>
-            <div>
-                <span>每页限制</span>
-                <input type="text" name="limit" placeholder="">
-                <span style="color: red" id="limit_msg"></span>
-            </div>
         </div>
-        <button id="typespider">采集</button>
+        <button id="bqgtypespider">采集</button>
 
-        <hr>
-        <div>
-            <h3>根据小说采集</h3>
-            <div>
-                <span>小说名字</span>
-                <input type="text" name="novelname">
-            </div>
-            <button id="namespider">采集</button>
-        </div>
+
     </div>
     <div id="tip"></div>
 

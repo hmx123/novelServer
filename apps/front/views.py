@@ -1,3 +1,5 @@
+import random
+
 from elasticsearch import Elasticsearch
 from flask import Blueprint, request, jsonify
 
@@ -159,8 +161,9 @@ def search():
         novelId_list = []
         for item in result["hits"]["hits"][start:end]:
             novelId_list.append(item['_id'])
-        novels = Novels.query.filter(Novels.id.in_(novelId_list)).all()
-        for novel in novels:
+        # novels = Novels.query.filter(Novels.id.in_(novelId_list)).all()
+        for novel_id in novelId_list:
+            novel = Novels.query.get(novel_id)
             # 根据分类id获取分类
             novel_type = NovelType.query.get(novel.label)
             # 根据作者id获取作者
@@ -310,10 +313,51 @@ def contentv():
 #版本
 @bp.route('/versions')
 def versions():
-    return jsonify({"retCode": 200, "msg": "success", "result": {'url': 'https://orzppu.oss-cn-shenzhen.aliyuncs.com/%E6%8E%A8%E5%B9%BF/book.apk', 'version': '1'}})
+    return jsonify({"retCode": 200, "msg": "success", "result": {'url': 'https://orzppu.oss-cn-shenzhen.aliyuncs.com/%E6%8E%A8%E5%B9%BF/book.apk', 'version': 1}})
 
 # 根据性别随机推荐小说
 @bp.route('/recommend')
 def recommend():
     gender = request.args.get('gender')
+    if gender == '1' or gender == '0':
+        offset = random.randint(0, 20)
+        # 根据gender获取小说分类
+        types = NovelType.query.filter_by(gender=gender).all()
+        # 根据小说分类获取一本小说
+        novels_list = []
+        for typ in types:
+            novel = Novels.query.filter_by(label=typ.id).limit(1).offset(offset).first()
+            if novel:
+                novels_list.append(novel)
+        # 获取3本小说
+        new_novels_list = novels_list[: 3]
+        novel_list = []
+        for novel in new_novels_list:
+            # 根据分类id获取分类
+            novel_type = NovelType.query.get(novel.label)
+            # 根据作者id获取作者
+            authorId = novel.authorId
+            author = Author.query.get(authorId)
+            # 根据小说id获取章节总数
+            countchapter = Chapters.query.filter_by(novelId=novel.id).count()
+            novel_list.append({
+                "id": novel.id,
+                "name": novel.name,
+                "cover": novel.cover,
+                "summary": novel.summary,
+                "label": novel_type.type,
+                "state": novel.state,
+                "enabled": novel.enabled,
+                "words": novel.words,
+                "created": novel.created,
+                "updated": novel.updated,
+                "authorId": authorId,
+                "author": author.name,
+                "extras": "",
+                "countchapter": countchapter
+            })
+        return jsonify({"retCode": 200, "msg": "success", "result": novel_list})
+
+    else:
+        return jsonify({"retCode": 400, "msg": "args error", "result": []})
 

@@ -82,11 +82,15 @@ def resetpwd():
             # 验证旧密码
             result = user.check_password(oldpwd)
             if result:
+                # 生成token
+                token = rand_string()
                 newpwd = form.newpwd2.data
                 user.password = newpwd
+                user.token = token
                 db.session.add(user)
-                return jsonify({"retCode": 200, "msg": "修改密码成功", "result": {}})
-            return jsonify({"retCode": 400, "msg": "用户名活密码错误", "result": {}})
+                db.session.commit()
+                return jsonify({"retCode": 200, "msg": "修改密码成功", "result": {"analysis": token}})
+            return jsonify({"retCode": 400, "msg": "用户名或密码错误", "result": {}})
 
         return jsonify({"retCode": 400, "msg": "该用户不存在", "result": {}})
     message = form.errors.popitem()[1][0]
@@ -159,13 +163,38 @@ def uncollect():
     user = User.query.filter_by(token=token).first()
     if user:
         # 判断用户是否收藏
-        book_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId)
+        book_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId).first()
+        print(book_collect)
         if book_collect:
             db.session.delete(book_collect)
             return jsonify({"retCode": 200, "msg": "取消收藏成功", "result": {}})
         else:
             return jsonify({"retCode": 400, "msg": "收藏不存在", "result": {}})
     return jsonify({"retCode": 400, "msg": "认证失败", "result": {}})
+
+
+# 用户批量取消收藏
+@bp.route('/uncollectmany')
+def uncollectmany():
+    # token bookid 验证token
+    token = request.args.get('analysis')
+    bookIds = request.args.get('bookIds')
+    try:
+        bookId_list = bookIds.split(',')
+    except:
+        return jsonify({"retCode": 400, "msg": "args error", "result": {}})
+    user = User.query.filter_by(token=token).first()
+    if user:
+        # 判断用户是否收藏
+        print(bookId_list)
+        for bookId in bookId_list:
+            book_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId).first()
+            if book_collect:
+                db.session.delete(book_collect)
+                db.session.commit()
+        return jsonify({"retCode": 200, "msg": "取消收藏成功", "result": {}})
+    return jsonify({"retCode": 400, "msg": "认证失败", "result": {}})
+
 
 # 获取用户收藏
 @bp.route('/getcollect')
@@ -218,4 +247,6 @@ def resetgender():
     user = User.query.filter_by(token=token).first()
     if user:
         user.gender = gender
+        db.session.commit()
+        return jsonify({"retCode": 200, "msg": "修改成功", "result": {}})
     return jsonify({"retCode": 400, "msg": "认证失败", "result": {}})
