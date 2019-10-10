@@ -23,6 +23,8 @@ class Novels(db.Model):
     bookId = db.Column(db.Integer)
     addtime = db.Column(db.DATETIME, default=datetime.now)
     novel_web = db.Column(db.Integer, comment='小说采集网站id')
+    updatetime = db.Column(db.DATETIME, comment='小说更新时间')
+
 class NovelType(db.Model):
     __tablename__ = 'novel_type'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -135,6 +137,14 @@ class NovelWeb(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(128))
     url = db.Column(db.String(255))
+
+# 版本
+class AppVersions(db.Model):
+    __tablename__ = 'app_versions'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    down_url = db.Column(db.String(255))
+    version = db.Column(db.String(16))
+    equip_type = db.Column(db.Integer)
 
 
 

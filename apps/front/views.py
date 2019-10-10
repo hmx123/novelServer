@@ -3,7 +3,7 @@ import random
 from elasticsearch import Elasticsearch
 from flask import Blueprint, request, jsonify
 
-from apps.common.models import NovelType, Novels, Chapters, Contents, Author, Monthly, MonthlyNovel
+from apps.common.models import NovelType, Novels, Chapters, Contents, Author, Monthly, MonthlyNovel, AppVersions
 
 bp = Blueprint("front", __name__, url_prefix='/front')
 host = 'http://www.ljsb.top:5000'
@@ -46,7 +46,7 @@ def classify():
         limit = 10
     offset = (int(page) - 1) * int(limit)
     if classify and classify.isdigit():
-        novels = Novels.query.filter_by(label=classify).limit(limit).offset(offset).all()
+        novels = Novels.query.filter_by(label=classify).order_by(-Novels.addtime).limit(limit).offset(offset).all()
     else:
         return jsonify({"retCode": 400, "msg": "args error", "result": []})
     novel_list = []
@@ -122,14 +122,38 @@ def chapter():
         })
     return jsonify({"retCode": 200, "msg": "success", "result":chapter_list})
 
+# 请求全部章节数据
+@bp.route('/chapterv')
+def chapterv():
+    bookId = request.args.get('book')
+    if bookId and bookId.isdigit():
+        chapters = Chapters.query.filter_by(novelId=bookId).order_by(Chapters.chapterId).all()
+    else:
+        return jsonify({"retCode": 400, "msg": "args error", "result": []})
+    chapter_list = []
+    for chapter in chapters:
+        chapter_list.append({
+            "id": chapter.id,
+            "name": chapter.name,
+            "state": chapter.state,
+            "created": chapter.created,
+            "updated": chapter.updated,
+            "words": chapter.words,
+            "novelId": chapter.novelId,
+            "num": chapter.chapterId
+        })
+    return jsonify({"retCode": 200, "msg": "success", "result": chapter_list})
+
 @bp.route('/content')
 def content():
     chapterId = request.args.get('chapter')
     novelId = request.args.get('book')
     if chapterId and novelId and chapterId.isdigit() and novelId.isdigit():
         content = Contents.query.filter_by(chapterId=chapterId, novelId=novelId).first()
+        if not content:
+            return jsonify({"retCode": 200, "msg": "The content doesn't exist", "result": {}})
     else:
-        return jsonify({"retCode": 400, "msg": "args error", "result": []})
+        return jsonify({"retCode": 400, "msg": "args error", "result": {}})
     content_detail = {
         'title': content.title,
         "content": content.content,
@@ -258,7 +282,7 @@ def book():
     if bookId and bookId.isdigit():
         novel = Novels.query.get(bookId)
     else:
-        return jsonify({"retCode": 400, "msg": "args error", "result": []})
+        return jsonify({"retCode": 400, "msg": "args error", "result": {}})
     # 根据分类id获取分类
     novel_type = NovelType.query.get(novel.label)
     # 根据作者id获取作者
@@ -294,10 +318,12 @@ def contentv():
         # 获取chapterId
         chapter = Chapters.query.filter_by(novelId=novelId, chapterId=num).first()
         if not chapter:
-            return jsonify({"retCode": 200, "msg": "The content doesn't exist", "result": []})
+            return jsonify({"retCode": 200, "msg": "The content doesn't exist", "result": {}})
         content = Contents.query.filter_by(chapterId=chapter.id, novelId=novelId).first()
+        if not content:
+            return jsonify({"retCode": 200, "msg": "The content doesn't exist", "result": {}})
     else:
-        return jsonify({"retCode": 400, "msg": "args error", "result": []})
+        return jsonify({"retCode": 400, "msg": "args error", "result": {}})
     content_detail = {
         'title': content.title,
         "content": content.content,
@@ -310,10 +336,23 @@ def contentv():
     return jsonify({"retCode": 200, "msg": "success", "result": content_detail})
 
 
-#版本
+# 版本   1安卓 2ios
 @bp.route('/versions')
 def versions():
-    return jsonify({"retCode": 200, "msg": "success", "result": {'url': 'https://orzppu.oss-cn-shenzhen.aliyuncs.com/%E6%8E%A8%E5%B9%BF/book.apk', 'version': 1}})
+    equipment = request.args.get('equipment')
+    if not equipment:
+        equip = 1
+    elif equipment == '2':
+        equip = 2
+    else:
+        return jsonify({"retCode": 400, "msg": "args error", "result": {}})
+    app_versions = AppVersions.query.filter_by(equip_type=equip).first()
+    if not app_versions:
+        return jsonify({"retCode": 200, "msg": "Version does not exist", "result": {}})
+    version = app_versions.version
+    if equip == 1:
+        version = int(version)
+    return jsonify({"retCode": 200, "msg": "success", "result": {'url': app_versions.down_url, 'version': version}})
 
 # 根据性别随机推荐小说
 @bp.route('/recommend')

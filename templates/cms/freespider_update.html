@@ -1,64 +1,127 @@
 {% extends 'cms/cms_base.html' %}
+{% from 'cms/macro.html' import show_pagination %}
 
-{% block title %}
+{% block head %}
+    <style>
+        .my_header {
+            margin-left: 30px;
+        }
 
+        .my_header button {
+            margin: 5px;
+        }
+
+        hr {
+            border-top: 1px solid #DFE4ED
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-    <style>
-        .my_content {
-            margin: 30px 100px;
-        }
 
-        #tip {
-            width: 200px;
-            height: 30px;
-            background-color: lightgray;
-            opacity: 0.5;
-            margin: 0px auto;
-            padding-top: 5px;
-            text-align: center;
-            color: red;
-            display: none;
-            position: absolute;
-            top: 250px;
-            left: 45%;
-        }
-    </style>
-    <h2>免费小说之王更新</h2>
-    <div class="my_content">
-
-        <div>
-            <h3>根据分类更新</h3>
-            <div>
-                <span>小说分类</span>
-                <select name="noveltype">
-                    <option value="0">请选择小说分类</option>
-                    {% for type in novel_type %}
-                        <option value="{{ type.id }}">{{ type.type }}</option>
-                    {% endfor %}
-                </select>
-                <span style="color: red" id="type_msg"></span>
-            </div>
-
-        </div>
-        <button id="typespiderup">更新</button>
-
-        <hr>
-        <div>
-            <h3>根据小说更新</h3>
-            <div>
-                <span>小说名字</span>
-                <input type="text" name="novelname">
-            </div>
-            <button id="namespiderup">更新</button>
-        </div>
+    <div class="my_header">
+    {% for boy in boys %}
+        {% if boy.id == typeId %}
+            <a href="{{ url_for('cms.freeupdate') }}?type={{ boy.id }}"><button type="button" class="btn btn-w-m btn-default active" id="{{ boy.id }}">{{ boy.type }}</button></a>
+        {% else %}
+            <a href="{{ url_for('cms.freeupdate') }}?type={{ boy.id }}"><button type="button" class="btn btn-w-m btn-default" id="{{ boy.id }}">{{ boy.type }}</button></a>
+        {% endif %}
+    {% endfor %}
+    {% for girl in girls %}
+        {% if girl.id == typeId %}
+            <a href="{{ url_for('cms.freeupdate') }}?type={{ girl.id }}"><button type="button" class="btn btn-w-m btn-default active" id="{{ girl.id }}">{{ girl.type }}</button></a>
+        {% else %}
+            <a href="{{ url_for('cms.freeupdate') }}?type={{ girl.id }}"><button type="button" class="btn btn-w-m btn-default" id="{{ girl.id }}">{{ girl.type }}</button></a>
+        {% endif %}
+    {% endfor %}
     </div>
-    <div id="tip"></div>
+    <hr/>
+    <div class="ibox-content">
 
+        <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper form-inline" role="grid">
+            <form action="" method="post">
+            <table class="table table-striped table-bordered table-hover dataTables-example dataTable"
+                   id="DataTables_Table_0" aria-describedby="DataTables_Table_0_info">
+                <thead>
+                <tr role="row">
+                    <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                        aria-sort="ascending" aria-label="渲染引擎：激活排序列升序" style="width: 40px;"><input type="checkbox" id="j_cbAll" />
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                        aria-sort="ascending" aria-label="渲染引擎：激活排序列升序" style="width: 40px;">id
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                        aria-sort="ascending" aria-label="渲染引擎：激活排序列升序" style="width: 80px;">小说名字
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                        aria-sort="ascending" aria-label="浏览器：激活排序列升序" style="width: 60px;">图片
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                        aria-sort="ascending" aria-label="平台：激活排序列升序" style="width: 150px;">简介
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                        aria-sort="ascending" aria-label="引擎版本：激活排序列升序" style="width: 50px;">分类
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 30px;">字数
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 50px;">状态
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 70px;">小说更新时间
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 70px;">采集时间
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 70px;">本站更新时间
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 70px;">标签
+                    </th>
+
+                </tr>
+                </thead>
+                <tbody>
+
+                {% for novel in novels %}
+                    <tr class="gradeA odd" style="height: 70px">
+                        <td class="sorting_1">
+                            <input name="novels_id" type="checkbox" value="{{ novel.id }}">
+                        </td>
+                        <td class="sorting_1">{{ novel.id }}</td>
+                        <td class=" ">{{ novel.name }}</td>
+                        <td class=" "><img style="width: 50px; height: 50px" src="{{ novel.cover }}" alt=""></td>
+                        <td class="center " style="overflow: hidden;text-overflow: ellipsis;">{{ novel.summary }}</td>
+                        <td class="center ">{{ novel.label }}</td>
+                        <td class="center ">{{ novel.words }}</td>
+                        <td class="center ">{{ novel.state }}</td>
+                        <td class="center ">{{ novel.updated }}</td>
+                        <td class="center ">{{ novel.addtime }}</td>
+                        <td class="center ">{{ novel.updatetime }}</td>
+                        <td class="center ">{{ novel.target }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+
+            </table>
+            <span>当前共有{{ novelcount }}本小说</span> &nbsp;&nbsp;&nbsp;
+            <button class="btn btn-sm btn-primary m-t-n-xs" type="submit">
+                <strong>选中更新</strong>
+            </button>
+        </form>
+            <div class="row">
+                {# 显示分页，若需要携带额外的参数，请以关键字参数的方式传递给宏 #}
+                {{ show_pagination(pagination, 'cms.freeupdate', type=typeId ) }}
+            </div>
+
+        </div>
+
+    </div>
 {% endblock %}
-
 {% block foot %}
-    <script src="{{ static('js/custom.js') }}"></script>
-
+{#    <script src="{{ static('js/plugins/dataTables/jquery.dataTables.js') }}"></script>#}
+{#    <script src="{{ static('js/plugins/jeditable/jquery.jeditable.js') }}"></script>#}
+<script src="{{ static('js/cms/biquupdate.js') }}"></script>
 {% endblock %}

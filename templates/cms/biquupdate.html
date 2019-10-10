@@ -63,10 +63,13 @@
                         aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 50px;">状态
                     </th>
                     <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
-                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 70px;">更新时间
+                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 70px;">小说更新时间
                     </th>
                     <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
                         aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 70px;">采集时间
+                    </th>
+                    <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
+                        aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 70px;">本站更新时间
                     </th>
                     <th class="sorting_asc" tabindex="0" aria-controls="DataTables_Table_0" rowspan="1" colspan="1"
                         aria-sort="ascending" aria-label="CSS等级：激活排序列升序" style="width: 70px;">标签
@@ -90,6 +93,7 @@
                         <td class="center ">{{ novel.state }}</td>
                         <td class="center ">{{ novel.updated }}</td>
                         <td class="center ">{{ novel.addtime }}</td>
+                        <td class="center ">{{ novel.updatetime }}</td>
                         <td class="center ">{{ novel.target }}</td>
                     </tr>
                 {% endfor %}

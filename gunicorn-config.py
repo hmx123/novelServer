@@ -6,7 +6,8 @@ bind = ["127.0.0.1:5001"]  # 线上环境不会开启在公网 IP 下，一般�
 daemon = True  # 是否开启守护进程模式
 pidfile = 'gunicorn.pid'
 
-workers = cpu_count() * 2
+# workers = cpu_count() * 2
+workers = 1
 worker_class = "gevent"  # 指定一个异步处理的库
 forwarded_allow_ips = '*'
 

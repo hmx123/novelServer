@@ -54,13 +54,13 @@ def register():
         # 判断用户是否存在
         user = User.query.filter_by(phone=phone).first()
         if user:
-            return jsonify({"retCode": 400, "msg": "用户已注册", "result": []})
+            return jsonify({"retCode": 400, "msg": "用户已注册", "result": {"analysis": ""}})
         code = form.code.data
         password = form.password.data
         gender = form.gender.data
 
         if not checkcode(phone, code):
-            return jsonify({"retCode": 400, "msg": "code error", "result": []})
+            return jsonify({"retCode": 400, "msg": "验证码错误", "result": {"analysis": ""}})
         # 生成token
         token = rand_string()
         user = User(username=phone, password=password, phone=phone, token=token, gender=gender)
@@ -68,7 +68,7 @@ def register():
         db.session.commit()
         return jsonify({"retCode": 200, "msg": "success", "result": {"analysis": token}})
     message = form.errors.popitem()[1][0]
-    return jsonify({"retCode": 400, "msg": message, "result": {}})
+    return jsonify({"retCode": 400, "msg": message, "result": {"analysis": ""}})
 
 # 用户修改密码
 @bp.route('/resetpwd', methods=['POST'])
@@ -90,11 +90,11 @@ def resetpwd():
                 db.session.add(user)
                 db.session.commit()
                 return jsonify({"retCode": 200, "msg": "修改密码成功", "result": {"analysis": token}})
-            return jsonify({"retCode": 400, "msg": "用户名或密码错误", "result": {}})
+            return jsonify({"retCode": 400, "msg": "用户名或密码错误", "result": {"analysis": ""}})
 
-        return jsonify({"retCode": 400, "msg": "该用户不存在", "result": {}})
+        return jsonify({"retCode": 400, "msg": "该用户不存在", "result": {"analysis": ""}})
     message = form.errors.popitem()[1][0]
-    return jsonify({"retCode": 400, "msg": message, "result": {}})
+    return jsonify({"retCode": 400, "msg": message, "result": {"analysis": ""}})
 
 # 用户忘记密码
 @bp.route('/forgetpwd', methods=['POST'])
@@ -107,7 +107,7 @@ def forgetpwd():
         user = User.query.filter_by(phone=phone).first()
         if user:
             if not checkcode(phone, code):
-                return jsonify({"retCode": 400, "msg": "code error", "result": []})
+                return jsonify({"retCode": 400, "msg": "验证码错误", "result": {"analysis": ""}})
             # 生成token
             token = rand_string()
             user.password = password
@@ -115,7 +115,7 @@ def forgetpwd():
             db.session.add(user)
             db.session.commit()
             return jsonify({"retCode": 200, "msg": "success", "result": {"analysis": token}})
-        return jsonify({"retCode": 400, "msg": "该用户不存在", "result": {}})
+        return jsonify({"retCode": 400, "msg": "该用户不存在", "result": {"analysis": ""}})
 
 
 # 用户登录
@@ -132,9 +132,9 @@ def login():
             user.token = token
             db.session.commit()
             return jsonify({"retCode": 200, "msg": "success", "result": {"analysis": token}})
-        return jsonify({"retCode": 400, "msg": "账号或密码错误", "result": {}})
+        return jsonify({"retCode": 400, "msg": "账号或密码错误", "result": {"analysis": ""}})
     message = form.errors.popitem()[1][0]
-    return jsonify({"retCode": 400, "msg": message, "result": {}})
+    return jsonify({"retCode": 400, "msg": message, "result": {"analysis": ""}})
 
 # 用户收藏
 @bp.route('/collect')
@@ -182,7 +182,7 @@ def uncollectmany():
     try:
         bookId_list = bookIds.split(',')
     except:
-        return jsonify({"retCode": 400, "msg": "args error", "result": {}})
+        return jsonify({"retCode": 400, "msg": "参数错误", "result": {}})
     user = User.query.filter_by(token=token).first()
     if user:
         # 判断用户是否收藏
@@ -235,7 +235,7 @@ def getcollect():
                 "countchapter": countchapter
             })
         return jsonify({"retCode": 200, "msg": "success", "result": novel_list})
-    return jsonify({"retCode": 400, "msg": "认证失败", "result": {}})
+    return jsonify({"retCode": 400, "msg": "认证失败", "result": []})
 
 # 用户性别重选
 @bp.route('/resetgender')
