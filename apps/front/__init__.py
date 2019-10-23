@@ -1,2 +1,2 @@
 from .views import bp
-import apps.front.hooks
+# import apps.front.hooks

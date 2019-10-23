@@ -205,13 +205,10 @@ def getcollect():
     if user:
         book_collect = BookCollect.query.filter_by(userId=user.id).all()
         # 根据bookId获取小说详情
-        novelId_list = []
-        for novel in book_collect:
-            novelId_list.append({novel.bookId})
         novel_list = []
-        novels = Novels.query.filter(Novels.id.in_(novelId_list)).all()
-        for novel in novels:
-            # 根据分类id获取分类
+        for collect in book_collect:
+            novel = Novels.query.get(collect.bookId)
+            is_read = collect.isread
             novel_type = NovelType.query.get(novel.label)
             # 根据作者id获取作者
             authorId = novel.authorId
@@ -232,7 +229,8 @@ def getcollect():
                 "authorId": authorId,
                 "author": author.name,
                 "extras": "",
-                "countchapter": countchapter
+                "countchapter": countchapter,
+                "isread": is_read
             })
         return jsonify({"retCode": 200, "msg": "success", "result": novel_list})
     return jsonify({"retCode": 400, "msg": "认证失败", "result": []})
@@ -250,3 +248,23 @@ def resetgender():
         db.session.commit()
         return jsonify({"retCode": 200, "msg": "修改成功", "result": {}})
     return jsonify({"retCode": 400, "msg": "认证失败", "result": {}})
+
+# 设置书籍已读未读
+@bp.route('/isread')
+def isread():
+    token = request.args.get('analysis')
+    bookId = request.args.get('bookId')
+    user = User.query.filter_by(token=token).first()
+    if user:
+        # 判断用户是否收藏
+        collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId).first()
+        if collect:
+            # 修改已读状态
+            collect.isread = 1
+            db.session.commit()
+            return jsonify({"retCode": 200, "msg": "修改成功", "result": {}})
+        return jsonify({"retCode": 400, "msg": "收藏不存在", "result": {}})
+    return jsonify({"retCode": 400, "msg": "认证失败", "result": {}})
+
+
+

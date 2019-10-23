@@ -1,3 +1,4 @@
+import datetime
 import time
 
 from flask import Blueprint, render_template, views, session, request, redirect, url_for, g, jsonify, json
@@ -7,6 +8,7 @@ from apps.cms.decorators import login_required
 from apps.cms.forms import LoginForm, TypeSpiderForm, BqgSpiderForm
 from apps.cms.models import CMSUser
 from apps.common.models import NovelType, Novels, NovelTag
+from exts import db, scheduler
 from utils.zlcache import my_lpush
 from urllib import parse
 import requests
@@ -210,7 +212,7 @@ def bqgspider():
                 my_lpush(redis_key, a)
             return jsonify({'code': 200, 'msg': '添加采集任务成功，已在后台采集'})
 
-        type_list = {'4': '1', '5': '2', '3': '3', '7': '4', '8': '6'}
+        type_list = {'4': '1', '5': '2', '3': '3', '7': '4', '8': '6', '14': '5'}
         # http://www.xbiquge.la/fenlei/6_2.html 根据分类 页码请求小说
         # 判断typeId是否存在数据库
         if typeId not in type_list:
@@ -408,9 +410,81 @@ class BqgUpdateView(views.MethodView):
             my_lpush(redis_key, url)
         return '已添加到后台更新'
 
+# 小说新增页面
+class TypeNovelAddView(views.MethodView):
+    decorators = [login_required]
+    def get(self):
+        # 获取分类
+        novel_types = NovelType.query.all()
+        return render_template('cms/typenovel.html', types=novel_types)
+    def post(self):
+        typeId = request.form.get('typeId')
+        novel_type = NovelType.query.get(typeId)
+        if not novel_type:
+            return jsonify({"retCode": 400, "msg": "分类不存在", "result": []})
+        page = request.form.get('page')
+        if not page or not page.isdigit():
+            page = 1
+        limit = request.form.get('limit')
+        if not limit or not limit.isdigit():
+            limit = 20
+        offset = (int(page) - 1) * int(limit)
+        if typeId and typeId.isdigit():
+            novels = Novels.query.filter_by(label=typeId).order_by(-Novels.addtime).limit(limit).offset(offset).all()
+        else:
+            return jsonify({"retCode": 400, "msg": "args error", "result": []})
+        novel_list = []
+        for novel in novels:
+            novel_list.append({
+                'novelId': novel.id,
+                'img': novel.cover,
+                'name': novel.name
+            })
+        return jsonify({"retCode": 200, "msg": "success", "result": novel_list})
+
+# 修改小说分类
+@bp.route('/altertype/', methods=['POST'])
+@login_required
+def alter_type():
+    # 获取小说id
+    novelsId = request.form.get('novelsId')
+    type = request.form.get('type')
+    novel_type = NovelType.query.get(type)
+    if not novel_type:
+        return jsonify({"retCode": 400, "msg": "分类不存在", "result": ""})
+    novelId_list = novelsId.split(',')
+    for novelId in novelId_list:
+        novel = Novels.query.get(novelId)
+        if novel:
+            novel.label = type
+            db.session.add(novel)
+            db.session.commit()
+    return jsonify({"retCode": 200, "msg": "", "result": ""})
+
+# 定时任务暂停
+@bp.route('/stoptask')
+@login_required
+def stoptask():
+    jobId = request.args.get('jobId')
+    scheduler.pause_job(jobId)
+    return jsonify({"retCode": 200, "msg": "", "result": ""})
+
+# 定时任务恢复
+@bp.route('/restarttask')
+@login_required
+def restarttask():
+    jobId = request.args.get('jobId')
+    scheduler.resume_job(jobId)
+    return jsonify({"retCode": 200, "msg": "", "result": ""})
+
+
+
+
+
 bp.add_url_rule('/login/', view_func=LoginView.as_view('login'))
 bp.add_url_rule('/bqgupdate/', view_func=BqgUpdateView.as_view('bqgupdate'))
 bp.add_url_rule('/freeupdate/', view_func=FreeUpdateView.as_view('freeupdate'))
+bp.add_url_rule('/typenovel/', view_func=TypeNovelAddView.as_view('typenovel'))
 
 
 

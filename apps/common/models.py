@@ -131,6 +131,7 @@ class BookCollect(db.Model):
     userId = db.Column(db.Integer)
     bookId = db.Column(db.Integer)
     addtime = db.Column(db.DATETIME, default=datetime.now)
+    isread = db.Column(db.Integer, default=0)
 
 class NovelWeb(db.Model):
     __tablename__ = 'novel_web'
@@ -145,6 +146,16 @@ class AppVersions(db.Model):
     down_url = db.Column(db.String(255))
     version = db.Column(db.String(16))
     equip_type = db.Column(db.Integer)
+
+# 小说banner
+class NovelBanner(db.Model):
+    __tablename__ = 'novel_banner'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    type = db.Column(db.Integer)
+    imgurl = db.Column(db.String(255))
+    rank = db.Column(db.Integer)
+    args = db.Column(db.String(128))
+
 
 
 

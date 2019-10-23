@@ -32,9 +32,7 @@ def sendcode(mobile):
 	if response.status_code == 200:
 		try:
 			jsonData = json.loads(response.text)
-			print(jsonData)
 			if jsonData['code'] == 200:
-				print(jsonData['obj'])
 				return jsonData['obj']
 		except ValueError:
 			jsonData = None

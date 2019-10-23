@@ -3,7 +3,7 @@ from apps.cms import bp as cms_bp
 from apps.front import bp as front_bp
 from apps.common import bp as common_bp
 import config
-from exts import db, redis_store
+from exts import db, redis_store, scheduler
 
 
 def create_app():
@@ -16,6 +16,8 @@ def create_app():
     app.register_blueprint(common_bp)
     db.init_app(app)
     redis_store.init_app(app)
+    scheduler.init_app(app)
+    scheduler.start()
 
     return app
 

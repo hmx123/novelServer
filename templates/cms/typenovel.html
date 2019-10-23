@@ -1,0 +1,87 @@
+{% extends 'cms/cms_base.html' %}
+
+{% block title %}
+
+{% endblock %}
+
+{% block content %}
+    <style>
+        li {
+            list-style: none;
+            margin: 10px auto;
+        }
+
+        .my_box {
+            display: flex;
+        }
+
+        .cont {
+            width: 500px;
+            background-color: #fff;
+            margin: 30px;
+            flex: 1;
+        }
+        .cont .select {
+            height: 600px;
+            overflow: scroll;
+        }
+        img {
+            width: 50px;
+        }
+
+        .mycent {
+            margin-top: 350px;
+        }
+
+        .myright {
+            margin-right: 30px;
+        }
+        #tip {
+                width: 200px;
+                height: 30px;
+                background-color: lightgray;
+                opacity: 0.5;
+                margin: 0px auto;
+                padding-top: 5px;
+                text-align: center;
+                color: red;
+                display: none;
+                position: absolute;
+                top: 250px;
+                left: 45%;
+            }
+    </style>
+    <div class="my_box">
+        <div class="cont left">
+            <select name="typeselect" id="" class="form-control">
+                <option value="0">请选择分类</option>
+                {% for type in types %}
+                    <option value="{{ type.id }}">{{ type.type }}</option>
+                {% endfor %}
+            </select>
+            <div class="select">
+                <ul id="left">
+                </ul>
+            </div>
+        </div>
+        <span class="glyphicon glyphicon-arrow-right mycent"></span>
+        <div class="cont right">
+            <select name="typeselect" id="" class="form-control">
+                <option value="0">请选择分类</option>
+                {% for type in types %}
+                    <option value="{{ type.id }}">{{ type.type }}</option>
+                {% endfor %}
+            </select>
+            <div class="select">
+                <ul id="right"></ul>
+            </div>
+        </div>
+    </div>
+    <button class="btn btn-sm btn-primary pull-right m-t-n-xs myright" type="submit" id="submit"><strong>新 增</strong></button>
+<div id="tip"></div>
+{% endblock %}
+
+{% block foot %}
+    <script src="{{ static('js/cms/noveladd.js') }}"></script>
+
+{% endblock %}

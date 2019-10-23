@@ -81,18 +81,31 @@
                         <span class="ng-scope">小说管理</span>
                     </li>
                     <li>
-                        <a class="J_menuItem" href="index_v1.html">
+                        <a href="#">
                             <i class="fa fa-gg"></i>
                             <span class="nav-label">小说分类</span>
                             <span class="fa arrow"></span>
                         </a>
+                        <ul class="nav nav-second-level">
+                            <li>
+                                <a class="J_menuItem" href="{{ url_for('cms.typenovel') }}">小说所属分类变化</a>
+                            </li>
+                        </ul>
                     </li>
                     <li>
-                        <a class="J_menuItem" href="index_v1.html">
+                        <a  href="#">
                             <i class="fa fa-gg"></i>
                             <span class="nav-label">小说榜单</span>
                             <span class="fa arrow"></span>
                         </a>
+                        <ul class="nav nav-second-level">
+                            <li>
+                                <a class="J_menuItem" href="{{ url_for('cms.typenovel') }}">榜单新增</a>
+                            </li>
+                            <li>
+                                <a class="J_menuItem" href="{{ url_for('cms.typenovel') }}">榜单小说新增</a>
+                            </li>
+                        </ul>
                     </li>
                     <li class="line dk"></li>
                 </ul>

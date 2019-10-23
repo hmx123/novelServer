@@ -34,7 +34,7 @@ def process_request():
     now = time.time()
     request_history = zlcache.get(request_key)
     if not request_history:
-        request_history = [0, 0, 0, 0, 0, 0]
+        request_history = [0, 0, 0, 0, 0, 0, 0, 0, 0]
     else:
         request_history = eval(request_history.decode())
     # 检查与最早访问时间的间隔
