@@ -11,7 +11,7 @@ $(document).ready(function() {
             var typeId = $(this).prev().val();
             var classname = $(this).parent().attr('class');
             var that = $(this);
-            if (contentH - (scroH + viewH) <= -36.59375){  //距离底部高度小于100px
+            if (contentH - (scroH + viewH) <= -25){  //距离底部高度小于100px
                  page++;
                  $.post({
                     url: "/cms/typenovel/",
@@ -19,7 +19,6 @@ $(document).ready(function() {
                     success: function (data) {
                         var novel_list = data.result;
                         var ul = that.children();
-                        console.dir(ul);
                         if(novel_list.length === 0){
                             ul.append("<li>到底了！！！</li>");
                             that.unbind('scroll')
@@ -35,7 +34,6 @@ $(document).ready(function() {
                             li.append('<span>' + novel_list[i].name + '</span>');
                             ul.append(li);
                         }
-                        console.log('添加了');
 
                     }
             })

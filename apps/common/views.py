@@ -214,7 +214,7 @@ def getcollect():
             authorId = novel.authorId
             author = Author.query.get(authorId)
             # 根据小说id获取章节总数
-            countchapter = Chapters.query.filter_by(novelId=novel.id).count()
+            countchapter = novel.chaptercount
             novel_list.append({
                 "id": novel.id,
                 "name": novel.name,

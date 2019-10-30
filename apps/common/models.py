@@ -24,6 +24,7 @@ class Novels(db.Model):
     addtime = db.Column(db.DATETIME, default=datetime.now)
     novel_web = db.Column(db.Integer, comment='小说采集网站id')
     updatetime = db.Column(db.DATETIME, comment='小说更新时间')
+    chaptercount = db.Column(db.Integer, comment='小说章节总数')
 
 class NovelType(db.Model):
     __tablename__ = 'novel_type'

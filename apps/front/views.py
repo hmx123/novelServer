@@ -2,7 +2,7 @@ import json
 import random
 
 from elasticsearch import Elasticsearch
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 
 from apps.common.models import NovelType, Novels, Chapters, Contents, Author, Monthly, MonthlyNovel, AppVersions, \
     NovelBanner
@@ -61,7 +61,7 @@ def classify():
         authorId = novel.authorId
         author = Author.query.get(authorId)
         # 根据小说id获取章节总数
-        countchapter = Chapters.query.filter_by(novelId=novel.id).count()
+        countchapter = novel.chaptercount
         novel_list.append(
             {
                 "id": novel.id,
@@ -153,7 +153,7 @@ def content():
     chapterId = request.args.get('chapter')
     novelId = request.args.get('book')
     if chapterId and novelId and chapterId.isdigit() and novelId.isdigit():
-        content = Contents.query.filter_by(chapterId=chapterId, novelId=novelId).first()
+        content = Contents.query.filter_by(novelId=novelId, chapterId=chapterId).first()
         if not content:
             return json.dumps({"retCode": 200, "msg": "The content doesn't exist", "result": {}}, ensure_ascii=False)
     else:
@@ -202,7 +202,7 @@ def search():
                 authorId = novel.authorId
                 author = Author.query.get(authorId)
                 # 根据小说id获取章节总数
-                countchapter = Chapters.query.filter_by(novelId=novel.id).count()
+                countchapter = novel.chaptercount
                 novel_list.append({
                     "id": novel.id,
                     "name": novel.name,
@@ -264,7 +264,7 @@ def monthnov():
         authorId = novel.authorId
         author = Author.query.get(authorId)
         # 根据小说id获取章节总数
-        countchapter = Chapters.query.filter_by(novelId=novel.id).count()
+        countchapter = novel.chaptercount
         novel_list.append({
             "id": novel.id,
             "name": novel.name,
@@ -297,7 +297,7 @@ def book():
     authorId = novel.authorId
     author = Author.query.get(authorId)
     # 根据小说id获取章节总数
-    countchapter = Chapters.query.filter_by(novelId=novel.id).count()
+    countchapter = novel.chaptercount
     novel_dict = {
         "id": novel.id,
         "name": novel.name,
@@ -386,7 +386,7 @@ def recommend():
             authorId = novel.authorId
             author = Author.query.get(authorId)
             # 根据小说id获取章节总数
-            countchapter = Chapters.query.filter_by(novelId=novel.id).count()
+            countchapter = novel.chaptercount
             novel_list.append({
                 "id": novel.id,
                 "name": novel.name,
@@ -454,7 +454,7 @@ def monthnovall():
             authorId = novel.authorId
             author = Author.query.get(authorId)
             # 根据小说id获取章节总数
-            countchapter = Chapters.query.filter_by(novelId=novel.id).count()
+            countchapter = novel.chaptercount
             novel_list.append({
                 "id": novel.id,
                 "name": novel.name,

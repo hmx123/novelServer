@@ -7,7 +7,7 @@ import config
 from apps.cms.decorators import login_required
 from apps.cms.forms import LoginForm, TypeSpiderForm, BqgSpiderForm
 from apps.cms.models import CMSUser
-from apps.common.models import NovelType, Novels, NovelTag
+from apps.common.models import NovelType, Novels, NovelTag, Author
 from exts import db, scheduler
 from utils.zlcache import my_lpush
 from urllib import parse
@@ -16,9 +16,9 @@ from lxml import etree
 
 bp = Blueprint('cms', __name__, url_prefix='/cms')
 
-
-
-
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.80 Safari/537.36'
+}
 
 @bp.route('/')
 @login_required
@@ -203,35 +203,71 @@ def bqgspider():
         if typeId == '1':
             # 采集最新小说
             url = 'http://www.xbiquge.la/'
-            response = requests.get(url=url, headers=headers, verify=False)
-            response.encoding = 'utf-8'
-            html = etree.HTML(response.text)
-            new_a_list = html.xpath('//div[@id="newscontent"]/div[@class="r"]/ul/li/span/a/@href')
-            for a in new_a_list:
-                redis_key = 'xbiquspider:start_urls'
-                my_lpush(redis_key, a)
-            return jsonify({'code': 200, 'msg': '添加采集任务成功，已在后台采集'})
-
-        type_list = {'4': '1', '5': '2', '3': '3', '7': '4', '8': '6', '14': '5'}
-        # http://www.xbiquge.la/fenlei/6_2.html 根据分类 页码请求小说
-        # 判断typeId是否存在数据库
-        if typeId not in type_list:
-            return jsonify({'code': 400, 'msg': '分类不存在'})
-        bqg_type = type_list[typeId]
-        # 拼接url
-        url = 'http://www.xbiquge.la/fenlei/%s_%s.html' % (bqg_type, page)
+        else:
+            type_list = {'4': '1', '5': '2', '3': '3', '7': '4', '8': '6', '14': '5'}
+            # http://www.xbiquge.la/fenlei/6_2.html 根据分类 页码请求小说
+            # 判断typeId是否存在数据库
+            if typeId not in type_list:
+                return jsonify({'code': 400, 'msg': '分类不存在'})
+            bqg_type = type_list[typeId]
+            url = 'http://www.xbiquge.la/fenlei/%s_%s.html' % (bqg_type, page)
         response = requests.get(url=url, headers=headers, verify=False)
         response.encoding = 'utf-8'
         html = etree.HTML(response.text)
-        new_a_list = html.xpath('//div[@id="newscontent"]/div[@class="l"]/ul/li/span[1]/a/@href')
-        for a in new_a_list:
+        if typeId == '1':
+            novel_href_list = html.xpath('//div[@id="newscontent"]/div[@class="r"]/ul/li/span/a/@href')
+            novel_name_list = html.xpath('//div[@id="newscontent"]/div[@class="r"]/ul/li/span/a/text()')
+            novel_author_list = html.xpath('//div[@id="newscontent"]/div[@class="r"]/ul/li/span[@class="s5"]/text()')
+        else:
+            novel_href_list = html.xpath('//div[@id="newscontent"]/div[@class="l"]/ul/li/span[@class="s2"]/a/@href')
+            novel_name_list = html.xpath('//div[@id="newscontent"]/div[@class="l"]/ul/li/span[@class="s2"]/a/text()')
+            novel_author_list = html.xpath('//div[@id="newscontent"]/div[@class="l"]/ul/li/span[@class="s4"]/text()')
+        for x in range(len(novel_href_list)):
+            # 获取小说作者id
+            authorId = Author.query.filter_by(name=novel_author_list[x]).first()
+            novel = Novels.query.filter(Novels.name == novel_name_list[x], Novels.authorId == authorId,
+                                        Novels.novel_web != 2).first()
+            if novel:
+                continue
             redis_key = 'xbiquspider:start_urls'
-            my_lpush(redis_key, a)
+            my_lpush(redis_key, novel_href_list[x])
         return jsonify({'code': 200, 'msg': '添加采集任务成功，已在后台采集'})
-
-
     msg = form.errors.popitem()[1][0]
     return jsonify({'code': 400, 'msg': msg})
+
+# 全本小说采集 根据分类采集
+@bp.route('/qb5spider/', methods=['POST'])
+@login_required
+def qb5_spider():
+    form = BqgSpiderForm(request.form)
+    if form.validate():
+        typeId = str(form.typeId.data)
+        page = form.page.data
+        if typeId == '1':
+            # 采集最新小说
+            url = 'https://www.qb5.tw/'
+        else:
+            # https://www.qb5.tw/list/2/2.html
+            url = 'https://www.qb5.tw/list/%s/%s.html' % (typeId, page)
+        response = requests.get(url=url, headers=headers, verify=False)
+        response.encoding = 'gbk'
+        html = etree.HTML(response.text)
+        novel_href_list = html.xpath('//ul[@class="titlelist"]/li/div[@class="zp"]/a/@href')
+        novel_name_list = html.xpath('//ul[@class="titlelist"]/li/div[@class="zp"]/a/text()')
+        novel_author_list = html.xpath('//ul[@class="titlelist"]/li/div[@class="author"]/text()')
+        # 获取小说名字和作者 判断其他 webid 没有采集过
+        for x in range(len(novel_href_list)):
+            # 获取小说作者id
+            authorId = Author.query.filter_by(name=novel_author_list[x]).first()
+            novel = Novels.query.filter(Novels.name == novel_name_list[x], Novels.authorId == authorId, Novels.novel_web != 3).first()
+            if novel:
+                continue
+            redis_key = 'qb5tw:start_urls'
+            my_lpush(redis_key, novel_href_list[x])
+        return jsonify({'code': 200, 'msg': '添加采集任务成功，已在后台采集'})
+    msg = form.errors.popitem()[1][0]
+    return jsonify({'code': 400, 'msg': msg})
+
 
 # 免费小说之王更新
 class FreeUpdateView(views.MethodView):
@@ -410,6 +446,7 @@ class BqgUpdateView(views.MethodView):
             my_lpush(redis_key, url)
         return '已添加到后台更新'
 
+
 # 小说新增页面
 class TypeNovelAddView(views.MethodView):
     decorators = [login_required]
@@ -476,10 +513,6 @@ def restarttask():
     jobId = request.args.get('jobId')
     scheduler.resume_job(jobId)
     return jsonify({"retCode": 200, "msg": "", "result": ""})
-
-
-
-
 
 bp.add_url_rule('/login/', view_func=LoginView.as_view('login'))
 bp.add_url_rule('/bqgupdate/', view_func=BqgUpdateView.as_view('bqgupdate'))
