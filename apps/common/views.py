@@ -1,9 +1,6 @@
-import time
-
 from flask import Blueprint, request, jsonify
-from itsdangerous import Serializer
 
-import config
+
 from apps.common.forms import RegisterForm, LoginForm, ResetpwdForm, ForgetPassword
 from apps.common.models import User, BookCollect, Novels, NovelType, Author, Chapters
 from apps.common.wyyapi import sendcode, checkcode
@@ -12,6 +9,7 @@ from exts import db
 from utils import zlcache
 
 bp = Blueprint('common', __name__, url_prefix='/common')
+
 
 
 @bp.route('/')
@@ -265,6 +263,7 @@ def isread():
             return jsonify({"retCode": 200, "msg": "修改成功", "result": {}})
         return jsonify({"retCode": 400, "msg": "收藏不存在", "result": {}})
     return jsonify({"retCode": 400, "msg": "认证失败", "result": {}})
+
 
 
 

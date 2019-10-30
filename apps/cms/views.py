@@ -211,6 +211,7 @@ def bqgspider():
                 return jsonify({'code': 400, 'msg': '分类不存在'})
             bqg_type = type_list[typeId]
             url = 'http://www.xbiquge.la/fenlei/%s_%s.html' % (bqg_type, page)
+            print(url)
         response = requests.get(url=url, headers=headers, verify=False)
         response.encoding = 'utf-8'
         html = etree.HTML(response.text)
@@ -221,12 +222,12 @@ def bqgspider():
         else:
             novel_href_list = html.xpath('//div[@id="newscontent"]/div[@class="l"]/ul/li/span[@class="s2"]/a/@href')
             novel_name_list = html.xpath('//div[@id="newscontent"]/div[@class="l"]/ul/li/span[@class="s2"]/a/text()')
-            novel_author_list = html.xpath('//div[@id="newscontent"]/div[@class="l"]/ul/li/span[@class="s4"]/text()')
+            novel_author_list = html.xpath('//div[@id="newscontent"]/div[@class="l"]/ul/li/span[@class="s5"]/text()')
         for x in range(len(novel_href_list)):
             # 获取小说作者id
-            authorId = Author.query.filter_by(name=novel_author_list[x]).first()
+            authorId = Author.query.filter_by(name=novel_author_list[x])
             novel = Novels.query.filter(Novels.name == novel_name_list[x], Novels.authorId == authorId,
-                                        Novels.novel_web != 2).first()
+                                        Novels.novel_web != 2)
             if novel:
                 continue
             redis_key = 'xbiquspider:start_urls'
@@ -258,8 +259,8 @@ def qb5_spider():
         # 获取小说名字和作者 判断其他 webid 没有采集过
         for x in range(len(novel_href_list)):
             # 获取小说作者id
-            authorId = Author.query.filter_by(name=novel_author_list[x]).first()
-            novel = Novels.query.filter(Novels.name == novel_name_list[x], Novels.authorId == authorId, Novels.novel_web != 3).first()
+            authorId = Author.query.filter_by(name=novel_author_list[x])
+            novel = Novels.query.filter(Novels.name == novel_name_list[x], Novels.authorId == authorId, Novels.novel_web != 3)
             if novel:
                 continue
             redis_key = 'qb5tw:start_urls'

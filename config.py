@@ -2,7 +2,7 @@ import os
 
 from apps.common.decorators import xbqg_1h_data, qb5_1h_data
 
-DEBUG = True
+DEBUG = False
 
 MySQLUser = os.environ.get('MySQLUser')
 MySQLPassword = os.environ.get('MySQLPassword')
@@ -17,11 +17,12 @@ SECRET_KEY = 'qwertyuiopasdfghjkl'
 REDIS_URL = "redis://:@localhost:6379/0"
 
 SQLALCHEMY_COMMIT_ON_TEARDOWN = True
-SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
 # 定时任务
+
 SCHEDULER_API_ENABLED = True
+
 
 JOBS = [
         {
@@ -39,5 +40,4 @@ JOBS = [
             'hours': 1
         }
 ]
-
 
