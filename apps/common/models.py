@@ -40,12 +40,6 @@ class NovelTag(db.Model):
     target = db.Column(db.String(32))
     addtime = db.Column(db.DateTime)
 
-class NovelGroup(db.Model):
-    __tablename__ = 'novel_group'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    group = db.Column(db.String(255))
-    addtime = db.Column(db.DateTime)
-
 class MiddleTagNov(db.Model):
     __tablename__ = 'middle_tag_nov'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -88,6 +82,7 @@ class Author(db.Model):
 class Monthly(db.Model):
     __tablename__ = 'monthly'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    type_one = db.Column(db.Integer)
     monthly = db.Column(db.String(64), comment='榜单')
     addtime = db.Column(db.DateTime)
 
@@ -100,10 +95,10 @@ class MonthlyNovel(db.Model):
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(50), nullable=True)
-    _password = db.Column(db.String(100), nullable=True)
+    username = db.Column(db.String(50))
+    _password = db.Column(db.String(100))
     phone = db.Column(db.String(50), nullable=True)
-    gender = db.Column(db.Integer, nullable=True)
+    gender = db.Column(db.Integer)
     token = db.Column(db.String(128))
     join_time = db.Column(db.DATETIME, default=datetime.now)
 
@@ -156,6 +151,46 @@ class NovelBanner(db.Model):
     imgurl = db.Column(db.String(255))
     rank = db.Column(db.Integer)
     args = db.Column(db.String(128))
+
+
+# group
+class NovelGroup(db.Model):
+    __tablename__ = 'novel_group'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    group = db.Column(db.String(16))
+    type_one = db.Column(db.String(16))
+    type_two = db.Column(db.String(16))
+    type_three = db.Column(db.String(16))
+    addtime = db.Column(db.DATETIME, default=datetime.now)
+    remarks = db.Column(db.String(32))
+
+class GroupidNovelid(db.Model):
+    __tablename__ = 'groupid_novelid'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    groupId = db.Column(db.Integer)
+    novelId = db.Column(db.Integer)
+
+class ComposePage(db.Model):
+    __tablename__ = 'compose_page'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    classify = db.Column(db.String(16))
+    title = db.Column(db.String(16))
+    style = db.Column(db.Integer)
+    type = db.Column(db.String(16))
+    mode = db.Column(db.Integer)
+    head = db.Column(db.String(16))
+    girlcount = db.Column(db.Integer)
+    boycount = db.Column(db.Integer)
+    girlmonthly = db.Column(db.Integer)
+    boymonthly = db.Column(db.Integer)
+    girllabel = db.Column(db.Integer)
+    boylabel = db.Column(db.Integer)
+
+class ComposeStyle(db.Model):
+    __tablename__ = 'compose_style'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    style = db.Column(db.Integer)
+    remarks = db.Column(db.String(32))
 
 
 

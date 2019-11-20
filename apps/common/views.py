@@ -134,6 +134,27 @@ def login():
     message = form.errors.popitem()[1][0]
     return jsonify({"retCode": 400, "msg": message, "result": {"analysis": ""}})
 
+# 用户验证码登录
+@bp.route('/logincode', methods=['POST'])
+def logincode():
+    phone = request.form.get('phone')
+    code = request.form.get('code')
+    # 验证验证码
+    if not checkcode(phone, code):
+        return jsonify({"retCode": 400, "msg": "验证码错误", "result": {"analysis": ""}})
+    # 判断数据库是否存在
+    u = User.query.filter_by(phone=phone).first()
+    # 生成token
+    token = rand_string()
+    # 若用户存在 更新 否则插入新用户
+    if u:
+        u.token = token
+    else:
+        u = User(phone=phone, token=token, username=None, password='1', gender=None)
+    db.session.add(u)
+    db.session.commit()
+    return jsonify({"retCode": 200, "msg": "success", "result": {"analysis": token}})
+
 # 用户收藏
 @bp.route('/collect')
 def collect():

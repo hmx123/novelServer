@@ -2,7 +2,7 @@ import os
 
 from apps.common.decorators import xbqg_1h_data, qb5_1h_data
 
-DEBUG = False
+DEBUG = True
 
 MySQLUser = os.environ.get('MySQLUser')
 MySQLPassword = os.environ.get('MySQLPassword')
@@ -20,24 +20,24 @@ SQLALCHEMY_COMMIT_ON_TEARDOWN = True
 
 
 # 定时任务
-
-SCHEDULER_API_ENABLED = True
-
-
-JOBS = [
-        {
-            'id': 'xbqg_1h_data',
-            'func': xbqg_1h_data,
-            'args': '',
-            'trigger': 'interval',
-            'hours': 1
-        },
-        {
-            'id': 'qb5_1h_data',
-            'func': qb5_1h_data,
-            'args': '',
-            'trigger': 'interval',
-            'hours': 1
-        }
-]
+#
+# SCHEDULER_API_ENABLED = True
+#
+#
+# JOBS = [
+#         {
+#             'id': 'xbqg_1h_data',
+#             'func': xbqg_1h_data,
+#             'args': '',
+#             'trigger': 'interval',
+#             'hours': 1
+#         },
+#         {
+#             'id': 'qb5_1h_data',
+#             'func': qb5_1h_data,
+#             'args': '',
+#             'trigger': 'interval',
+#             'hours': 1
+#         }
+# ]
 
