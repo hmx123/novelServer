@@ -1,5 +1,6 @@
-from wtforms import Form, StringField, IntegerField, BooleanField
+from wtforms import Form, StringField, IntegerField
 from wtforms.validators import InputRequired, EqualTo
+
 
 
 class RegisterForm(Form):
@@ -23,3 +24,5 @@ class ForgetPassword(Form):
     code = StringField(validators=[InputRequired(message='请输入验证码')])
     password = StringField(validators=[InputRequired(message='请输入密码')])
     password2 = StringField(validators=[EqualTo('password', message='两次密码不一致'), InputRequired(message='请再次输入新密码')])
+
+

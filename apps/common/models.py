@@ -33,6 +33,7 @@ class NovelType(db.Model):
     cover = db.Column(db.String(255), comment='分类封面')
     addtime = db.Column(db.DateTime)
     gender = db.Column(db.Integer, comment='1男频 0女频')
+    type_count = db.Column(db.Integer)
 
 class NovelTag(db.Model):
     __tablename__ = 'novel_tag'
@@ -101,13 +102,18 @@ class User(db.Model):
     gender = db.Column(db.Integer)
     token = db.Column(db.String(128))
     join_time = db.Column(db.DATETIME, default=datetime.now)
+    read_time = db.Column(db.Integer, default=0)
+    icon = db.Column(db.String(128), default='default.png')
+    signer = db.Column(db.Text, default='')
 
-    def __init__(self, username, password, phone, token, gender):
+    def __init__(self, username, password, phone, token, gender, icon, signer):
         self.username = username
         self.password = password
         self.phone = phone
         self.token = token
         self.gender = gender
+        self.icon = icon
+        self.signer = signer
 
     @property
     def password(self):
@@ -128,6 +134,7 @@ class BookCollect(db.Model):
     bookId = db.Column(db.Integer)
     addtime = db.Column(db.DATETIME, default=datetime.now)
     isread = db.Column(db.Integer, default=0)
+    read_progress = db.Column(db.Integer, default=0)
 
 class NovelWeb(db.Model):
     __tablename__ = 'novel_web'
@@ -147,7 +154,7 @@ class AppVersions(db.Model):
 class NovelBanner(db.Model):
     __tablename__ = 'novel_banner'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    type = db.Column(db.Integer)
+    type = db.Column(db.String(16))
     imgurl = db.Column(db.String(255))
     rank = db.Column(db.Integer)
     args = db.Column(db.String(128))
@@ -192,6 +199,30 @@ class ComposeStyle(db.Model):
     style = db.Column(db.Integer)
     remarks = db.Column(db.String(32))
 
+class NovelComment(db.Model):
+    __tablename__ = 'novel_comment'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    novelId = db.Column(db.Integer)
+    userId = db.Column(db.Integer)
+    comment = db.Column(db.Text, default='')
+    username = db.Column(db.String(32))
+    addtime = db.Column(db.DATETIME, default=datetime.now)
+    icon = db.Column(db.String(64))
+    commentId = db.Column(db.Integer)
+    praise = db.Column(db.Integer, default=0)
+    star = db.Column(db.Integer, default=5)
 
+class Feedback(db.Model):
+    __tablename__ = 'feedback'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    suggest = db.Column(db.Text)
+    addtime = db.Column(db.DATETIME, default=datetime.now)
+    phone = db.Column(db.String(64))
 
+class NovelHistory(db.Model):
+    __tablename__ = 'novel_history'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    userId = db.Column(db.Integer)
+    novelId = db.Column(db.Integer)
+    iscollect = db.Column(db.Integer, default=0)
 

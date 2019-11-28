@@ -36,6 +36,10 @@ def novelOb_novelList(novels):
         author = Author.query.get(authorId)
         # 根据小说id获取章节总数
         countchapter = novel.chaptercount
+        if novel.updated:
+            clickc = int(str(novel.updated)[-5:-1])
+        else:
+            clickc = 1046
         novel_list.append({
             "id": novel.id,
             "name": novel.name,
@@ -50,7 +54,8 @@ def novelOb_novelList(novels):
             "authorId": authorId,
             "author": author.name,
             "extras": "",
-            "countchapter": countchapter
+            "countchapter": countchapter,
+            "clickc": clickc
         })
     return novel_list
 

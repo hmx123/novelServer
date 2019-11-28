@@ -2,7 +2,7 @@ import json
 import random
 
 from elasticsearch import Elasticsearch
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 
 from apps.common.models import NovelType, Novels, Chapters, Contents, Author, Monthly, MonthlyNovel, AppVersions, \
     NovelBanner, NovelGroup, GroupidNovelid, ComposePage
@@ -103,7 +103,6 @@ def chapter():
     page = request.args.get('page')
     if not page or not page.isdigit():
         page = 1
-
     limit = request.args.get('limit')
     if not limit or not limit.isdigit():
         limit = 10
@@ -113,7 +112,9 @@ def chapter():
     else:
         return json.dumps({"retCode": 400, "msg": "args error", "result": []}, ensure_ascii=False)
     chapter_list = []
+    chapter_num = offset
     for chapter in chapters:
+        chapter_num += 1
         chapter_list.append({
             "id": chapter.id,
             "name": chapter.name,
@@ -122,7 +123,8 @@ def chapter():
             "updated": chapter.updated,
             "words": chapter.words,
             "novelId": chapter.novelId,
-            "num": chapter.chapterId
+            "num": chapter.chapterId,
+            "chapternum": chapter_num
         })
     return json.dumps({"retCode": 200, "msg": "success", "result": chapter_list, "page": page, "limit": limit}, ensure_ascii=False)
 
@@ -135,7 +137,9 @@ def chapterv():
     else:
         return json.dumps({"retCode": 400, "msg": "args error", "result": []}, ensure_ascii=False)
     chapter_list = []
+    chapter_num = 0
     for chapter in chapters:
+        chapter_num += 1
         chapter_list.append({
             "id": chapter.id,
             "name": chapter.name,
@@ -144,7 +148,8 @@ def chapterv():
             "updated": chapter.updated,
             "words": chapter.words,
             "novelId": chapter.novelId,
-            "num": chapter.chapterId
+            "num": chapter.chapterId,
+            "chpternum": chapter_num
         })
     return json.dumps({"retCode": 200, "msg": "success", "result": chapter_list}, ensure_ascii=False)
 
@@ -175,7 +180,7 @@ es = Elasticsearch()
 @search_counter
 def search():
     keyword = request.args.get('keyword')
-    if len(keyword) > 10:
+    if len(keyword) > 20:
         return json.dumps({"retCode": 400, "msg": "关键词太长", "result": []}, ensure_ascii=False)
     page = request.args.get('page')
     if not page or not page.isdigit():
@@ -186,7 +191,7 @@ def search():
     start = (int(page) - 1) * int(limit)  # 开始的文章
     end = start + int(limit)
     if keyword:
-        body = {"query": {"match": {"title": keyword}}}
+        body = {"query": {"match": {"title": keyword}}, "size": 50}
         result = es.search(index="novel-index", body=body)
         novel_list = []
         novelId_list = []
@@ -267,31 +272,32 @@ def book():
         novel = Novels.query.get(bookId)
     else:
         return json.dumps({"retCode": 400, "msg": "args error", "result": {}}, ensure_ascii=False)
-    # 根据分类id获取分类
-    novel_type = NovelType.query.get(novel.label)
-    # 根据作者id获取作者
-    authorId = novel.authorId
-    author = Author.query.get(authorId)
-    # 根据小说id获取章节总数
-    countchapter = novel.chaptercount
-    novel_dict = {
-        "id": novel.id,
-        "name": novel.name,
-        "cover": novel.cover,
-        "summary": novel.summary,
-        "label": novel_type.type,
-        "state": novel.state,
-        "enabled": novel.enabled,
-        "words": novel.words,
-        "created": novel.created,
-        "updated": novel.updated,
-        "authorId": authorId,
-        "author": author.name,
-        "extras": "",
-        "countchapter": countchapter
-    }
-    return json.dumps({"retCode": 200, "msg": "success", "result": novel_dict}, ensure_ascii=False)
-
+    if novel:
+        # 根据分类id获取分类
+        novel_type = NovelType.query.get(novel.label)
+        # 根据作者id获取作者
+        authorId = novel.authorId
+        author = Author.query.get(authorId)
+        # 根据小说id获取章节总数
+        countchapter = novel.chaptercount
+        novel_dict = {
+            "id": novel.id,
+            "name": novel.name,
+            "cover": novel.cover,
+            "summary": novel.summary,
+            "label": novel_type.type,
+            "state": novel.state,
+            "enabled": novel.enabled,
+            "words": novel.words,
+            "created": novel.created,
+            "updated": novel.updated,
+            "authorId": authorId,
+            "author": author.name,
+            "extras": "",
+            "countchapter": countchapter
+        }
+        return json.dumps({"retCode": 200, "msg": "success", "result": novel_dict}, ensure_ascii=False)
+    return json.dumps({"retCode": 400, "msg": "小说不存在", "result": {}}, ensure_ascii=False)
 
 # 根据bookid 采集章节id获取 内容
 @bp.route('/contentv')
@@ -1408,6 +1414,40 @@ def typefree():
 
     return json.dumps({"retCode": 200, "msg": "success", "result": novel_list}, ensure_ascii=False)
 
+# 分类页面 更多 根据传过来的 type不同获取
+@bp.route('/typepage')
+def typepage():
+    typepage = request.args.get('typepage')
+    if typepage == 'new':
+        type = request.args.get('type')
+        page = request.args.get('page')
+        if not page or not page.isdigit():
+            page = 1
+        limit = request.args.get('limit')
+        if not limit or not limit.isdigit():
+            limit = 10
+        offset = (int(page) - 1) * int(limit)
+        if type == 'wbjxb':
+            Monthly_list = MonthlyNovel.query.filter_by(monthlyId=7).limit(limit).offset(offset).all()
+            novelId_list = []
+            for monthly in Monthly_list:
+                novelId_list.append(monthly.novelId)
+            novels = Novels.query.filter(Novels.id.in_(novelId_list)).all()
+        elif type == 'wbjxg':
+            Monthly_list = MonthlyNovel.query.filter_by(monthlyId=14).limit(limit).offset(offset).all()
+            novelId_list = []
+            for monthly in Monthly_list:
+                novelId_list.append(monthly.novelId)
+            novels = Novels.query.filter(Novels.id.in_(novelId_list)).all()
+        # 男生分类
+        else:
+            novels = Novels.query.filter_by(label=type).order_by(-Novels.id).limit(limit).offset(offset).all()
+        novel_list = novelOb_novelList(novels)
+
+        return json.dumps({"retCode": 200, "msg": "success", "result": novel_list}, ensure_ascii=False)
+    else:
+        return json.dumps({"retCode": 200, "msg": "success", "result": []}, ensure_ascii=False)
+
 # 分类页面 -------------------------------end-------------------------------
 
 # ----------------------------书库 -start----------------------------------
@@ -1436,7 +1476,7 @@ def classification():
             typeId = 18
         cover = host + cover_str
         type_list.append(
-            {'id': typeId, 'type': type.type, 'cover': cover, 'gender': gender}
+            {'id': typeId, 'type': type.type, 'cover': cover, 'gender': gender, 'count': type.type_count}
         )
     return json.dumps({"retCode": 200, "msg": "success", "result": type_list}, ensure_ascii=False)
 
@@ -1555,11 +1595,22 @@ def firsttime():
     novels_list = novelOb_novelList(novels)
     return json.dumps({"retCode": 200, "msg": "success", "result": novels_list}, ensure_ascii=False)
 
-
-
-
 # ----------------------------书架 -end  ----------------------------------
-
+# 根据页面不同分类 获取banner
+@bp.route('/banners')
+def banners():
+    typee = request.args.get('type')
+    host = 'http://%s' % request.host
+    banner_list_tt = NovelBanner.query.filter_by(type=typee).order_by(NovelBanner.rank).all()
+    banner_list = []
+    for banner in banner_list_tt:
+        cover = host + banner.imgurl
+        banner_list.append({
+            'imgurl': cover,
+            'rank': banner.rank,
+            'bookId': eval(banner.args)['bookId']
+        })
+    return json.dumps({"retCode": 200, "msg": "success", "result": banner_list}, ensure_ascii=False)
 
 
 

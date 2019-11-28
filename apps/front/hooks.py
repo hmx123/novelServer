@@ -22,7 +22,7 @@ from flask import request, jsonify
 
 @bp.before_request
 def process_request():
-    user_ip = request.remote_addr
+    user_ip = request.headers['X-Real-Ip']
     request_key = 'Request-%s' % user_ip  # 用户请求时间的 key
     block_key = 'Block-%s' % user_ip      # 被封禁用户的 key
 
