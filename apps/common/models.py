@@ -34,6 +34,7 @@ class NovelType(db.Model):
     addtime = db.Column(db.DateTime)
     gender = db.Column(db.Integer, comment='1男频 0女频')
     type_count = db.Column(db.Integer)
+    version = db.Column(db.Integer)
 
 class NovelTag(db.Model):
     __tablename__ = 'novel_tag'
@@ -224,5 +225,5 @@ class NovelHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     userId = db.Column(db.Integer)
     novelId = db.Column(db.Integer)
-    iscollect = db.Column(db.Integer, default=0)
+    addtime = db.Column(db.DATETIME, default=datetime.now)
 

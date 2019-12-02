@@ -25,7 +25,7 @@ def gender():
     else:
         return json.dumps({"retCode": 400, "msg": "args error", "result": []}, ensure_ascii=False)
     type_list = []
-    types = NovelType.query.filter_by(gender=gender).all()
+    types = NovelType.query.filter_by(gender=gender, version=1).all()
     for type in types:
         if not type.cover:
             cover_str = ""
@@ -448,14 +448,15 @@ def handpick():
             novelId_list.append(monthly.novelId)
         novels = Novels.query.filter(Novels.id.in_(novelId_list)).all()
     elif type == 'recommend':
-        boy_Monthly_list = MonthlyNovel.query.filter_by(monthlyId=1).limit(4).all()
-        girl_Monthly_list = MonthlyNovel.query.filter_by(monthlyId=8).limit(4).all()
+        boy_Monthly_list = MonthlyNovel.query.filter_by(monthlyId=1).all()
+        girl_Monthly_list = MonthlyNovel.query.filter_by(monthlyId=8).all()
         novelId_list = []
         for monthly in boy_Monthly_list:
             novelId_list.append(monthly.novelId)
         for monthly in girl_Monthly_list:
             novelId_list.append(monthly.novelId)
         # 打乱顺序random.shuffle(novelId_list)
+        novelId_list = random.sample(novelId_list, 8)
 
         novels = Novels.query.filter(Novels.id.in_(novelId_list)).all()
     elif type == 'over':
@@ -1612,7 +1613,50 @@ def banners():
         })
     return json.dumps({"retCode": 200, "msg": "success", "result": banner_list}, ensure_ascii=False)
 
+# 根据性别 页面获取不同的分类
+@bp.route('/gendertype')
+def gendertype():
+    host = 'http://%s' % request.host
+    gender = request.args.get('gender')
+    if gender == '1':
+        gender = 1
+        gg = 'boy'
+    elif gender == '0':
+        gender = 0
+        gg = 'girl'
+    else:
+        return json.dumps({"retCode": 400, "msg": "args error", "result": []}, ensure_ascii=False)
+    typ = request.args.get('type')
 
+    novel_type_list = NovelType.query.filter_by(version=2, gender=gender).all()
+    type_list = []
+    for novel_type in novel_type_list:
+        if not novel_type.cover:
+            cover_str = ""
+        else:
+            cover_str = novel_type.cover
+            if typ == 'cheng':
+                cover_str = '/static/images/%s/cheng%s' % (gg, cover_str.split('/')[-1])
+        cover = host + cover_str
+        if novel_type.id == 47:
+            type_list.append(
+                {'id': 'wbjxb', 'type': novel_type.type, 'cover': cover, 'channelId': gender}
+            )
+        elif novel_type.id == 48:
+            type_list.append(
+                {'id': 'wbjxg', 'type': novel_type.type, 'cover': cover, 'channelId': gender}
+            )
+        else:
+            if novel_type.id == 36:
+                type_id = 14
+            elif novel_type.id == 45:
+                type_id = 18
+            else:
+                type_id = novel_type.id-21
+            type_list.append(
+                {'id': type_id, 'type': novel_type.type, 'cover': cover, 'channelId': gender}
+            )
+    return json.dumps({"retCode": 200, "msg": "success", "result": type_list}, ensure_ascii=False)
 
 
 

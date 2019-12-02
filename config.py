@@ -1,6 +1,6 @@
 import os
 
-from apps.common.decorators import xbqg_1h_data, qb5_1h_data
+from apps.common.decorators import xbqg_1h_data, qb5_1h_data, ever_week_monday
 base_dir = os.path.dirname(__file__)
 DEBUG = True
 
@@ -24,10 +24,8 @@ MAX_CONTENT_LENGTH = 3 * 1024 * 1024
 UPLOADED_PHOTOS_DEST = os.path.join(base_dir, 'static/images/icon')
 
 # 定时任务
-#
+
 # SCHEDULER_API_ENABLED = True
-#
-#
 # JOBS = [
 #         {
 #             'id': 'xbqg_1h_data',
@@ -42,6 +40,16 @@ UPLOADED_PHOTOS_DEST = os.path.join(base_dir, 'static/images/icon')
 #             'args': '',
 #             'trigger': 'interval',
 #             'hours': 1
+#         },
+#         {
+#             'id': 'ever_week_monday',
+#             'func': ever_week_monday,
+#             'args': '',
+#             'trigger': 'cron',
+#             'day_of_week': 0,
+#             'hour': 0,
+#             'minute': 0,
+#             'second': 0
 #         }
 # ]
 

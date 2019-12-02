@@ -70,6 +70,16 @@ def qb5_1h_data():
     cursor.close()
     conn.close()
 
+# 每周一凌晨清空阅读分钟数
+def ever_week_monday():
+    conn = pymysql.connect(host='localhost', user='%s' % MySQLUser, passwd='%s' % MySQLPassword, db='novels',
+                           charset='utf8')
+    cursor = conn.cursor()
+    sql = "update user set read_time=0;"
+    cursor.execute(sql)
+    conn.commit()
+    cursor.close()
+    conn.close()
 
 
 
