@@ -344,6 +344,10 @@ def collectb():
                 # 判断小说是否收藏过了
                 is_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId).first()
                 if is_collect:
+                    # 收藏过了 更新阅读进度和阅读状态
+                    is_collect.read_progress = read_progress
+                    is_collect.isread = isread
+                    book_collect_list.append(is_collect)
                     continue
                 novel = Novels.query.get(bookId)
                 if not novel:
@@ -694,7 +698,7 @@ def wechat_login():
         url_info = 'https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s'
         response_info = requests.get(url=url_info % (access_token, openid)).json()
         # 获取用户基本信息
-        username = response_info['nickname']
+        username = response_info['nickname'].encode('ISO-8859-1').decode('UTF-8')
         gender = response_info['sex']
         if gender == 2:
             gender = 0

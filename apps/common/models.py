@@ -227,3 +227,61 @@ class NovelHistory(db.Model):
     novelId = db.Column(db.Integer)
     addtime = db.Column(db.DATETIME, default=datetime.now)
 
+# -------------第三版本新增漫画start-------------
+class Cartoon(db.Model):
+    __tablename__ = 'cartoon'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(64))
+    author = db.Column(db.String(16))
+    statu = db.Column(db.Integer)
+    label = db.Column(db.String(32))
+    hotcount = db.Column(db.Integer)
+    subcount = db.Column(db.Integer)
+    info = db.Column(db.String(255))
+    chaptercount = db.Column(db.Integer)
+    updatetime = db.Column(db.DATETIME)
+    addtime = db.Column(db.DATETIME)
+    cover = db.Column(db.String(128))
+    webId = db.Column(db.Integer)
+    cartoonId = db.Column(db.Integer)
+
+class CartoonChapter(db.Model):
+    __tablename__ = 'cartoon_chapter'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    cid = db.Column(db.Integer)
+    name = db.Column(db.String(32))
+    startnum = db.Column(db.Integer)
+    endnum = db.Column(db.Integer)
+    isbuy = db.Column(db.Integer)
+    price = db.Column(db.Integer)
+    updatetime = db.Column(db.DATETIME)
+    chapterId = db.Column(db.Integer)
+
+class CartoonType(db.Model):
+    __tablename__ = 'cartoon_type'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    type = db.Column(db.String(16))
+    version = db.Column(db.Integer)
+    img = db.Column(db.String(64))
+
+class CartoonidTypeid(db.Model):
+    __tablename__ = 'cartoonid_typeid'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    typeId = db.Column(db.Integer)
+    cartoonId = db.Column(db.Integer)
+
+class CartoonMonthly(db.Model):
+    __tablename__ = 'cartoon_monthly'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    type_one = db.Column(db.Integer)
+    monthly = db.Column(db.String(16))
+    addtime = db.Column(db.DATETIME)
+
+class CartoonMonthlyNovel(db.Model):
+    __tablename__ = 'cartoon_monthly_novel'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    cartoonId = db.Column(db.Integer)
+    monthlyId = db.Column(db.Integer)
+
+
+# -------------第三版本新增漫画end---------------

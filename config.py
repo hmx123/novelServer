@@ -1,6 +1,6 @@
 import os
 
-from apps.common.decorators import xbqg_1h_data, qb5_1h_data, ever_week_monday
+from apps.common.decorators import xbqg_1h_data, qb5_1h_data, ever_week_monday, cartoon_spider
 base_dir = os.path.dirname(__file__)
 DEBUG = True
 
@@ -50,6 +50,13 @@ UPLOADED_PHOTOS_DEST = os.path.join(base_dir, 'static/images/icon')
 #             'hour': 0,
 #             'minute': 0,
 #             'second': 0
+#         },
+#         {
+#             'id': 'cartoon_spider',
+#             'func': cartoon_spider,
+#             'args': '',
+#             'trigger': 'interval',
+#             'hours': 12
 #         }
 # ]
 

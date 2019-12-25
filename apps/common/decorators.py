@@ -81,6 +81,21 @@ def ever_week_monday():
     cursor.close()
     conn.close()
 
+# 每天采集两次更新漫画(漫画5)
+def cartoon_spider():
+    url = 'http://www.kuman5.com/rank/5-1.html'
+    response = requests.get(url=url, headers=headers, verify=False)
+    response.encoding = 'utf8'
+    html = etree.HTML(response.text)
+    href_list = html.xpath('//ul[@class="mh-list col7"]/li/div/a/@href')
+    # http://www.kuman5.com/21370/
+    for href in href_list:
+        redis_key = 'manhuawuspider:start_urls'
+        new_url = 'http://www.kuman5.com' + href
+        my_lpush(redis_key, new_url)
+
+
+
 
 
 

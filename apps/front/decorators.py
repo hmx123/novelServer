@@ -2,7 +2,7 @@
 from flask import request
 from functools import wraps
 
-from apps.common.models import NovelType, Author
+from apps.common.models import NovelType, Author, Cartoon, CartoonType
 from exts import redis_store
 
 
@@ -59,4 +59,34 @@ def novelOb_novelList(novels):
         })
     return novel_list
 
-
+# 漫画对象解析返回漫画解析好的list
+def cartoonOb_cartoonList(cartoons, host):
+    # 根据id获取漫画
+    cartoon_list = []
+    for cartoonId in cartoons:
+        cartoon = Cartoon.query.get(cartoonId.cartoonId)
+        if cartoon:
+            label_arr = []
+            label_str = cartoon.label
+            label_list = label_str.split(',')
+            # 根据分类id获取分类
+            for label in label_list:
+                cartoon_type = CartoonType.query.get(label)
+                if cartoon_type:
+                    label_arr.append(cartoon_type.type)
+            # 获取封面链接
+            cover_href = '%s/static/cartoon/%s/%s' % (host, cartoon.id, cartoon.cover)
+            cartoon_dict = {
+                'id': cartoon.id,
+                'name': cartoon.name,
+                'author': cartoon.author,
+                'statu': cartoon.statu,
+                'label': label_arr,
+                'hotcount': cartoon.hotcount,
+                'subcount': cartoon.subcount,
+                'info': cartoon.info,
+                'chaptercount': cartoon.chaptercount,
+                'updatetime': str(cartoon.updatetime),
+                'cover': cover_href}
+            cartoon_list.append(cartoon_dict)
+    return cartoon_list
