@@ -136,6 +136,7 @@ class BookCollect(db.Model):
     addtime = db.Column(db.DATETIME, default=datetime.now)
     isread = db.Column(db.Integer, default=0)
     read_progress = db.Column(db.Integer, default=0)
+    type = db.Column(db.Integer)
 
 class NovelWeb(db.Model):
     __tablename__ = 'novel_web'
@@ -226,6 +227,7 @@ class NovelHistory(db.Model):
     userId = db.Column(db.Integer)
     novelId = db.Column(db.Integer)
     addtime = db.Column(db.DATETIME, default=datetime.now)
+    type = db.Column(db.Integer)
 
 # -------------第三版本新增漫画start-------------
 class Cartoon(db.Model):
@@ -282,6 +284,27 @@ class CartoonMonthlyNovel(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     cartoonId = db.Column(db.Integer)
     monthlyId = db.Column(db.Integer)
+    hotcount = db.Column(db.Integer)
 
+class CartoonComment(db.Model):
+    __tablename__ = 'cartoon_comment'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    novelId = db.Column(db.Integer)
+    userId = db.Column(db.Integer)
+    comment = db.Column(db.Text, default='')
+    username = db.Column(db.String(32))
+    addtime = db.Column(db.DATETIME, default=datetime.now)
+    icon = db.Column(db.String(64))
+    commentId = db.Column(db.Integer)
+    praise = db.Column(db.Integer, default=0)
+    star = db.Column(db.Integer, default=5)
 
+class BookcityBanner(db.Model):
+    __tablename__ = 'bookcity_banner'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    type = db.Column(db.String(16))
+    imgurl = db.Column(db.String(255))
+    rank = db.Column(db.Integer)
+    book = db.Column(db.Integer)
+    version = db.Column(db.Integer)
 # -------------第三版本新增漫画end---------------

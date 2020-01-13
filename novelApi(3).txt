@@ -1,0 +1,1135 @@
+---------------------漫画接口-start---------------------
+根据漫画id获取漫画详情
+	GET http://www.ljsb.top:5000/front/cartoon?cartoonId=237
+	args cartoonId   漫画id
+	return
+		{
+		    "retCode":200,
+		    "msg":"success",
+		    "result":{
+		        "name":"谪仙录",
+		        "author":"泼克文化",
+		        "statu":2,
+		        "label":[
+		            "恋爱",
+		            "都市"
+		        ],
+		        "hotcount":201,
+		        "subcount":888,
+		        "info":"介绍:【每周二更新】昔年，四界始分，天界上仙黄天，得奇书《太平青领经》，掀起天界之乱，天庭屡屡败退之际，《三式》出世，封印黄天，却埋下了乱世祸患。世家公子杨焱被奇书《太平青领经》认主，变成人们口中的“乱世灾星”，家族破灭，逃亡途中的奇异经历指引杨焱决心踏上对抗命运的道路…",
+		        "chaptercount":76,
+		        "updatetime":"2019-12-24 00:00:00",
+		        "cover":"http://www.ljsb.top:5000/static/cartoon/237/0X0VqSlAz3o.jpg",
+		        "previvew":[
+		            {
+		                "image":"http://www.ljsb.top:5000/static/cartoon/237/1/1.jpg",
+		                "h":1453,
+		                "w":800
+		            },
+		            {
+		                "image":"http://www.ljsb.top:5000/static/cartoon/237/1/2.jpg",
+		                "h":2041,
+		                "w":800
+		            },
+		            {
+		                "image":"http://www.ljsb.top:5000/static/cartoon/237/1/3.jpg",
+		                "h":1512,
+		                "w":800
+		            },
+		            {
+		                "image":"http://www.ljsb.top:5000/static/cartoon/237/1/4.jpg",
+		                "h":1223,
+		                "w":800
+		            },
+		            {
+		                "image":"http://www.ljsb.top:5000/static/cartoon/237/1/5.jpg",
+		                "h":1863,
+		                "w":800
+		            }
+		        ]
+		    }
+		}
+		参数说明
+			statu  1完结 2连载
+			hotcount  热度  单位：万
+			subcount  追漫人数 单位：万
+			updatetime  更新时间
+			previvew  预览 第一章的前5张图片
+
+根据漫画id获取漫画章节
+	GET http://www.ljsb.top:5000/front/carchapter?cartoonId=237
+	args cartoonId 漫画id
+	return
+		成功
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":[
+			        {
+			            "cartoonId":237,
+			            "name":"第0话1",
+			            "chapterId":1
+			        },
+			        {
+			            "cartoonId":237,
+			            "name":"第0话2",
+			            "chapterId":2
+			        }]
+	        }
+	    失败
+	    	{"retCode": 400, "msg": "args error", "result": []}
+
+根据漫画id和章节id获取漫画章节详情
+	GET http://www.ljsb.top:5000/front/carcontent?cartoonId=237&chapterId=1
+	args 
+		cartoonId   漫画id
+		chapterId   章节id
+	return
+		成功
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "chaptername": "第2话1"
+			    "result":[
+			        {
+			            "image":"http://www.ljsb.top:5000/static/cartoon/237/1/1.jpg",
+			            "h":1453,
+			            "w":800,
+			            "index": 1
+			        },
+			        {
+			            "image":"http://www.ljsb.top:5000/static/cartoon/237/1/2.jpg",
+			            "h":2041,
+			            "w":800,
+			            "index": 2
+			        }]
+			}
+		失败
+			{"retCode": 400, "msg": "args error", "result": [], "chaptername": ""}
+
+获取漫画分类
+	GET http://www.ljsb.top:5000/front/cartype?type=cheng
+	args
+		type 参数：cheng（获取书城的） ku（获取书库的）
+			书城和书库的分类图片的分辨率不同
+	return
+		成功
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":[
+			        {
+			            "id":1,
+			            "type":"新作",
+			            "img":"http://ljsb.top:5000/static/images/cartoon/cheng/mh_1.png"
+			        },
+			        {
+			            "id":2,
+			            "type":"热血",
+			            "img":"http://ljsb.top:5000/static/images/cartoon/cheng/mh_2.png"
+			        },
+			        {
+			            "id":3,
+			            "type":"恋爱",
+			            "img":"http://ljsb.top:5000/static/images/cartoon/cheng/mh_3.png"
+			        }]
+			}
+		失败
+			{"retCode": 400, "msg": "args error", "result": []}
+
+根据漫画分类id获取漫画（排序）
+	GET http://www.ljsb.top:5000/front/carclassify?classify=14&page=1&limit=10&rank=1
+	args
+		classify   漫画分类id
+		page	   页码 可以不写 默认为1
+		limit	   每页显示条数 可以不写 默认6
+		rank       （1,2,3）可以不写默认为1根据人气排序 根据1人气、2话数、3时间排序
+	return
+		成功
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":[
+			        {
+			        	"id": 35,
+			            "name":"通灵妃",
+			            "author":"肉肉",
+			            "statu":2,
+			            "label":[
+			                "玄幻",
+			                "科幻",
+			                "古风"
+			            ],
+			            "hotcount":302,
+			            "subcount":573,
+			            "info":"       丞相府大小姐千云兮自小身负异能，被视为不详之人养在灵云山上，16岁这年代替妹妹千云裳嫁入夜王府，传说夜幽幂性情古怪，冷酷残暴，千云兮将会经历怎样的遭遇呢......他们的新婚之夜又将如何度过？代嫁的事情会败露吗？",
+			            "newest": "第033话 你太赞了",
+			            "chaptercount":402,
+			            "updatetime":"2019-12-20 00:00:00",
+			            "cover":"http://ljsb.top:5000/static/cartoon/32/0X4qzFZUkNM.jpg"
+			        },
+			        {
+			        	"id": 36,
+			            "name":"特殊传说",
+			            "author":"红麟",
+			            "statu":2,
+			            "label":[
+			                "玄幻",
+			                "科幻",
+			                "古风"
+			            ],
+			            "hotcount":645,
+			            "subcount":977,
+			            "info":"介绍:
+			倒楣的少年褚冥漾從小到大衰運纏身, 
+			功課明明沒有不好,但聯考當天就硬是遇到食物中毒, 
+			填志願的時候居然給他填進了一所不存在的學校！？ 
+			入學當天,不但遇到了「死神」, 
+			還被死神逼著要用「撞火車」這種「激烈」的方式進學校…… 
+			漫画程序2011年全力打造第一漫画程序漫画网收集自互联网，漫画程序2011年全力打造第一漫画程序漫画_为你做最好的在线漫画网站！",
+						"newest": "第033话 你太赞了",
+			            "chaptercount":44,
+			            "updatetime":"2019-12-20 00:00:00",
+			            "cover":"http://ljsb.top:5000/static/cartoon/34/0WtYOxum2Fs.jpg"
+			        }]
+			}
+
+		失败
+			{"retCode": 400, "msg": "args error", "result": []}
+
+获取漫画榜单
+	GET http://www.ljsb.top:5000/front/carmonthly
+	return
+		{
+		    "retCode":200,
+		    "msg":"success",
+		    "result":[
+		        {
+		            "id":1,
+		            "monthly":"人气榜"
+		        },
+		        {
+		            "id":2,
+		            "monthly":"热销榜"
+		        },
+		        {
+		            "id":3,
+		            "monthly":"完结榜"
+		        },
+		        {
+		            "id":4,
+		            "monthly":"新作榜"
+		        },
+		        {
+		            "id":5,
+		            "monthly":"男神榜"
+		        },
+		        {
+		            "id":6,
+		            "monthly":"女神榜"
+		        },
+		        {
+		            "id":7,
+		            "monthly":"逆袭榜"
+		        },
+		        {
+		            "id":8,
+		            "monthly":"免费榜"
+		        }
+		    ]
+		}
+
+根据榜单id获取漫画
+	GET http://www.ljsb.top:5000/front/carmonthlys?monthlyId=3&page=1&limit=10
+	args
+		monthlyId  榜单id
+		page	   页码 可以不写 默认为1
+		limit	   每页显示条数 可以不写 默认10
+	return
+		成功
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":[
+			        {
+			        	"id": 35,
+			            "name":"通灵妃",
+			            "author":"肉肉",
+			            "statu":2,
+			            "label":[
+			                "玄幻",
+			                "科幻",
+			                "古风"
+			            ],
+			            "hotcount":302,
+			            "subcount":573,
+			            "info":"       丞相府大小姐千云兮自小身负异能，被视为不详之人养在灵云山上，16岁这年代替妹妹千云裳嫁入夜王府，传说夜幽幂性情古怪，冷酷残暴，千云兮将会经历怎样的遭遇呢......他们的新婚之夜又将如何度过？代嫁的事情会败露吗？",
+			            "newest": "第033话 你太赞了",
+			            "chaptercount":402,
+			            "updatetime":"2019-12-20 00:00:00",
+			            "cover":"http://ljsb.top:5000/static/cartoon/32/0X4qzFZUkNM.jpg"
+			        },
+			        {
+			        	"id": 36,
+			            "name":"特殊传说",
+			            "author":"红麟",
+			            "statu":2,
+			            "label":[
+			                "玄幻",
+			                "科幻",
+			                "古风"
+			            ],
+			            "hotcount":645,
+			            "subcount":977,
+			            "info":"介绍:
+			倒楣的少年褚冥漾從小到大衰運纏身, 
+			功課明明沒有不好,但聯考當天就硬是遇到食物中毒, 
+			填志願的時候居然給他填進了一所不存在的學校！？ 
+			入學當天,不但遇到了「死神」, 
+			還被死神逼著要用「撞火車」這種「激烈」的方式進學校…… 
+			漫画程序2011年全力打造第一漫画程序漫画网收集自互联网，漫画程序2011年全力打造第一漫画程序漫画_为你做最好的在线漫画网站！",
+						"newest": "第033话 你太赞了",
+			            "chaptercount":44,
+			            "updatetime":"2019-12-20 00:00:00",
+			            "cover":"http://ljsb.top:5000/static/cartoon/34/0WtYOxum2Fs.jpg"
+			        }]
+			}
+		失败
+			{"retCode": 400, "msg": "args error", "result": []}
+
+书城漫画 标题(更多)接口
+	GET http://www.ljsb.top:5000/front/comicmore?type=update&page=2&limit=10
+	args 
+		type  
+			recommend (小编推荐)
+		    new （新作出炉
+		    boy （少年青睐）
+		    girl （少女恋爱馆） 
+		    over (完结书) 
+		    like (猜你喜欢)
+		page	   页码 可以不写 默认为1
+		limit	   每页显示条数 可以不写 默认10
+	return 
+		成功
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":[
+			        {
+			        	"id": 35,
+			            "name":"通灵妃",
+			            "author":"肉肉",
+			            "statu":2,
+			            "label":[
+			                "玄幻",
+			                "科幻",
+			                "古风"
+			            ],
+			            "hotcount":302,
+			            "subcount":573,
+			            "info":"       丞相府大小姐千云兮自小身负异能，被视为不详之人养在灵云山上，16岁这年代替妹妹千云裳嫁入夜王府，传说夜幽幂性情古怪，冷酷残暴，千云兮将会经历怎样的遭遇呢......他们的新婚之夜又将如何度过？代嫁的事情会败露吗？",
+			            "newest": "第033话 你太赞了",
+			            "chaptercount":402,
+			            "updatetime":"2019-12-20 00:00:00",
+			            "cover":"http://ljsb.top:5000/static/cartoon/32/0X4qzFZUkNM.jpg"
+			        },
+			        {
+			        	"id": 36,
+			            "name":"特殊传说",
+			            "author":"红麟",
+			            "statu":2,
+			            "label":[
+			                "玄幻",
+			                "科幻",
+			                "古风"
+			            ],
+			            "hotcount":645,
+			            "subcount":977,
+			            "info":"介绍:
+			倒楣的少年褚冥漾從小到大衰運纏身, 
+			功課明明沒有不好,但聯考當天就硬是遇到食物中毒, 
+			填志願的時候居然給他填進了一所不存在的學校！？ 
+			入學當天,不但遇到了「死神」, 
+			還被死神逼著要用「撞火車」這種「激烈」的方式進學校…… 
+			漫画程序2011年全力打造第一漫画程序漫画网收集自互联网，漫画程序2011年全力打造第一漫画程序漫画_为你做最好的在线漫画网站！",
+						"newest": "第033话 你太赞了",
+			            "chaptercount":44,
+			            "updatetime":"2019-12-20 00:00:00",
+			            "cover":"http://ljsb.top:5000/static/cartoon/34/0WtYOxum2Fs.jpg"
+			        }]
+			}
+
+		失败
+			{"retCode": 400, "msg": "args error", "result": []}
+
+书城漫画 免费 完结 接口
+	GET http://www.ljsb.top:5000/front/comicmore?type=update&page=2&limit=10
+	args 
+		type  
+			free 免费
+		    over 完结
+
+		page	   页码 可以不写 默认为1
+		limit	   每页显示条数 可以不写 默认10
+	return 
+		成功
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":[
+			        {
+			        	"id": 35,
+			            "name":"通灵妃",
+			            "author":"肉肉",
+			            "statu":2,
+			            "label":[
+			                "玄幻",
+			                "科幻",
+			                "古风"
+			            ],
+			            "hotcount":302,
+			            "subcount":573,
+			            "info":"       丞相府大小姐千云兮自小身负异能，被视为不详之人养在灵云山上，16岁这年代替妹妹千云裳嫁入夜王府，传说夜幽幂性情古怪，冷酷残暴，千云兮将会经历怎样的遭遇呢......他们的新婚之夜又将如何度过？代嫁的事情会败露吗？",
+			            "newest": "第033话 你太赞了",
+			            "chaptercount":402,
+			            "updatetime":"2019-12-20 00:00:00",
+			            "cover":"http://ljsb.top:5000/static/cartoon/32/0X4qzFZUkNM.jpg"
+			        },
+			        {
+			        	"id": 36,
+			            "name":"特殊传说",
+			            "author":"红麟",
+			            "statu":2,
+			            "label":[
+			                "玄幻",
+			                "科幻",
+			                "古风"
+			            ],
+			            "hotcount":645,
+			            "subcount":977,
+			            "info":"介绍:
+			倒楣的少年褚冥漾從小到大衰運纏身, 
+			功課明明沒有不好,但聯考當天就硬是遇到食物中毒, 
+			填志願的時候居然給他填進了一所不存在的學校！？ 
+			入學當天,不但遇到了「死神」, 
+			還被死神逼著要用「撞火車」這種「激烈」的方式進學校…… 
+			漫画程序2011年全力打造第一漫画程序漫画网收集自互联网，漫画程序2011年全力打造第一漫画程序漫画_为你做最好的在线漫画网站！",
+						"newest": "第033话 你太赞了",
+			            "chaptercount":44,
+			            "updatetime":"2019-12-20 00:00:00",
+			            "cover":"http://ljsb.top:5000/static/cartoon/34/0WtYOxum2Fs.jpg"
+			        }]
+			}
+
+		失败
+			{"retCode": 400, "msg": "args error", "result": []}
+
+书城漫画 换一换
+	GET http://www.ljsb.top:5000/front/comicchange?type=recommend	
+	args 
+		type
+			# recommend (小编推荐) 4
+		    # new （新作出炉） 新作榜 6
+		    # over (完结书) 完本榜 6
+	return
+		成功
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":[
+			        {
+			        	"id": 35,
+			            "name":"通灵妃",
+			            "author":"肉肉",
+			            "statu":2,
+			            "label":[
+			                "玄幻",
+			                "科幻",
+			                "古风"
+			            ],
+			            "hotcount":302,
+			            "subcount":573,
+			            "info":"       丞相府大小姐千云兮自小身负异能，被视为不详之人养在灵云山上，16岁这年代替妹妹千云裳嫁入夜王府，传说夜幽幂性情古怪，冷酷残暴，千云兮将会经历怎样的遭遇呢......他们的新婚之夜又将如何度过？代嫁的事情会败露吗？",
+			            "newest": "第033话 你太赞了",
+			            "chaptercount":402,
+			            "updatetime":"2019-12-20 00:00:00",
+			            "cover":"http://ljsb.top:5000/static/cartoon/32/0X4qzFZUkNM.jpg"
+			        },
+			        {
+			        	"id": 36,
+			            "name":"特殊传说",
+			            "author":"红麟",
+			            "statu":2,
+			            "label":[
+			                "玄幻",
+			                "科幻",
+			                "古风"
+			            ],
+			            "hotcount":645,
+			            "subcount":977,
+			            "info":"介绍:
+			倒楣的少年褚冥漾從小到大衰運纏身, 
+			功課明明沒有不好,但聯考當天就硬是遇到食物中毒, 
+			填志願的時候居然給他填進了一所不存在的學校！？ 
+			入學當天,不但遇到了「死神」, 
+			還被死神逼著要用「撞火車」這種「激烈」的方式進學校…… 
+			漫画程序2011年全力打造第一漫画程序漫画网收集自互联网，漫画程序2011年全力打造第一漫画程序漫画_为你做最好的在线漫画网站！",
+						"newest": "第033话 你太赞了",
+			            "chaptercount":44,
+			            "updatetime":"2019-12-20 00:00:00",
+			            "cover":"http://ljsb.top:5000/static/cartoon/34/0WtYOxum2Fs.jpg"
+			        }]
+			}
+
+		失败
+			{"retCode": 400, "msg": "args error", "result": []}
+
+书城漫画 更新必看
+	GET	http://www.ljsb.top:5000/front/comicmust?date=2019-12-22&page=2&limit=10
+	args
+		date       日期格式 2019-12-22
+		page	   页码 可以不写 默认为1
+		limit	   每页显示条数 可以不写 默认10
+	return
+		成功
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":[
+			        {
+			        	"id": 35,
+			            "name":"通灵妃",
+			            "author":"肉肉",
+			            "statu":2,
+			            "label":[
+			                "玄幻",
+			                "科幻",
+			                "古风"
+			            ],
+			            "hotcount":302,
+			            "subcount":573,
+			            "info":"       丞相府大小姐千云兮自小身负异能，被视为不详之人养在灵云山上，16岁这年代替妹妹千云裳嫁入夜王府，传说夜幽幂性情古怪，冷酷残暴，千云兮将会经历怎样的遭遇呢......他们的新婚之夜又将如何度过？代嫁的事情会败露吗？",
+			            "newest": "第033话 你太赞了",
+			            "chaptercount":402,
+			            "updatetime":"2019-12-20 00:00:00",
+			            "cover":"http://ljsb.top:5000/static/cartoon/32/0X4qzFZUkNM.jpg"
+			        },
+			        {
+			        	"id": 36,
+			            "name":"特殊传说",
+			            "author":"红麟",
+			            "statu":2,
+			            "label":[
+			                "玄幻",
+			                "科幻",
+			                "古风"
+			            ],
+			            "hotcount":645,
+			            "subcount":977,
+			            "info":"介绍:
+			倒楣的少年褚冥漾從小到大衰運纏身, 
+			功課明明沒有不好,但聯考當天就硬是遇到食物中毒, 
+			填志願的時候居然給他填進了一所不存在的學校！？ 
+			入學當天,不但遇到了「死神」, 
+			還被死神逼著要用「撞火車」這種「激烈」的方式進學校…… 
+			漫画程序2011年全力打造第一漫画程序漫画网收集自互联网，漫画程序2011年全力打造第一漫画程序漫画_为你做最好的在线漫画网站！",
+						"newest": "第033话 你太赞了",
+			            "chaptercount":44,
+			            "updatetime":"2019-12-20 00:00:00",
+			            "cover":"http://ljsb.top:5000/static/cartoon/34/0WtYOxum2Fs.jpg"
+			        }]
+			}
+
+		失败
+			{"retCode": 400, "msg": "args error", "result": []}
+
+书城漫画 样式+数据
+	GET http://www.ljsb.top:5000/front/comic
+	return
+		{
+		    "retCode":200,"msg":"success",
+		    "result":[
+			        {"style":8,"type":"recommend","title":"小编推荐","data":Array[2],
+			            "other":[{"mode":2,"head":"换一换"},{"mode":3,"head":"更多"}]
+			        },
+			        {"style":9,"type":"new","title":"新作出炉","data":Array[6],
+			            "other":[{"mode":2,"head":"换一换"},{"mode":3,"head":"更多"}]
+			        },
+			        {"style":10,"type":"boy","title":"少年青睐","data":Array[4],
+			            "other":[{"mode":4,"head":"查看更多戳这里"},{"mode":3,"head":"更多"}]
+			        },
+			        {"style":10,"type":"girl","title":"少女恋爱馆","data":Array[4],
+			            "other":[{"mode":4,"head":"查看更多戳这里"},{"mode":3,"head":"更多"}]
+			        },
+			        {"style":11,"type":"must","title":"更新必看","data":Array[3],
+			            "other":[{"mode":4,"head":"查看更多戳这里"},{"mode":3,"head":"更多"}]
+			        },
+			        {"style":12,"title":"分类精选",
+			            "classify":[
+			                {"title":"新作","classifyId":"1"},
+			                {"title":"恋爱","classifyId":"3"},
+			                {"title":"都市","classifyId":"5"},
+			                {"title":"穿越","classifyId":"4"}
+			            ],
+			            "other":[
+			                {"mode":3,"head":"全部分类"}
+			            ]
+			        },
+			        {"style":9,"type":"over","title":"完结书","data":Array[6],
+			            "other":[{"mode":2,"head":"换一换"},{"mode":3,"head":"更多"}]
+			        },
+			        {"style":13,"type":"like","title":"猜你喜欢","data":Array[10],
+			            "other":[{"mode":3,"head":"更多"}]
+			        },
+			        {"style":14,"title":"人气榜佳作","data":Array[10],
+			            "other":[{"mode":3,"head":"全部榜单"}]
+			        }
+		    ]
+		}
+		参数说明
+			style
+				8： 2本 一行两列
+				9：六本 两行三列
+				10：四本 两行两列
+				11： 三本 一行三列
+				12： 分类特殊处理
+				13： 10本 一行滑动
+				14： 10本 一列
+			mode 
+				1: 换一换 右侧 
+				2: 换一换 下侧 
+				3: 跳转  右侧 
+				4: 跳转  下侧
+
+漫画详情页 看了又看
+	GET http://www.ljsb.top:5000/front/carrecomm?type=like
+	args
+		type （可以不填 默认从所有榜单中获取8本）
+			recommend (小编推荐)
+		    new （新作出炉） 新作榜
+		    boy （少年青睐）少年最爱榜
+		    girl （少女恋爱馆）少女最爱榜
+		    update（更新必看） 获取当天更新漫画
+		    over (完结书) 完本榜
+		    free (免费)
+		    like
+	return
+		{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":[
+			        {
+			        	"id": 35,
+			            "name":"通灵妃",
+			            "author":"肉肉",
+			            "statu":2,
+			            "label":[
+			                "玄幻",
+			                "科幻",
+			                "古风"
+			            ],
+			            "hotcount":302,
+			            "subcount":573,
+			            "info":"       丞相府大小姐千云兮自小身负异能，被视为不详之人养在灵云山上，16岁这年代替妹妹千云裳嫁入夜王府，传说夜幽幂性情古怪，冷酷残暴，千云兮将会经历怎样的遭遇呢......他们的新婚之夜又将如何度过？代嫁的事情会败露吗？",
+			            "newest": "第033话 你太赞了",
+			            "chaptercount":402,
+			            "updatetime":"2019-12-20 00:00:00",
+			            "cover":"http://ljsb.top:5000/static/cartoon/32/0X4qzFZUkNM.jpg"
+			        },
+			        {
+			        	"id": 36,
+			            "name":"特殊传说",
+			            "author":"红麟",
+			            "statu":2,
+			            "label":[
+			                "玄幻",
+			                "科幻",
+			                "古风"
+			            ],
+			            "hotcount":645,
+			            "subcount":977,
+			            "info":"介绍:
+			倒楣的少年褚冥漾從小到大衰運纏身, 
+			功課明明沒有不好,但聯考當天就硬是遇到食物中毒, 
+			填志願的時候居然給他填進了一所不存在的學校！？ 
+			入學當天,不但遇到了「死神」, 
+			還被死神逼著要用「撞火車」這種「激烈」的方式進學校…… 
+			漫画程序2011年全力打造第一漫画程序漫画网收集自互联网，漫画程序2011年全力打造第一漫画程序漫画_为你做最好的在线漫画网站！",
+						"newest": "第033话 你太赞了",
+			            "chaptercount":44,
+			            "updatetime":"2019-12-20 00:00:00",
+			            "cover":"http://ljsb.top:5000/static/cartoon/34/0WtYOxum2Fs.jpg"
+			        }]
+			}
+
+评论漫画
+	POST http://www.ljsb.top:5000/common/carcomment
+	form-data
+		comment       //评论（不少于5个字符）
+		analysis	  //  用户标识 未登录 为0
+		cartoonId	  //漫画id
+		start         //星星数量 最多5个 不可不填
+	return
+		成功
+			{"retCode": 200, "msg": "评论成功", "result": {}}
+		失败
+			{"retCode": 405, "msg": "字数不能少于5个字", "result": {}}
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+			{"retCode": 405, "msg": "漫画不存在", "result": {}}
+			
+评论漫画的评论
+	POST http://www.ljsb.top:5000/common/carcomments
+	form-data
+		comment    //评论
+		analysis   //用户标识  若用户未登录 填为0
+		cartoonId     //漫画id
+		commentId  //评论id
+	return
+		成功
+			{"retCode": 200, "msg": "评论成功", "result": {}}
+		失败
+			{"retCode": 405, "msg": "评论不存在", "result": {}}
+			{"retCode": 405, "msg": "漫画不存在", "result": {}}
+
+获取漫画的评论
+	GET http://www.ljsb.top:5000/common/cargetcomment?cartoonId=14
+	args cartoonId    //漫画id
+	return
+		成功
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":[
+			        {
+			            "id":2,
+			            "comment":"这本小说可以",
+			            "username":"游客01",
+			            "addtime":"2019-11-22 17:11:58",
+			            "icon":"http://ljsb.top:5000/static/images/icon/default.png",
+			            "praise":0,
+			            "star":5
+			            "count":3
+			        },
+			        {
+			            "id":1,
+			            "comment":"这本小说可以",
+			            "username":"12",
+			            "addtime":"2019-11-22 17:09:40",
+			            "icon":"http://ljsb.top:5000/static/images/icon/default.png",
+			            "praise":0,
+			            "star":5
+			            "count":0
+			        }
+			    ]
+			}
+			参数说明
+				id  评论的id
+				praise 该条评论的点赞数
+				count   评论这条评论的数目
+				star    用户评论时候的星星数
+		失败
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+
+获取漫画评论的评论
+	GET http://www.ljsb.top:5000/common/carcommentcom?cartoonId=14&commentId=2
+	args
+		cartoonId     //漫画的id
+		commentId  //评论的id
+	return
+		成功
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":[
+			        {
+			            "id":15,
+			            "comment":"这本小说可以",
+			            "username":"游客20191126",
+			            "addtime":"2019-11-26 15:46:41",
+			            "icon":"http://ljsb.top:5000/static/images/icon/default.png",
+			            "praise":0,
+			            "count":0
+			        },
+			        {
+			            "id":14,
+			            "comment":"这本小说可以",
+			            "username":"大飞鞋",
+			            "addtime":"2019-11-26 15:45:51",
+			            "icon":"http://ljsb.top:5000/static/images/icon/zso9ynmmjvzllrkwz5n10uh38re7grc2.jpg",
+			            "praise":0,
+			            "count":0
+			        }
+			        
+			    ]
+			}
+		失败
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+			{"retCode": 405, "msg": "评论不存在", "result": {}}
+
+点赞评论
+	GET http://www.ljsb.top:5000/common/carcompraise?commentId=16&cartoonId=14
+	args 
+		commentId   //评论id
+		cartoonId     //漫画id
+	return
+		成功 
+			{"retCode": 200, "msg": "success", "result": {}}
+		失败
+			{"retCode": 405, "msg": "您已赞过了", "result": {}}   根据用户的ip限制用户一天只能赞一次这个评论
+			{"retCode": 405, "msg": "评论不存在", "result": {}}
+
+漫画搜索
+	GET http://ljsb.top:5000/front/carsearch?keyword=斗破苍穹&page=1&limit=10
+	args
+		keyword   //关键词 最多20字符
+		page	   页码 可以不写 默认为1
+		limit	   每页显示条数 可以不写 默认10
+	return
+		成功
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":[
+			        {
+			        	"id": 35,
+			            "name":"通灵妃",
+			            "author":"肉肉",
+			            "statu":2,
+			            "label":[
+			                "玄幻",
+			                "科幻",
+			                "古风"
+			            ],
+			            "hotcount":302,
+			            "subcount":573,
+			            "info":"       丞相府大小姐千云兮自小身负异能，被视为不详之人养在灵云山上，16岁这年代替妹妹千云裳嫁入夜王府，传说夜幽幂性情古怪，冷酷残暴，千云兮将会经历怎样的遭遇呢......他们的新婚之夜又将如何度过？代嫁的事情会败露吗？",
+			            "newest": "第033话 你太赞了",
+			            "chaptercount":402,
+			            "updatetime":"2019-12-20 00:00:00",
+			            "cover":"http://ljsb.top:5000/static/cartoon/32/0X4qzFZUkNM.jpg"
+			        },
+			        {
+			        	"id": 36,
+			            "name":"特殊传说",
+			            "author":"红麟",
+			            "statu":2,
+			            "label":[
+			                "玄幻",
+			                "科幻",
+			                "古风"
+			            ],
+			            "hotcount":645,
+			            "subcount":977,
+			            "info":"介绍:
+			倒楣的少年褚冥漾從小到大衰運纏身, 
+			功課明明沒有不好,但聯考當天就硬是遇到食物中毒, 
+			填志願的時候居然給他填進了一所不存在的學校！？ 
+			入學當天,不但遇到了「死神」, 
+			還被死神逼著要用「撞火車」這種「激烈」的方式進學校…… 
+			漫画程序2011年全力打造第一漫画程序漫画网收集自互联网，漫画程序2011年全力打造第一漫画程序漫画_为你做最好的在线漫画网站！",
+						"newest": "第033话 你太赞了",
+			            "chaptercount":44,
+			            "updatetime":"2019-12-20 00:00:00",
+			            "cover":"http://ljsb.top:5000/static/cartoon/34/0WtYOxum2Fs.jpg"
+			        }]
+			}
+
+获取漫画搜索关键词
+	GET http://ljsb.top:5000/front/cartopsearch
+	return 
+		(返回最多5个关键词)
+		{
+		    "retCode": 200,
+		    "msg": "success",
+		    "result": [
+		        "星空下的"
+		    ]
+		}
+
+---------------------漫画接口-end-----------------------
+
+
+---------------------------用户相关-start----------------------
+单个添加用户浏览记录
+	GET http://ljsb.top:5000/common/carhistory?analysis=4gs6hshn4alwssc7edggahtsyqjpt2qw&bookId=43&type=2
+	args 
+		analysis    //用户标识
+		type		//分类 1小说 2漫画
+		bookId		//书籍Id
+	return
+		成功
+			{"retCode": 200,"msg": "success","result": {}}
+		失败
+			{"retCode": 405,"msg": "数据不存在","result": {}}
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+			{"retCode": 401, "msg": "认证失败", "result": {}}
+
+批量添加用户浏览记录
+	GET http://ljsb.top:5000/common/carhistorys?analysis=4gs6hshn4alwssc7edggahtsyqjpt2qw&bookIds=48,49,50&timees=2019-12-27 14:33:02,2019-12-27 14:33:02,2019-12-27 14:33:02&types=2,1,2
+	args 
+		analysis    //用户标识
+		timees      //添加时间 字符串拼接以 “,” 分隔
+		types       //分类    1小说 2漫画 字符串拼接以 “,” 分隔
+		bookIds		//书籍id   字符串拼接以 “,” 分隔
+	return
+		成功
+			{"retCode": 200,"msg": "success","result": {}}
+		失败
+			{"retCode": 405,"msg": "数据不存在","result": {}}
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+			{"retCode": 401, "msg": "认证失败", "result": {}}
+
+获取用户浏览记录
+	GET http://ljsb.top:5000/common/cargethistory?analysis=4gs6hshn4alwssc7edggahtsyqjpt2qw
+	args 
+		analysis   //用户标识
+	return
+		成功
+			{
+		    "retCode": 200,
+		    "msg": "success",
+		    "result": [
+		        {
+		            "id": 47,
+		            "name": "至尊神魔",
+		            "author": "冬漫社",
+		            "timee": "2019-12-27 14:47:12",
+		            "iscollect": 0,
+		            "cover": "http://ljsb.top:5000/static/cartoon/47/0X4rY6nWzrc.jpg",
+		            "type": 2
+		        },
+		        {
+		            "id": 49,
+		            "name": "帝凰之神医弃妃",
+		            "author": "阿彩",
+		            "timee": "2019-12-27 14:33:02",
+		            "iscollect": 1,
+		            "cover": "https://cdn.cnbj0.fds.api.mi-img.com/atlas/608ae84d98a42cfb61b136cd394b3916?thumb=1&w=240&h=320",
+		            "type": 1
+		        }]
+		        }
+		失败
+			{"retCode": 401, "msg": "认证失败", "result": {}}
+
+清空浏览记录
+	GET http://ljsb.top:5000/common/carclearhis?analysis=4gs6hshn4alwssc7edggahtsyqjpt2qw
+	args
+		analysis   //用户标识
+	return
+		成功
+			{"retCode": 200,"msg": "success","result": {}}
+		失败
+			{"retCode": 401, "msg": "认证失败", "result": {}}
+
+用户收藏 
+	GET http://ljsb.top:5000/common/carcollects?analysis=4gs6hshn4alwssc7edggahtsyqjpt2qw&bookId=47&type=2&progress=2&read=1
+	args
+		analysis   //用户标识
+		bookId   //书籍id
+		type     //书籍分类  1小说 2漫画
+		progress  // 阅读进度
+		read      //已读未读
+	return
+		成功
+			{"retCode": 200, "msg": "收藏成功", "result": {}
+		失败
+			{"retCode": 401, "msg": "认证失败", "result": {}}
+			{"retCode": 402, "msg": "漫画不存在", "result": {}}
+			{"retCode": 402, "msg": "小说不存在", "result": {}}
+			{"retCode": 403, "msg": "小说已在收藏夹", "result": {}}
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+
+用户批量收藏（支持单本收藏）（如果小说 已收藏更新阅读进度已读未读）
+	GET http://ljsb.top:5000/common/carcollectb?analysis=4gs6hshn4alwssc7edggahtsyqjpt2qw&books=47,49,30&types=1,2,1&progress=2,0,200&read=1,0,1
+	args
+		analysis  //用户标识
+		books     //书籍id以英文逗号分隔
+		types     //类别 1小说 2漫画 以英文逗号分隔
+		progress  //阅读进度   未读写0 以英文逗号分隔
+		read      //1已读 0未读  以英文逗号分隔
+	return
+		成功
+			{"retCode": 200, "msg": "收藏成功", "result": {}
+		失败
+			{"retCode": 401, "msg": "认证失败", "result": {}}
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+
+更新用户漫画阅读进度
+	GET http://ljsb.top:5000/common/carupprogress?analysis=4gs6hshn4alwssc7edggahtsyqjpt2qw&cartoonId=49&progress=30
+	args
+		analysis   //用户标识
+		cartoonId  //漫画id
+		progress   //阅读进度 int
+	return
+		成功
+			{"retCode": 200,"msg": "更新成功","result": {}}
+		失败
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+			{"retCode": 402, "msg": "漫画不存在", "result": {}}
+			{"retCode": 405, "msg": "收藏不存在", "result": {}}
+
+获取用户收藏 返回书本 阅读进度 本周阅读分钟数
+	GET http://ljsb.top:5000/common/cargetcollects?analysis=4gs6hshn4alwssc7edggahtsyqjpt2qw
+	args
+		analysis   //用户标识
+	return
+		{
+		    "retCode": 200,
+		    "msg": "success",
+		    "read_time": 0,
+		    "result": {
+		        "data": [
+		            {
+		                "id": 10,
+		                "name": "我的贴身校花",
+		                "cover": "https://cdn.cnbj0.fds.api.mi-img.com/atlas/664fa44a4c5bb43b9cc5a796ca511c20?thumb=1&w=240&h=320",
+		                "author": "带玉",
+		                "isread": 1,
+		                "read_progress": 0,
+		                "type": 1
+		            },
+		            {
+		                "id": 11,
+		                "name": "绝品邪少",
+		                "cover": "https://cdn.cnbj0.fds.api.mi-img.com/atlas/3b05982850f74c8245c71af99b87b881?thumb=1&w=240&h=320",
+		                "author": "陨落星辰",
+		                "isread": 1,
+		                "read_progress": 10,
+		                "type": 1
+		            }]
+		            }
+		  }
+		  参数说明
+		  	type  1小说 2漫画
+		  	read_time 本周阅读分钟
+
+用户批量取消收藏
+	GET http://ljsb.top:5000/common/uncarcollect?analysis=4gs6hshn4alwssc7edggahtsyqjpt2qw&bookIds=49,30&types=2,1
+	args
+		analysis   //用户标识
+		bookIds    //书籍id
+		types      //分类  1小说 2漫画
+	return
+		成功
+			{"retCode": 200, "msg": "取消收藏成功", "result": {}}
+		失败
+			{"retCode": 400, "msg": "认证失败", "result": {}}
+			{"retCode": 400, "msg": "参数错误", "result": {}}
+
+书库banner
+	GET http://ljsb.top:5000/front/bookbanner?type=boy	
+	args 		
+		type  handpick精选页 boy男 girl女 cartoon漫画 
+	return
+		{
+		    "retCode": 200,
+		    "msg": "success",
+		    "result": [
+		        {
+		            "imgurl": "http://ljsb.top:5000/static/images/banner/boy31.png",
+		            "rank": 1,
+		            "bookId": 3075
+		        },
+		        {
+		            "imgurl": "http://ljsb.top:5000/static/images/banner/boy32.png",
+		            "rank": 2,
+		            "bookId": 3060
+		        }
+		    ]
+		}
+
+用户第一次进来推荐6本小说 3本漫画
+	GET http://ljsb.top:5000/front/recomment
+	return
+		{
+		    "retCode": 200,
+		    "msg": "success",
+		    "result": [
+		        {
+				    "id": 3131,
+				    "name": "都市超级医仙",
+				    "cover": "https://www.qb5.tw/files/article/image/88/88709/88709s.jpg",
+				    "summary": "左手惊天医术、右手至强武功，携带百年记忆，重生回归都市，这一世，定要纵横无敌、执掌一切，登临苍穹之巅！\t\r",
+				    "label": "都市",
+				    "state": 1,
+				    "enabled": 1,
+				    "words": 14370000,
+				    "created": 0,
+				    "updated": 1572922320,
+				    "authorId": 2937,
+				    "author": "南极海",
+				    "extras": "",
+				    "countchapter": 2701,
+				    "clickc": 2232,
+				    "type": 1
+				},
+		        {
+		            "id": 247,
+		            "cover": "http://www.xbiquge.la/files/article/image/46/46496/46496s.jpg",
+		            "isread": 0,
+		            "read_progress": 0,
+		            "type": 2
+		        }]
+		}
+
+设置用户收藏漫画已读	
+	GET http://ljsb.top:5000/common/carisread?analysis=4gs6hshn4alwssc7edggahtsyqjpt2qw&cartoonId=47
+	args
+		analysis   //用户标识
+		cartoonId  //漫画id
+	return
+		成功
+			{"retCode": 200, "msg": "修改成功", "result": {}}
+		失败
+			{"retCode": 400, "msg": "收藏不存在", "result": {}}
+			{"retCode": 400, "msg": "认证失败", "result": {}}
+
+判断这本书 或者漫画是否在书架	
+	GET	http://ljsb.top:5000/common/iscollect?analysis=4gs6hshn4alwssc7edggahtsyqjpt2qw&bookId=48&type=2
+	args
+		analysis    //用户标识
+		bookId      //小说或者漫画id
+		type        //1小说 2漫画
+	return
+		没有收藏
+			{"retCode": 200,"msg": "","result": 0}
+		收藏
+			{"retCode": 200,"msg": "","result": 1}
+		错误
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+			{"retCode": 400, "msg": "认证失败", "result": {}}
+
+书城漫画最近更新
+	http://www.ljsb.top:5000/front/cartoonnew?page=1&limit=10
+	args
+		page	   页码 可以不写 默认为1
+		limit	   每页显示条数 可以不写 默认10
+	return
+		{
+		    "retCode": 200,
+		    "msg": "success",
+		    "result": [
+		        {
+		            "id": 305,
+		            "name": "司少你老婆又跑了",
+		            "author": "iCiyuan动漫",
+		            "statu": 2,
+		            "label": [
+		                "生活",
+		                "校园",
+		                "搞笑"
+		            ],
+		            "hotcount": 235,
+		            "subcount": 556,
+		            "info": "深藏功与名，白兔少女上演惊天逆袭。一切的莫名其妙，却又情理之中。偶然与必然，演技与心机，献身与失身，一切的一切都在他与她周围不断酝酿发酵。霸道军阀少帅与满级白兔少女的史诗恋歌！",
+		            "newest": "第216话 轻舟被跟踪！",
+		            "chaptercount": 221,
+		            "updatetime": "2020-01-07 00:00:00",
+		            "cover": "http://www.ljsb.top:5000/static/cartoon/305/0aTnLGdcBu4.jpg"
+		        }]
+		}
+
+---------------------------用户相关-end------------------------
+
+
+

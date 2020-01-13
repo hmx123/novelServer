@@ -10,8 +10,9 @@ from flask import Blueprint, request
 
 from apps.common.models import NovelType, Novels, Chapters, Contents, Author, Monthly, MonthlyNovel, AppVersions, \
     NovelBanner, NovelGroup, GroupidNovelid, ComposePage, Cartoon, CartoonType, CartoonChapter, CartoonidTypeid, \
-    CartoonMonthly, CartoonMonthlyNovel
-from apps.front.decorators import search_counter, get_top_n, novelOb_novelList, cartoonOb_cartoonList
+    CartoonMonthly, CartoonMonthlyNovel, BookcityBanner
+from apps.front.decorators import search_counter, get_top_n, novelOb_novelList, cartoonOb_cartoonList, \
+    cartoon_search_counter, cartoon_get_top_n
 
 bp = Blueprint("front", __name__, url_prefix='/front')
 host = 'http://www.ljsb.top:5000'
@@ -1607,7 +1608,7 @@ def monthlyv():
 @bp.route('/firsttime')
 def firsttime():
     offset_count_list = []
-    for y in range(0, 350):
+    for y in range(1, 350):
         offset_count_list.append(y)
     # 获取9本榜单中的小说
     offset_list = random.sample(offset_count_list, 9)
@@ -1720,12 +1721,20 @@ def cartoon():
                     img_path = '/static/cartoon/%s/%s/%s.jpg' % (cartoonId, 1, x)
                     img_dir = '%s%s' % (base_dir, img_path)
                     # 获取图片的宽高
-                    im = Image.open(img_dir)
-                    w = im.width  # 图片的宽
-                    h = im.height
-                    previvew.append({
-                        'image': '%s%s' % (host, img_path), 'h': h, 'w': w
-                    })
+                    # 判断这个文件是否存在
+                    if os.path.exists(img_dir):
+                        im = Image.open(img_dir)
+                        w = im.width  # 图片的宽
+                        h = im.height
+                        previvew.append({
+                            'image': '%s%s' % (host, img_path), 'h': h, 'w': w
+                        })
+        # 获取最新一话的名称
+        newest = CartoonChapter.query.filter_by(cid=cartoon.id, chapterId=cartoon.chaptercount).first()
+        if not newest:
+            newest_chapter = '第%s话' % cartoon.chaptercount
+        else:
+            newest_chapter = newest.name
         cartoon_dict = {
             'name': cartoon.name,
             'author': cartoon.author,
@@ -1734,6 +1743,7 @@ def cartoon():
             'hotcount': cartoon.hotcount,
             'subcount': cartoon.subcount,
             'info': cartoon.info,
+            'newest': newest_chapter,
             'chaptercount': cartoon.chaptercount,
             'updatetime': str(cartoon.updatetime),
             'cover': cover_href,
@@ -1770,23 +1780,27 @@ def carcontent():
         return json.dumps({"retCode": 400, "msg": "args error", "result": []}, ensure_ascii=False)
     cartoon_chapter = CartoonChapter.query.filter_by(cid=cartoonId, chapterId=chapterId).first()
     image_list = []
+    chapter_name = ''
     if cartoon_chapter:
         base_dir = os.getcwd()
         startnum = cartoon_chapter.startnum
         endnum = cartoon_chapter.endnum
+        chapter_name = cartoon_chapter.name
         # {'image': 'http://ljsb.top:5000/static/cartoon/24/1/1.jpg', 'h': 300, 'w':200}
         for x in range(startnum, endnum+1):
             img_path = '/static/cartoon/%s/%s/%s.jpg' % (cartoonId, chapterId, x)
             img_dir = '%s%s' % (base_dir, img_path)
             # 获取图片的宽高
-            im = Image.open(img_dir)
-            w = im.width  # 图片的宽
-            h = im.height
-            image_list.append({
-                'image': '%s%s' % (host, img_path), 'h': h, 'w': w
-            })
+            # 判断这个文件是否存在
+            if os.path.exists(img_dir):
+                im = Image.open(img_dir)
+                w = im.width  # 图片的宽
+                h = im.height
+                image_list.append({
+                    'image': '%s%s' % (host, img_path), 'h': h, 'w': w, 'index': x
+                })
             # 获取图片链接
-    return json.dumps({"retCode": 200, "msg": "success", "result": image_list}, ensure_ascii=False)
+    return json.dumps({"retCode": 200, "msg": "success", "result": image_list, "chaptername": chapter_name}, ensure_ascii=False)
 
 # 获取漫画分类
 @bp.route('/cartype')
@@ -1821,7 +1835,7 @@ def carclassify():
         page = 1
     limit = request.args.get('limit')
     if not limit or not limit.isdigit():
-        limit = 10
+        limit = 6
     start = (int(page) - 1) * int(limit)
     end = int(page) * int(limit)
     if classify and classify.isdigit():
@@ -1864,7 +1878,7 @@ def carmonthlys():
 
     if not monthlyId or not monthlyId.isdigit():
         return json.dumps({"retCode": 400, "msg": "args error", "result": []}, ensure_ascii=False)
-    cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=monthlyId).limit(limit).offset(offset).all()
+    cartoonId_list = CartoonMonthlyNovel.query.order_by(CartoonMonthlyNovel.hotcount).filter_by(monthlyId=monthlyId).limit(limit).offset(offset).all()
     # 根据id获取漫画
     cartoon_list = cartoonOb_cartoonList(cartoonId_list, host)
     return json.dumps({"retCode": 200, "msg": "success", "result": cartoon_list}, ensure_ascii=False)
@@ -1889,19 +1903,19 @@ def comicmore():
     if not limit or not limit.isdigit():
         limit = 10
     offset = (int(page) - 1) * int(limit)
-    if typee in {'recommend', 'new', 'boy', 'girl', 'over', 'free'}:
+    if typee in {'recommend', 'new', 'boy', 'girl', 'over', 'free', 'like'}:
         if typee == 'recommend' or typee == 'like':
-            cartoonId_list = CartoonMonthlyNovel.query.limit(limit).offset(offset).all()
+            cartoonId_list = CartoonMonthlyNovel.query.order_by(-CartoonMonthlyNovel.hotcount).limit(limit).offset(offset).all()
         elif typee == 'new':
-            cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=4).limit(limit).offset(offset).all()
+            cartoonId_list = CartoonMonthlyNovel.query.order_by(-CartoonMonthlyNovel.hotcount).filter_by(monthlyId=4).limit(limit).offset(offset).all()
         elif typee == 'boy':
-            cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=5).limit(limit).offset(offset).all()
+            cartoonId_list = CartoonMonthlyNovel.query.order_by(-CartoonMonthlyNovel.hotcount).filter_by(monthlyId=5).limit(limit).offset(offset).all()
         elif typee == 'girl':
-            cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=6).limit(limit).offset(offset).all()
+            cartoonId_list = CartoonMonthlyNovel.query.order_by(-CartoonMonthlyNovel.hotcount).filter_by(monthlyId=6).limit(limit).offset(offset).all()
         elif typee == 'over':
-            cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=3).limit(limit).offset(offset).all()
+            cartoonId_list = CartoonMonthlyNovel.query.order_by(-CartoonMonthlyNovel.hotcount).filter_by(monthlyId=3).limit(limit).offset(offset).all()
         elif typee == 'free':
-            cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=8).limit(limit).offset(offset).all()
+            cartoonId_list = CartoonMonthlyNovel.query.order_by(-CartoonMonthlyNovel.hotcount).filter_by(monthlyId=8).limit(limit).offset(offset).all()
         # 根据id获取漫画
         cartoon_list = cartoonOb_cartoonList(cartoonId_list, host)
 
@@ -1922,6 +1936,12 @@ def comicmore():
                     label_arr.append(cartoon_type.type)
             # 获取封面链接
             cover_href = '%s/static/cartoon/%s/%s' % (host, cartoon.id, cartoon.cover)
+            # 获取最新一话的名称
+            newest = CartoonChapter.query.filter_by(cid=cartoon.id, chapterId=cartoon.chaptercount).first()
+            if not newest:
+                newest_chapter = '第%s话' % cartoon.chaptercount
+            else:
+                newest_chapter = newest.name
             cartoon_dict = {
                 'name': cartoon.name,
                 'author': cartoon.author,
@@ -1930,6 +1950,7 @@ def comicmore():
                 'hotcount': cartoon.hotcount,
                 'subcount': cartoon.subcount,
                 'info': cartoon.info,
+                'newest': newest_chapter,
                 'chaptercount': cartoon.chaptercount,
                 'updatetime': str(cartoon.updatetime),
                 'cover': cover_href}
@@ -1967,7 +1988,14 @@ def comicmust():
                 label_arr.append(cartoon_type.type)
         # 获取封面链接
         cover_href = '%s/static/cartoon/%s/%s' % (host, cartoon.id, cartoon.cover)
+        # 获取最新一话的名称
+        newest = CartoonChapter.query.filter_by(cid=cartoon.id, chapterId=cartoon.chaptercount).first()
+        if not newest:
+            newest_chapter = '第%s话' % cartoon.chaptercount
+        else:
+            newest_chapter = newest.name
         cartoon_dict = {
+            'id': cartoon.id,
             'name': cartoon.name,
             'author': cartoon.author,
             'statu': cartoon.statu,
@@ -1975,6 +2003,7 @@ def comicmust():
             'hotcount': cartoon.hotcount,
             'subcount': cartoon.subcount,
             'info': cartoon.info,
+            'newest': newest_chapter,
             'chaptercount': cartoon.chaptercount,
             'updatetime': str(cartoon.updatetime),
             'cover': cover_href}
@@ -1985,14 +2014,14 @@ def comicmust():
 @bp.route('/comicchange')
 def comicchange():
     host = 'http://%s' % request.host
-    # recommend (小编推荐) 2
+    # recommend (小编推荐) 4
     # new （新作出炉） 新作榜 6
     # over (完结书) 完本榜 6
     typee = request.args.get('type')
     if typee == 'recommend':
         cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=1).all()
         # 随机取2本
-        cartoonId_list = random.sample(cartoonId_list, 2)
+        cartoonId_list = random.sample(cartoonId_list, 4)
     elif typee == 'new':
         cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=4).all()
         # 随机取6本
@@ -2031,9 +2060,9 @@ def comic():
     style_cartoon = []
     # 小编推荐
     cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=1).all()
-    cartoonId_list = random.sample(cartoonId_list, 2)
+    cartoonId_list = random.sample(cartoonId_list, 4)
     cartoon_list = cartoonOb_cartoonList(cartoonId_list, host)
-    style_cartoon.append({"style": 8, "type": "recommend", "title": "小编推荐", "data": cartoon_list,
+    style_cartoon.append({"style": 10, "type": "recommend", "title": "小编推荐", "data": cartoon_list,
      "other": [{"mode": 2, "head": "换一换"}, {"mode": 3, "head": "更多"}]})
     # 新作出炉
     cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=4).all()
@@ -2042,23 +2071,23 @@ def comic():
     style_cartoon.append({"style": 9, "type": "new", "title": "新作出炉", "data": cartoon_list,
      "other": [{"mode": 2, "head": "换一换"}, {"mode": 3, "head": "更多"}]})
     # 少年青睐
-    cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=5).all()
-    cartoonId_list = random.sample(cartoonId_list, 4)
+    cartoonId_list = CartoonMonthlyNovel.query.order_by(-CartoonMonthlyNovel.hotcount).filter_by(monthlyId=5).all()
+    cartoonId_list = cartoonId_list[:4]
     cartoon_list = cartoonOb_cartoonList(cartoonId_list, host)
     style_cartoon.append({"style": 10, "type": "boy", "title": "少年青睐", "data": cartoon_list,
-     "other": [{"mode": 4, "head": "查看更多戳这里"}, {"mode": 3, "head": "更多"}]})
+     "other": [{"mode": 4, "head": "查看更多戳这里"}]})
     # 少年恋爱馆
-    cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=6).all()
-    cartoonId_list = random.sample(cartoonId_list, 4)
+    cartoonId_list = CartoonMonthlyNovel.query.order_by(-CartoonMonthlyNovel.hotcount).filter_by(monthlyId=6).all()
+    cartoonId_list = cartoonId_list[:4]
     cartoon_list = cartoonOb_cartoonList(cartoonId_list, host)
     style_cartoon.append({"style": 10, "type": "girl", "title": "少女恋爱馆", "data": cartoon_list,
-     "other": [{"mode": 4, "head": "查看更多戳这里"}, {"mode": 3, "head": "更多"}]})
+     "other": [{"mode": 4, "head": "查看更多戳这里"}]})
     # 更新必看
-    cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=4).all()
-    cartoonId_list = random.sample(cartoonId_list, 3)
+    cartoonId_list = CartoonMonthlyNovel.query.order_by(-CartoonMonthlyNovel.hotcount).filter_by(monthlyId=4).all()
+    cartoonId_list = cartoonId_list[:3]
     cartoon_list = cartoonOb_cartoonList(cartoonId_list, host)
     style_cartoon.append({"style": 11, "type": "must", "title": "更新必看", "data": cartoon_list,
-     "other": [{"mode": 4, "head": "查看更多戳这里"}, {"mode": 3, "head": "更多"}]})
+     "other": [{"mode": 4, "head": "查看更多戳这里"}]})
     # 分类精选 处理
     style_cartoon.append({"style": 12, "title": "分类精选", "classify": [
         {"title": "新作", "classifyId": "1"},
@@ -2073,16 +2102,206 @@ def comic():
     style_cartoon.append({"style": 9, "type": "over", "title": "完结书", "data": cartoon_list,
      "other": [{"mode": 2, "head": "换一换"}, {"mode": 3, "head": "更多"}]})
     # 猜你喜欢
-    cartoonId_list = CartoonMonthlyNovel.query.all()
-    cartoonId_list = random.sample(cartoonId_list, 10)
+    cartoonId_list = CartoonMonthlyNovel.query.order_by(-CartoonMonthlyNovel.hotcount).all()
+    cartoonId_list = cartoonId_list[:10]
     cartoon_list = cartoonOb_cartoonList(cartoonId_list, host)
     style_cartoon.append({"style": 13, "type": "like", "title": "猜你喜欢", "data": cartoon_list, "other": [{"mode": 3, "head": "更多"}]})
     # 人气榜佳作
-    cartoonId_list = CartoonMonthlyNovel.query.all()
-    cartoonId_list = random.sample(cartoonId_list, 10)
+    cartoonId_list = CartoonMonthlyNovel.query.order_by(-CartoonMonthlyNovel.hotcount).filter_by(monthlyId=1).all()
+    cartoonId_list = cartoonId_list[:10]
     cartoon_list = cartoonOb_cartoonList(cartoonId_list, host)
     style_cartoon.append({"style": 14, "title": "人气榜佳作", "data": cartoon_list, "other": [{"mode": 3, "head": "全部榜单"}]})
     return json.dumps({"retCode": 200, "msg": "success", "result": style_cartoon}, ensure_ascii=False)
+
+# 漫画详情页 看了又看
+@bp.route('/carrecomm')
+def carrecomm():
+    host = 'http://%s' % request.host
+    # recommend (小编推荐)
+    # new （新作出炉） 新作榜
+    # boy （少年青睐）少年最爱榜
+    # girl （少女恋爱馆）少女最爱榜
+    # update（更新必看） 获取当天更新漫画
+    # over (完结书) 完本榜
+    # free (免费)
+    # like
+    typee = request.args.get('type')
+    if typee == 'new':
+        cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=4).all()
+    elif typee == 'boy':
+        cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=5).all()
+    elif typee == 'girl':
+        cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=6).all()
+    elif typee == 'over':
+        cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=3).all()
+    elif typee == 'free':
+        cartoonId_list = CartoonMonthlyNovel.query.filter_by(monthlyId=8).all()
+    else:
+        cartoonId_list = CartoonMonthlyNovel.query.all()
+    # 根据id获取漫画
+    cartoonId_list = random.sample(cartoonId_list, 8)
+    cartoon_list = cartoonOb_cartoonList(cartoonId_list, host)
+    return json.dumps({"retCode": 200, "msg": "success", "result": cartoon_list}, ensure_ascii=False)
+
+# 漫画搜索
+@bp.route('/carsearch')
+@cartoon_search_counter
+def carsearch():
+    keyword = request.args.get('keyword')
+    if len(keyword) > 20:
+        return json.dumps({"retCode": 400, "msg": "关键词太长", "result": []}, ensure_ascii=False)
+    page = request.args.get('page')
+    if not page or not page.isdigit():
+        page = 1
+    limit = request.args.get('limit')
+    if not limit or not limit.isdigit():
+        limit = 10
+    start = (int(page) - 1) * int(limit)  # 开始的文章
+    end = start + int(limit)
+    if keyword:
+        body = {"query": {"match": {"title": keyword}}, "size": 50}
+        result = es.search(index="cartoon-index", body=body)
+        cartoon_list = []
+        novelId_list = []
+        for item in result["hits"]["hits"][start:end]:
+            novelId_list.append(item['_id'])
+        for novel_id in novelId_list:
+            cartoon = Cartoon.query.get(novel_id)
+            if cartoon:
+                label_arr = []
+                label_str = cartoon.label
+                label_list = label_str.split(',')
+                # 根据分类id获取分类
+                for label in label_list:
+                    cartoon_type = CartoonType.query.get(label)
+                    if cartoon_type:
+                        label_arr.append(cartoon_type.type)
+                # 获取封面链接
+                cover_href = '%s/static/cartoon/%s/%s' % (host, cartoon.id, cartoon.cover)
+                # 获取最新一话的名称
+                newest = CartoonChapter.query.filter_by(cid=cartoon.id, chapterId=cartoon.chaptercount).first()
+                if not newest:
+                    newest_chapter = '第%s话' % cartoon.chaptercount
+                else:
+                    newest_chapter = newest.name
+                cartoon_dict = {
+                    'id': cartoon.id,
+                    'name': cartoon.name,
+                    'author': cartoon.author,
+                    'statu': cartoon.statu,
+                    'label': label_arr,
+                    'hotcount': cartoon.hotcount,
+                    'subcount': cartoon.subcount,
+                    'info': cartoon.info,
+                    'newest': newest_chapter,
+                    'chaptercount': cartoon.chaptercount,
+                    'updatetime': str(cartoon.updatetime),
+                    'cover': cover_href}
+                cartoon_list.append(cartoon_dict)
+        return json.dumps({"retCode": 200, "msg": "success", "result": cartoon_list, "page": page, "limit": limit},
+                          ensure_ascii=False)
+    else:
+        return json.dumps({"retCode": 400, "msg": "args error", "result": []}, ensure_ascii=False)
+
+# 获取漫画热搜关键词
+@bp.route('/cartopsearch')
+def cartopsearch():
+    top_search_list = cartoon_get_top_n(5)
+    top_search = []
+    for top in top_search_list:
+        top_search.append(top[0])
+    return json.dumps({"retCode": 200, "msg": "success", "result": top_search}, ensure_ascii=False)
+
+# 获取banner
+@bp.route('/bookbanner')
+def bookbanner():
+    typee = request.args.get('type')
+    host = 'http://%s' % request.host
+    banner_list_tt = BookcityBanner.query.filter_by(type=typee, version=3).all()
+    banner_list = []
+    for banner in banner_list_tt:
+        cover = host + banner.imgurl
+        banner_list.append({
+            'imgurl': cover,
+            'rank': banner.rank,
+            'bookId': banner.book
+        })
+    return json.dumps({"retCode": 200, "msg": "success", "result": banner_list}, ensure_ascii=False)
+
+# 用户第一次进来推荐6本小说 3本漫画
+@bp.route('/recomment')
+def recomment():
+    offset_count_list = [y for y in range(1, 350)]
+    # 获取9本榜单中的小说
+    offset_list = random.sample(offset_count_list, 6)
+    cartoon_count_list = [x for x in range(1, 200)]
+    cartoon_list = random.sample(cartoon_count_list, 3)
+    novels = []
+    for offset_count in offset_list:
+        Monthly = MonthlyNovel.query.limit(1).offset(offset_count).first()
+        novel = Novels.query.get(Monthly.novelId)
+        if novel:
+            # 封面  id 阅读进度 未读
+            novels.append(novel)
+    novels = novelOb_novelList(novels)
+    for cartoon in cartoon_list:
+        Monthly = CartoonMonthlyNovel.query.limit(1).offset(cartoon).first()
+        novel = Cartoon.query.get(Monthly.cartoonId)
+        cover = '%s/static/cartoon/%s/%s' % (host, novel.id, novel.cover)
+        novels.append({
+            "id": novel.id,
+            "cover": cover,
+            "isread": 0,
+            "read_progress": 0,
+            "type": 2
+        })
+    return json.dumps({"retCode": 200, "msg": "success", "result": novels}, ensure_ascii=False)
+
+# 书城漫画最近更新
+@bp.route('/cartoonnew')
+def cartoonnew():
+    page = request.args.get('page')
+    if not page or not page.isdigit():
+        page = 1
+    limit = request.args.get('limit')
+    if not limit or not limit.isdigit():
+        limit = 10
+    offset = (int(page) - 1) * int(limit)
+    cartoon_array = Cartoon.query.order_by(-Cartoon.updatetime).limit(limit).offset(offset).all()
+    cartoon_list = []
+    for cartoon in cartoon_array:
+        label_arr = []
+        label_str = cartoon.label
+        label_list = label_str.split(',')
+        # 根据分类id获取分类
+        for label in label_list:
+            cartoon_type = CartoonType.query.get(label)
+            if cartoon_type:
+                label_arr.append(cartoon_type.type)
+        # 获取封面链接
+        cover_href = '%s/static/cartoon/%s/%s' % (host, cartoon.id, cartoon.cover)
+        # 获取最新一话的名称
+        newest = CartoonChapter.query.filter_by(cid=cartoon.id, chapterId=cartoon.chaptercount).first()
+        if not newest:
+            newest_chapter = '第%s话' % cartoon.chaptercount
+        else:
+            newest_chapter = newest.name
+        cartoon_dict = {
+            'id': cartoon.id,
+            'name': cartoon.name,
+            'author': cartoon.author,
+            'statu': cartoon.statu,
+            'label': label_arr,
+            'hotcount': cartoon.hotcount,
+            'subcount': cartoon.subcount,
+            'info': cartoon.info,
+            'newest': newest_chapter,
+            'chaptercount': cartoon.chaptercount,
+            'updatetime': str(cartoon.updatetime),
+            'cover': cover_href}
+        cartoon_list.append(cartoon_dict)
+    return json.dumps({"retCode": 200, "msg": "success", "result": cartoon_list}, ensure_ascii=False)
+
 
 # -------------------------------------------------第三版小说新增漫画接口end'-------------------------------------
 

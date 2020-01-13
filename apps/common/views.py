@@ -8,7 +8,7 @@ from flask import Blueprint, request
 import config
 from apps.common.forms import RegisterForm, LoginForm, ResetpwdForm, ForgetPassword
 from apps.common.models import User, BookCollect, Novels, NovelType, Author, Chapters, NovelComment, Feedback, \
-    NovelHistory
+    NovelHistory, CartoonComment, Cartoon
 from apps.common.wyyapi import sendcode, checkcode
 from apps.front.decorators import novelOb_novelList
 from exts import db, photos
@@ -157,7 +157,7 @@ def collect():
         if not novel:
             return json.dumps({"retCode": 400, "msg": "小说不存在", "result": {}}, ensure_ascii=False)
 
-        book_collect = BookCollect(userId=user.id, bookId=bookId)
+        book_collect = BookCollect(userId=user.id, bookId=bookId, type=1)
         db.session.add(book_collect)
         db.session.commit()
         return json.dumps({"retCode": 200, "msg": "收藏成功", "result": {}}, ensure_ascii=False)
@@ -172,7 +172,7 @@ def uncollect():
     user = User.query.filter_by(token=token).first()
     if user:
         # 判断用户是否收藏
-        book_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId).first()
+        book_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId, type=1).first()
 
         if book_collect:
             db.session.delete(book_collect)
@@ -196,7 +196,7 @@ def uncollectmany():
     if user:
         # 判断用户是否收藏
         for bookId in bookId_list:
-            book_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId).first()
+            book_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId, type=1).first()
             if book_collect:
                 db.session.delete(book_collect)
                 db.session.commit()
@@ -211,7 +211,7 @@ def getcollect():
     token = request.args.get('analysis')
     user = User.query.filter_by(token=token).first()
     if user:
-        book_collect = BookCollect.query.filter_by(userId=user.id).all()
+        book_collect = BookCollect.query.filter_by(userId=user.id, type=1).all()
         # 根据bookId获取小说详情
         novel_list = []
         for collect in book_collect:
@@ -265,7 +265,7 @@ def isread():
     user = User.query.filter_by(token=token).first()
     if user:
         # 判断用户是否收藏
-        collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId).first()
+        collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId, type=1).first()
         if collect:
             # 修改已读状态
             collect.isread = 1
@@ -295,18 +295,22 @@ def collects():
         return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
     if not read_progress or not read_progress.isdigit():
         read_progress = 0
+    if read_progress.isdigit():
+        return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+    if int(read_progress) > 100:
+        read_progress = 100
     user = User.query.filter_by(token=token).first()
 
     if user:
         # 判断小说是否收藏过了
-        is_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId).first()
+        is_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId, type=1).first()
         if is_collect:
             return json.dumps({"retCode": 403, "msg": "小说已在收藏夹", "result": {}}, ensure_ascii=False)
         novel = Novels.query.get(bookId)
         if not novel:
             return json.dumps({"retCode": 402, "msg": "小说不存在", "result": {}}, ensure_ascii=False)
 
-        book_collect = BookCollect(userId=user.id, bookId=bookId, read_progress=read_progress, isread=isread)
+        book_collect = BookCollect(userId=user.id, bookId=bookId, read_progress=read_progress, isread=isread, type=1)
         db.session.add(book_collect)
         db.session.commit()
         return json.dumps({"retCode": 200, "msg": "收藏成功", "result": {}}, ensure_ascii=False)
@@ -342,7 +346,7 @@ def collectb():
                 else:
                     return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
                 # 判断小说是否收藏过了
-                is_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId).first()
+                is_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId, type=1).first()
                 if is_collect:
                     # 收藏过了 更新阅读进度和阅读状态
                     is_collect.read_progress = read_progress
@@ -352,7 +356,7 @@ def collectb():
                 novel = Novels.query.get(bookId)
                 if not novel:
                     return json.dumps({"retCode": 402, "msg": "小说不存在", "result": {}}, ensure_ascii=False)
-                book_collect = BookCollect(userId=user.id, bookId=bookId, read_progress=read_progress, isread=isread)
+                book_collect = BookCollect(userId=user.id, bookId=bookId, read_progress=read_progress, isread=isread, type=1)
 
                 book_collect_list.append(book_collect)
             db.session.add_all(book_collect_list)
@@ -377,9 +381,11 @@ def upprogress():
         if not novel:
             return json.dumps({"retCode": 402, "msg": "小说不存在", "result": {}}, ensure_ascii=False)
         # 获取到用户收藏的小说
-        book_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId).first()
+        book_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId, type=1).first()
         if not book_collect:
             return json.dumps({"retCode": 405, "msg": "收藏不存在", "result": {}}, ensure_ascii=False)
+        if int(read_progress) > 100:
+            read_progress = 100
         book_collect.read_progress = read_progress
         db.session.add(book_collect)
         db.session.commit()
@@ -410,7 +416,7 @@ def getcollects():
     user = User.query.filter_by(token=token).first()
     if user:
         # 根据用户id获取阅读书籍
-        book_collect = BookCollect.query.filter_by(userId=user.id).all()
+        book_collect = BookCollect.query.filter_by(userId=user.id, type=1).all()
         # 用户本周阅读分钟数
         read_time = user.read_time
         # 根据bookId获取小说详情
@@ -477,10 +483,11 @@ def comment():
         icon = user.icon
         userId = user.id
     else:
-        ip = time.strftime("%Y%m%d", time.localtime(time.time()))
-        username = '游客%s' % ip
-        icon = 'default.png'
-        userId = 0
+        # ip = time.strftime("%Y%m%d", time.localtime(time.time()))
+        # username = '游客%s' % ip
+        # icon = 'default.png'
+        # userId = 0
+        return json.dumps({"retCode": 405, "msg": "请登录后评论", "result": {}}, ensure_ascii=False)
     # 新增用户评论
     comm = NovelComment(novelId=bookId, userId=userId, comment=comment, username=username, icon=icon, commentId=0, star = star)
     db.session.add(comm)
@@ -518,10 +525,15 @@ def comments():
         icon = user.icon
         userId = user.id
     else:
-        ip = time.strftime("%Y%m%d", time.localtime(time.time()))
-        username = '游客%s' % ip
-        icon = 'default.png'
-        userId = 0
+        # ip = time.strftime("%Y%m%d", time.localtime(time.time()))
+        # username = '游客%s' % ip
+        # icon = 'default.png'
+        # userId = 0
+        return json.dumps({"retCode": 405, "msg": "请登录后评论", "result": {}}, ensure_ascii=False)
+    # 判断用户是否对相同的评论评论过了
+    nc = NovelComment.query.filter_by(novelId=bookId, userId=userId, commentId=commentId).first()
+    if nc:
+        return json.dumps({"retCode": 405, "msg": "您已评论过了", "result": {}}, ensure_ascii=False)
     # 新增用户评论
     comm = NovelComment(novelId=bookId, userId=userId, comment=comment, username=username, icon=icon, commentId=commentId)
     db.session.add(comm)
@@ -533,6 +545,7 @@ def comments():
 def compraise():
     # 获取评论id
     commentId = request.args.get('commentId')
+    #
     if not commentId or not commentId.isdigit():
         commentId = 0
     bookId = request.args.get('bookId')
@@ -835,10 +848,10 @@ def history():
         novel = Novels.query.get(bookId)
         if novel:
             #判断用户是否已经添加过浏览记录了
-            novel_history = NovelHistory.query.filter_by(userId=user.id, novelId=bookId).first()
+            novel_history = NovelHistory.query.filter_by(userId=user.id, novelId=bookId, type=1).first()
             if novel_history:
                 return json.dumps({"retCode": 200, "msg": "success", "result": {}}, ensure_ascii=False)
-            nh = NovelHistory(userId=user.id, novelId=bookId)
+            nh = NovelHistory(userId=user.id, novelId=bookId, type=1)
             db.session.add(nh)
             db.session.commit()
             return json.dumps({"retCode": 200, "msg": "success", "result": {}}, ensure_ascii=False)
@@ -876,9 +889,9 @@ def historys():
             # 判断小说是否存在
             if novel:
                 # 判断用户是否已经添加过浏览记录了
-                novel_history = NovelHistory.query.filter_by(userId=user.id, novelId=bookId).first()
+                novel_history = NovelHistory.query.filter_by(userId=user.id, novelId=bookId, type=1).first()
                 if not novel_history:
-                    nh = NovelHistory(userId=user.id, novelId=bookId, addtime=timee_list[x])
+                    nh = NovelHistory(userId=user.id, novelId=bookId, addtime=timee_list[x], type=1)
                     db.session.add(nh)
         db.session.commit()
         return json.dumps({"retCode": 200, "msg": "success", "result": {}}, ensure_ascii=False)
@@ -890,14 +903,14 @@ def gethistory():
     token = request.args.get('analysis')
     user = User.query.filter_by(token=token).first()
     if user:
-        nh_list = NovelHistory.query.filter_by(userId=user.id).order_by(NovelHistory.addtime).all()
+        nh_list = NovelHistory.query.filter_by(userId=user.id, type=1).order_by(NovelHistory.addtime).all()
         novel_list = []
         for nh in nh_list[::-1]:
             novelId = nh.novelId
             novel = Novels.query.get(novelId)
             if novel:
                 # 判断这本书用户是否收藏
-                book_collect = BookCollect.query.filter_by(userId=user.id, bookId=novelId).first()
+                book_collect = BookCollect.query.filter_by(userId=user.id, bookId=novelId, type=1).first()
                 if book_collect:
                     iscollect = 1
                 else:
@@ -936,7 +949,7 @@ def clearhis():
     token = request.args.get('analysis')
     user = User.query.filter_by(token=token).first()
     if user:
-        nh_list = NovelHistory.query.filter_by(userId=user.id).all()
+        nh_list = NovelHistory.query.filter_by(userId=user.id, type=1).all()
         for nh in nh_list:
             db.session.delete(nh)
         db.session.commit()
@@ -944,4 +957,567 @@ def clearhis():
     return json.dumps({"retCode": 401, "msg": "认证失败", "result": {}}, ensure_ascii=False)
 # -------------------------------------v2版本--end-------------------------------
 
+# ----------------------------------第三版漫画接口-start------------------------------------------------
+# 漫画评论
+@bp.route('/carcomment', methods=['POST'])
+def carcomment():
+    # 获取用户评论 获取用户token 获取小说id
+    comment = request.form.get('comment')
+    if len(comment) < 5:
+        return json.dumps({"retCode": 405, "msg": "字数不能少于5个字", "result": {}}, ensure_ascii=False)
+    token = request.form.get('analysis')
+    bookId = request.form.get('cartoonId')
+    star = request.form.get('star')
+    if not bookId or not bookId.isdigit():
+        bookId = 0
+    if not star or not star.isdigit():
+        return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+    if int(star) > 5:
+        return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+    if token == 0:
+        user = 0
+    else:
+        user = User.query.filter_by(token=token).first()
+    # 判断小说是否存在
+    novel = Novels.query.get(bookId)
+    if not novel:
+        return json.dumps({"retCode": 405, "msg": "漫画不存在", "result": {}}, ensure_ascii=False)
+    # 判断是游客还是用户
+    if user:
+        # 获取用户的昵称 头像
+        username = user.username
+        icon = user.icon
+        userId = user.id
+    else:
+        ip = time.strftime("%Y%m%d", time.localtime(time.time()))
+        username = '游客%s' % ip
+        icon = 'default.png'
+        userId = 0
+    # 新增用户评论
+    comm = CartoonComment(novelId=bookId, userId=userId, comment=comment, username=username, icon=icon, commentId=0, star = star)
+    db.session.add(comm)
+    db.session.commit()
+    return json.dumps({"retCode": 200, "msg": "评论成功", "result": {}}, ensure_ascii=False)
 
+# 评论漫画的评论
+@bp.route('/carcomments', methods=['POST'])
+def carcomments():
+    commentId = request.form.get('commentId')
+    if not commentId or not commentId.isdigit():
+        commentId = 0
+    bookId = request.form.get('cartoonId')
+    if not bookId or not bookId.isdigit():
+        bookId = 0
+    token = request.form.get('analysis')
+    comment = request.form.get('comment')
+    # 判断被评论的评论是否存在
+    novel_comment = CartoonComment.query.get(commentId)
+    if not novel_comment or str(novel_comment.novelId) != bookId:
+        return json.dumps({"retCode": 405, "msg": "评论不存在", "result": {}}, ensure_ascii=False)
+    if token == 0:
+        user = 0
+    else:
+        user = User.query.filter_by(token=token).first()
+
+    # 判断小说是否存在
+    novel = Cartoon.query.get(bookId)
+    if not novel:
+        return json.dumps({"retCode": 405, "msg": "漫画不存在", "result": {}}, ensure_ascii=False)
+    # 判断是游客还是用户
+    if user:
+        # 获取用户的昵称 头像
+        username = user.username
+        icon = user.icon
+        userId = user.id
+    else:
+        ip = time.strftime("%Y%m%d", time.localtime(time.time()))
+        username = '游客%s' % ip
+        icon = 'default.png'
+        userId = 0
+    # 新增用户评论
+    comm = CartoonComment(novelId=bookId, userId=userId, comment=comment, username=username, icon=icon, commentId=commentId)
+    db.session.add(comm)
+    db.session.commit()
+    return json.dumps({"retCode": 200, "msg": "评论成功", "result": {}}, ensure_ascii=False)
+
+# 点赞漫画评论
+@bp.route('/carcompraise')
+def carcompraise():
+    # 获取评论id
+    commentId = request.args.get('commentId')
+    if not commentId or not commentId.isdigit():
+        commentId = 0
+    bookId = request.args.get('cartoonId')
+    if not bookId or not bookId.isdigit():
+        bookId = 0
+    # 判断被评论的评论是否存在
+    novel_comment = CartoonComment.query.get(commentId)
+    if not novel_comment or str(novel_comment.novelId) != bookId:
+        return json.dumps({"retCode": 405, "msg": "评论不存在", "result": {}}, ensure_ascii=False)
+    # 获取请求头的ip
+    ip = request.headers['X-Real-Ip'] + 'cartoon'
+    comment = zlcache.get(ip)
+    if comment and commentId == comment.decode():
+        return json.dumps({"retCode": 405, "msg": "您已赞过了", "result": {}}, ensure_ascii=False)
+    # 把这个ip加入到redis中
+    zlcache.set(ip, commentId, 86400)   # 1天
+    praise = novel_comment.praise
+    novel_comment.praise = praise+1
+    db.session.add(novel_comment)
+    db.session.commit()
+    return json.dumps({"retCode": 200, "msg": "success", "result": {}})
+
+# 根据漫画id获取漫画评论
+@bp.route('/cargetcomment')
+def cargetcomment():
+    host = 'http://%s' % request.host
+    # 获取小说
+    bookId = request.args.get('cartoonId')
+    if not bookId or not bookId.isdigit():
+        return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+    novel_comments = CartoonComment.query.filter_by(novelId=bookId).all()
+    comment_list = []
+    for novel_comment in novel_comments[::-1]:
+        if novel_comment.commentId == 0:
+            # 获取这条评论的评论数量
+            count = CartoonComment.query.filter_by(novelId=bookId, commentId=novel_comment.id).all()
+            comment_dict = {
+                'id': novel_comment.id,
+                'comment': novel_comment.comment,
+                'username': novel_comment.username,
+                'addtime': str(novel_comment.addtime),
+                'icon': '%s/static/images/icon/%s' % (host, novel_comment.icon),
+                'praise': novel_comment.praise,
+                'count': len(count),
+                'star': novel_comment.star
+            }
+            comment_list.append(comment_dict)
+    return json.dumps({"retCode": 200, "msg": "success", "result": comment_list}, ensure_ascii=False)
+
+# 根据漫画和评论id获取评论的评论
+@bp.route('/carcommentcom')
+def carcommentcom():
+    host = 'http://%s' % request.host
+    commentId = request.args.get('commentId')
+    if not commentId or not commentId.isdigit():
+        return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+    bookId = request.args.get('cartoonId')
+    if not bookId or not bookId.isdigit():
+        return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+    # 判断传入的格式
+    # 判断评论是否存在
+    novel_comment = CartoonComment.query.filter_by(novelId=bookId, commentId=commentId).all()
+    if novel_comment:
+        comment_list = []
+        for novel_comment in novel_comment[::-1]:
+            # 获取这条评论的评论数量
+            count = NovelComment.query.filter_by(novelId=bookId, commentId=novel_comment.id).all()
+            comment_dict = {
+                'id': novel_comment.id,
+                'comment': novel_comment.comment,
+                'username': novel_comment.username,
+                'addtime': str(novel_comment.addtime),
+                'icon': '%s/static/images/icon/%s' % (host, novel_comment.icon),
+                'praise': novel_comment.praise,
+                'count': len(count)
+            }
+            comment_list.append(comment_dict)
+    else:
+        return json.dumps({"retCode": 405, "msg": "评论不存在", "result": []}, ensure_ascii=False)
+    return json.dumps({"retCode": 200, "msg": "success", "result": comment_list}, ensure_ascii=False)
+
+
+
+# -----------------------------------用户接口-start-----------------------------
+
+# 单个添加用户浏览记录
+@bp.route('/carhistory')
+def carhistory():
+    token = request.args.get('analysis')
+    bookId = request.args.get('bookId')
+    typee = request.args.get('type')  #1小说 2漫画
+    if not bookId or not bookId.isdigit():
+        return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+    user = User.query.filter_by(token=token).first()
+    if user:
+        if typee == '1':
+            novel = Novels.query.get(bookId)
+        elif typee == '2':
+            novel = Cartoon.query.get(bookId)
+        else:
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        if novel:
+            # 判断用户是否已经添加过浏览记录了
+            novel_history = NovelHistory.query.filter_by(userId=user.id, novelId=bookId, type=typee).first()
+            if novel_history:
+                return json.dumps({"retCode": 200, "msg": "success", "result": {}}, ensure_ascii=False)
+            nh = NovelHistory(userId=user.id, novelId=bookId, type=typee)
+            db.session.add(nh)
+            db.session.commit()
+            return json.dumps({"retCode": 200, "msg": "success", "result": {}}, ensure_ascii=False)
+        return json.dumps({"retCode": 405, "msg": "数据不存在", "result": {}}, ensure_ascii=False)
+    return json.dumps({"retCode": 401, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+
+# 批量添加用户浏览记录
+@bp.route('/carhistorys')
+def carhistorys():
+    token = request.args.get('analysis')
+    bookIds = request.args.get('bookIds')
+    timees = request.args.get('timees')
+    types = request.args.get('types')
+    user = User.query.filter_by(token=token).first()
+    if user:
+        try:
+            bookId_list = bookIds.split(',')
+            timee_list = timees.split(',')
+            type_list = types.split(',')
+        except:
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        # 判断长度是否相等
+        if len(bookId_list) != len(bookId_list) != len(type_list):
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+
+        for x in range(len(bookId_list)):
+            bookId = bookId_list[x]
+            # 判断bookid是否符合规范
+            if not bookId or not bookId.isdigit():
+                return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+            # 判断日期格式是否正确
+            try:
+                datetime.strptime(timee_list[x], '%Y-%m-%d %H:%M:%S')
+            except:
+                return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+            # 判断type是否正确
+            typee = type_list[x]
+            if typee not in ['1', '2']:
+                return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+            novel = Novels.query.get(bookId)
+            # 判断小说是否存在
+            if novel:
+                # 判断用户是否已经添加过浏览记录了
+                novel_history = NovelHistory.query.filter_by(userId=user.id, novelId=bookId, type=typee).first()
+                if not novel_history:
+                    nh = NovelHistory(userId=user.id, novelId=bookId, addtime=timee_list[x], type=typee)
+                    db.session.add(nh)
+        db.session.commit()
+        return json.dumps({"retCode": 200, "msg": "success", "result": {}}, ensure_ascii=False)
+    return json.dumps({"retCode": 401, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+
+# 获取用户浏览记录
+@bp.route('/cargethistory')
+def cargethistory():
+    host = 'http://%s' % request.host
+    token = request.args.get('analysis')
+    user = User.query.filter_by(token=token).first()
+    if user:
+        nh_list = NovelHistory.query.filter_by(userId=user.id).order_by(NovelHistory.addtime).all()
+        novel_list = []
+        for nh in nh_list[::-1]:
+            novelId = nh.novelId
+            typee = nh.type
+            if typee == 1:
+                novel = Novels.query.get(novelId)
+            else:
+                novel = Cartoon.query.get(novelId)
+            if novel:
+                # 判断这本书用户是否收藏
+                book_collect = BookCollect.query.filter_by(userId=user.id, bookId=novelId, type=typee).first()
+                if book_collect:
+                    iscollect = 1
+                else:
+                    iscollect = 0
+                if typee == 1:
+                    # 根据作者id获取作者
+                    authorId = novel.authorId
+                    author = Author.query.get(authorId)
+                    author = author.name
+                    cover = novel.cover
+                else:
+                    author = novel.author
+                    cover = '%s/static/cartoon/%s/%s' % (host, novel.id, novel.cover)
+                novel_list.append({
+                    'id': novel.id,
+                    'name': novel.name,
+                    'author': author,
+                    'timee': str(nh.addtime),
+                    'iscollect': iscollect,
+                    'cover': cover,
+                    'type': typee
+                })
+        return json.dumps({"retCode": 200, "msg": "success", "result": novel_list}, ensure_ascii=False)
+    return json.dumps({"retCode": 401, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+
+# 清空用户浏览记录
+@bp.route('/carclearhis')
+def carclearhis():
+    token = request.args.get('analysis')
+    user = User.query.filter_by(token=token).first()
+    if user:
+        nh_list = NovelHistory.query.filter_by(userId=user.id).all()
+        for nh in nh_list:
+            db.session.delete(nh)
+        db.session.commit()
+        return json.dumps({"retCode": 200, "msg": "success", "result": {}}, ensure_ascii=False)
+    return json.dumps({"retCode": 401, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+
+
+# 用户漫画收藏 增加用户书本阅读进度
+@bp.route('/carcollects')
+def carcollects():
+    # token bookid 验证token
+    token = request.args.get('analysis')
+    bookId = request.args.get('bookId')
+    typee = request.args.get('type')
+    if typee == '1':
+        typee = 1
+    elif typee == '2':
+        typee = 2
+    else:
+        return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+    # 已读未读
+    isread = request.args.get('read')
+    if not bookId or not bookId.isdigit():
+        return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+    # 阅读进度
+    read_progress = request.args.get('progress')
+    if isread == '1':
+        isread = 1
+    elif isread == '0':
+        isread = 0
+    else:
+        return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+    if not read_progress or not read_progress.isdigit():
+        read_progress = 0
+    if int(read_progress) > 100:
+        read_progress = 100
+    user = User.query.filter_by(token=token).first()
+
+    if user:
+        # 判断小说是否收藏过了
+        is_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId, type=typee).first()
+        if is_collect:
+            return json.dumps({"retCode": 403, "msg": "小说已在收藏夹", "result": {}}, ensure_ascii=False)
+        if typee == 1:
+            novel = Novels.query.get(bookId)
+        else:
+            novel = Cartoon.query.get(bookId)
+        if not novel:
+            if typee == 1:
+                st = '小说'
+            else:
+                st = '漫画'
+            return json.dumps({"retCode": 402, "msg": "%s不存在" % st, "result": {}}, ensure_ascii=False)
+
+        book_collect = BookCollect(userId=user.id, bookId=bookId, read_progress=read_progress, isread=isread, type=typee)
+        db.session.add(book_collect)
+        db.session.commit()
+        return json.dumps({"retCode": 200, "msg": "收藏成功", "result": {}}, ensure_ascii=False)
+    return json.dumps({"retCode": 401, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+
+# 用户批量收藏
+@bp.route('/carcollectb')
+def carcollectb():
+    books = request.args.get('books')
+    progress = request.args.get('progress')
+    isread = request.args.get('read')
+    typees = request.args.get('types')
+    token = request.args.get('analysis')
+    user = User.query.filter_by(token=token).first()
+    if user:
+        try:
+            bookId_list = books.split(',')
+            progress_list = progress.split(',')
+            isread_list = isread.split(',')
+            typee_list = typees.split(',')
+        except:
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        # 判断bookId_list的长度和progress_list长度
+        if len(bookId_list) == len(progress_list) == len(isread_list) == len(typee_list):
+            book_collect_list = []
+            for x in range(len(bookId_list)):
+                bookId = bookId_list[x]
+                read_progress = progress_list[x]
+                if not read_progress or not read_progress.isdigit():
+                    read_progress = 0
+                if int(read_progress) > 100:
+                    read_progress = 100
+                if isread_list[x] == '1':
+                    isread = 1
+                elif isread_list[x] == '0':
+                    isread = 0
+                else:
+                    return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+                if typee_list[x] == '1':
+                    typee = 1
+                elif typee_list[x] == '2':
+                    typee = 2
+                else:
+                    return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+                # 判断小说是否收藏过了
+                is_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId, type=typee).first()
+                if is_collect:
+                    # 收藏过了 更新阅读进度和阅读状态
+                    is_collect.read_progress = read_progress
+                    is_collect.isread = isread
+                    book_collect_list.append(is_collect)
+                    continue
+                if typee == 1:
+                    novel = Novels.query.get(bookId)
+                else:
+                    novel = Cartoon.query.get(bookId)
+                if not novel:
+                    return json.dumps({"retCode": 402, "msg": "小说不存在", "result": {}}, ensure_ascii=False)
+                book_collect = BookCollect(userId=user.id, bookId=bookId, read_progress=read_progress, isread=isread,
+                                           type=typee)
+                book_collect_list.append(book_collect)
+            db.session.add_all(book_collect_list)
+            db.session.commit()
+            return json.dumps({"retCode": 200, "msg": "收藏成功", "result": {}}, ensure_ascii=False)
+        return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+    return json.dumps({"retCode": 401, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+
+# 更新用户漫画的阅读进度
+@bp.route('/carupprogress')
+def carupprogress():
+    # token bookid 验证token
+    token = request.args.get('analysis')
+    bookId = request.args.get('cartoonId')
+    # 阅读进度
+    read_progress = request.args.get('progress')
+    if not read_progress or not read_progress.isdigit():
+        return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+    user = User.query.filter_by(token=token).first()
+    if user:
+        novel = Cartoon.query.get(bookId)
+        if not novel:
+            return json.dumps({"retCode": 402, "msg": "漫画不存在", "result": {}}, ensure_ascii=False)
+        # 获取到用户收藏的小说
+        book_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId, type=2).first()
+        if not book_collect:
+            return json.dumps({"retCode": 405, "msg": "收藏不存在", "result": {}}, ensure_ascii=False)
+        if int(read_progress) > 100:
+            read_progress = 100
+        book_collect.read_progress = read_progress
+        book_collect.isread = 1
+        db.session.add(book_collect)
+        db.session.commit()
+        return json.dumps({"retCode": 200, "msg": "更新成功", "result": {}}, ensure_ascii=False)
+    return json.dumps({"retCode": 401, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+
+
+# 获取用户收藏 返回书本 阅读进度 本周阅读分钟数
+@bp.route('/cargetcollects')
+def cargetcollects():
+    host = 'http://%s' % request.host
+    # token bookid 验证token
+    token = request.args.get('analysis')
+    user = User.query.filter_by(token=token).first()
+    if user:
+        # 根据用户id获取阅读书籍
+        book_collect = BookCollect.query.filter_by(userId=user.id).all()
+        # 用户本周阅读分钟数
+        read_time = user.read_time
+        # 根据bookId获取小说详情
+        novel_list = []
+        for collect in book_collect:
+            if collect.type == 1:
+                novel = Novels.query.get(collect.bookId)
+            else:
+                novel = Cartoon.query.get(collect.bookId)
+            is_read = collect.isread
+            read_progress = collect.read_progress
+            if collect.type == 1:
+                # 根据作者id获取作者
+                authorId = novel.authorId
+                author = Author.query.get(authorId)
+                author = author.name
+                cover = novel.cover
+            else:
+                author = novel.author
+                cover = '%s/static/cartoon/%s/%s' % (host, novel.id, novel.cover)
+            novel_list.append({
+                "id": novel.id,
+                "name": novel.name,
+                "cover": cover,
+                "author": author,
+                "isread": is_read,
+                "read_progress": read_progress,
+                "type": collect.type
+            })
+        return json.dumps({"retCode": 200, "msg": "success", "result": {"data": novel_list, "read_time": read_time}}, ensure_ascii=False)
+    return json.dumps({"retCode": 401, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+
+# 用户批量取消收藏
+@bp.route('/uncarcollect')
+def uncarcollect():
+    # token bookid 验证token
+    token = request.args.get('analysis')
+    bookIds = request.args.get('bookIds')
+    types = request.args.get('types')
+    try:
+        bookId_list = bookIds.split(',')
+        type_list = types.split(',')
+    except:
+        return json.dumps({"retCode": 400, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+    user = User.query.filter_by(token=token).first()
+    if user:
+        if len(type_list) != len(bookId_list):
+            return json.dumps({"retCode": 400, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        # 判断用户是否收藏
+        for x in range(len(bookId_list)):
+            bookId = bookId_list[x]
+            typee = type_list[x]
+            if typee == '1':
+                typee = 1
+            elif typee == '2':
+                typee = 2
+            else:
+                return json.dumps({"retCode": 400, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+            book_collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId, type=typee).first()
+            if book_collect:
+                db.session.delete(book_collect)
+                db.session.commit()
+        return json.dumps({"retCode": 200, "msg": "取消收藏成功", "result": {}}, ensure_ascii=False)
+    return json.dumps({"retCode": 400, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+
+# 设置用户收藏漫画已读
+@bp.route('/carisread')
+def carisread():
+    token = request.args.get('analysis')
+    bookId = request.args.get('cartoonId')
+    user = User.query.filter_by(token=token).first()
+    if user:
+        # 判断用户是否收藏
+        collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId, type=2).first()
+        if collect:
+            # 修改已读状态
+            collect.isread = 1
+            db.session.commit()
+            return json.dumps({"retCode": 200, "msg": "修改成功", "result": {}}, ensure_ascii=False)
+        return json.dumps({"retCode": 400, "msg": "收藏不存在", "result": {}}, ensure_ascii=False)
+    return json.dumps({"retCode": 400, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+
+# 判断这本书 或者漫画是否在书架
+@bp.route('/iscollect')
+def iscollect():
+    token = request.args.get('analysis')
+    bookId = request.args.get('bookId')
+    typee = request.args.get('type')
+    if typee == '1':
+        typee = 1
+    elif typee == '2':
+        typee = 2
+    else:
+        return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+    user = User.query.filter_by(token=token).first()
+    if user:
+        # 判断用户是否收藏
+        collect = BookCollect.query.filter_by(userId=user.id, bookId=bookId, type=typee).first()
+        if collect:
+            return json.dumps({"retCode": 200, "msg": "", "result": 1}, ensure_ascii=False)
+        return json.dumps({"retCode": 200, "msg": "", "result": 0}, ensure_ascii=False)
+    return json.dumps({"retCode": 400, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+# -----------------------------------用户接口-end-------------------------------
+
+
+# ----------------------------------第三版漫画接口-end--------------------------------------------------

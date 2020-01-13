@@ -1,0 +1,1680 @@
+根据性别获取分类
+	GET http://www.ljsb.top:5000/front/channels?channel=1
+	Args channel=1  1 男 0 女 
+	Return
+		成功
+		{
+		  "msg": "success", 
+		  "result": [
+		    {
+		      "id": 3, 
+		      "type": "都市"
+		      "channelId": ,
+		      "cover": 
+		    }
+		    
+		  ], 
+		  "retCode": 200
+		}
+		失败
+		{
+		  "msg": "args error", 
+		  "result": [], 
+		  "retCode": 400
+		}
+
+根据分类id获取小说
+	GET http://www.ljsb.top:5000/front/classify?classify=3
+	args 	classify=3 int 
+			page=1 int     //无此参数默认为1
+			limit=10 int   //无此参数默认为10
+	Return 
+		成功
+		{
+		  "msg": "success", 
+		  "result": [
+		   {
+	      "author": "带玉", 
+	      "authorId": 10, 
+	      "cover": "https://cdn.cnbj0.fds.api.mi-img.com/atlas/664fa44a4c5bb43b9cc5a796ca511c20?thumb=1&w=240&h=320", 
+	      "created": 1497399662, 
+	      "enabled": 1, 
+	      "extras": "", 
+	      "id": 10, 
+	      "label": "都市", 
+	      "name": "我的贴身校花", 
+	      "state": 1, 
+	      "summary": "一个普通的高中生，跟随自称是世界顶级杀手的无耻老头子学功夫，无意间又得到一瓶丹药，让他身怀数种异能，从此开始了美妙的生活...", 
+	      "updated": 1568057536, 
+	      "words": 23777730
+	    }
+		  ], 
+		  "retCode": 200
+		}
+		失败
+		{
+		  "msg": "args error", 
+		  "result": [], 
+		  "retCode": 400
+		}
+
+根据作者id获取作者
+	GET http://www.ljsb.top:5000/front/author?author=11
+	args author=11 int
+	Return
+		成功
+		{
+		  "msg": "success", 
+		  "result": {
+		    "avatar": null, 
+		    "id": 11, 
+		    "name": "陨落星辰", 
+		    "summary": null
+		  }, 
+		  "retCode": 200
+		}
+		失败
+		{
+		  "msg": "args error", 
+		  "result": [], 
+		  "retCode": 400
+		}
+
+根据小说id获取章节
+	GET http://www.ljsb.top:5000/front/chapter?book=11
+	args 	book=3   int
+			page=1 int     //无此参数默认为1
+			limit=10 int   //无此参数默认为10
+	Return
+		成功
+		{
+		  "msg": "success", 
+		  "result": [
+		    {
+		      "created": 1489230093, 
+		      "id": 45537, 
+		      "name": "第一章 我可以帮你们", 
+		      "novelId": 11, 
+		      "number": null, 
+		      "state": 1, 
+		      "updated": 1489230093, 
+		      "words": null,
+		      "num": 1,
+		      "chapternum": 1
+		    }, 
+		    {
+		      "created": 1489230093, 
+		      "id": 45541, 
+		      "name": "第二章 单挑之王", 
+		      "novelId": 11, 
+		      "number": null, 
+		      "state": 1, 
+		      "updated": 1489230093, 
+		      "words": null,
+		      "num": 2,
+		      "chapternum": 1       
+		    }
+		],
+		  "retCode": 200
+		}
+		参数说明   chapternum 这个字段用于计算阅读进度  当前第几章
+		失败
+		{
+		  "msg": "args error", 
+		  "result": [], 
+		  "retCode": 400
+		}
+
+根据小说id获取全部章节
+	GET http://www.ljsb.top:5000/front/chapterv?book=11
+	args 	book=3   int
+	Return
+		成功
+		{
+		  "msg": "success", 
+		  "result": [
+		    {
+		      "created": 1489230093, 
+		      "id": 45537, 
+		      "name": "第一章 我可以帮你们", 
+		      "novelId": 11, 
+		      "number": null, 
+		      "state": 1, 
+		      "updated": 1489230093, 
+		      "words": null,
+		      "num": 1,
+		      "chapternum": 1  
+		    }, 
+		    {
+		      "created": 1489230093, 
+		      "id": 45541, 
+		      "name": "第二章 单挑之王", 
+		      "novelId": 11, 
+		      "number": null, 
+		      "state": 1, 
+		      "updated": 1489230093, 
+		      "words": null,
+		      "num": 2,
+		      "chapternum": 2
+		    }
+		],
+		  "retCode": 200
+		}
+		参数说明 chapternum 这个字段用于计算阅读进度  当前第几章
+
+		失败
+		{
+		  "msg": "args error", 
+		  "result": [], 
+		  "retCode": 400
+		}
+
+根据章节id获取内容
+	GET http://www.ljsb.top:5000/front/content?book=11&chapter=45537
+	args book=3  int  chapter=45537 int
+	Return
+		成功
+		{
+		  "msg": "success", 
+		  "result": {
+		    "chapterId": 45537, 
+		    "content": "放学铃声响起，静海市云龙高中，数千名学生欢呼着涌出校园，显然比起枯燥 的校园生活来，校外的生活更精彩一些！\t\r可是高三七班的教室中，却一片愁云惨淡！十多名 男男女女正围绕在一名名身穿粉色运动服的少女身前……\t\r少女有着一头乌黑的长发，扎成马尾绑在脑后，一张精美的瓜子脸，嘴唇微薄，鼻子微挺，眼睛不是太大，但却非常的亮，那是一种只有在婴儿眼中才能够看到的清澈光芒——明亮而纯净！\t\r她坐在自己的座位上，看不出身高啊，但发育的很好，即便外面套着一件粉红色的运动装，依旧难以掩盖那挺拔的胸脯……\t\r她叫谭笑笑，是高三七班的班长，之所以放学之后还有这么多人留在这里，是因为班上的一名叫赵孟的同学保护班里的一名叫莉莉的女同学得罪了校园霸王之一的张龙，如今张龙正带着人在校门口守候，扬言要给他一点教训。\t\r莉莉是谭笑笑的好友，赵孟是为了她才得罪了张龙，而自己本身又身为一班之长，自然不可能眼睁睁的看着自己的同学被欺负！\t\r可惜高三七班并不是铁板一块，至少很多人并不愿意为了一个赵孟得罪有着市政委老爸的张龙，也因此放学之后，只有十几个留下来！\t\r“笑笑，罗军那混蛋说今天他老爹生曰，来不了……”\t\r“笑笑，李凯那家伙说他老妈感冒了，正赶去医院，也来不了……”\t\r“笑笑，李东明手机关机……”\t\r……\t\r一个又一个男生站在谭笑笑的身前，满脸愤慨的说道！\t\r他们在学校也有些地位，平曰里也结交了一些其他班的学生，以前在外面打架斗殴的时候都是一起上，谁知道这一次遇上了麻烦，竟然一个人都找不到……\t\r“没用的，张龙已经放出话来，谁帮我们，就是和他为敌，他们是不会得罪张龙的……”看到叽叽喳喳的众人，谭笑笑轻声叹息了一声……\t\r因为张龙老爸的原因，就算是学校里的老师，也不愿得罪他，况且这件事本来就是学生之间的事情，要是告诉了老师，以后他们也没脸在学校继续混下去了！\t\r“那我们怎么办？难道真的要把赵孟交出去不成？”又一名男生不满的说道！\t\r这人叫花小蝶，说实话，他心里倒是希望将赵孟交出去，张龙何许人也，校园霸王之一，老爸是市政委，没有人愿意得罪他？要不是自己在追求谭笑笑，他才不愿趟这趟浑水！\t\r其实不仅是他，除了赵孟外，班上的其他男生同样是看在谭笑笑的面子上才留下来的！", 
+		    "created": 1489230093, 
+		    "number": null, 
+		    "state": 0, 
+		    "title": "第一章 我可以帮你们", 
+		    "updated": 1489230093, 
+		    "words": 927
+		  }, 
+		  "retCode": 200
+		}
+
+		失败
+		{
+		  "msg": "args error", 
+		  "result": [], 
+		  "retCode": 400
+		}
+
+搜索
+	GET http://www.ljsb.top:5000/front/search?keyword=小说
+	args 	keyword=小说
+			page=1 int     //无此参数默认为1
+			limit=10 int   //无此参数默认为10
+	Return
+		成功
+		{
+		  "msg": "success", 
+		  "result": [
+		    {
+		      "authorId": 10, 
+		      "cover": "https://cdn.cnbj0.fds.api.mi-img.com/atlas/664fa44a4c5bb43b9cc5a796ca511c20?thumb=1&w=240&h=320", 
+		      "created": 1497399662, 
+		      "enabled": 1, 
+		      "extras": "", 
+		      "id": 10, 
+		      "label": 3, 
+		      "name": "我的贴身校花", 
+		      "state": 1, 
+		      "summary": "一个普通的高中生，跟随自称是世界顶级杀手的无耻老头子学功夫，无意间又得到一瓶丹药，让他身怀数种异能，从此开始了美妙的生活...", 
+		      "updated": 1568057536, 
+		      "words": 23777730
+		    }, 
+		    {
+		      "authorId": 11, 
+		      "cover": "https://cdn.cnbj0.fds.api.mi-img.com/atlas/3b05982850f74c8245c71af99b87b881?thumb=1&w=240&h=320", 
+		      "created": 1495168405, 
+		      "enabled": 1, 
+		      "extras": "", 
+		      "id": 11, 
+		      "label": 3, 
+		      "name": "绝品邪少", 
+		      "state": 1, 
+		      "summary": "谭笑笑说：我是极品校花！ 彭莹诗说：我是极品杀手！ 尹宝儿说：我是极品宝贝！ 上官无道说：我还是极品公子呢……叶潇震撼登场：吵什么吵，少爷才是主角，少爷的口号是践踏一切极品，只做人间绝品！", 
+		      "updated": 1567107125, 
+		      "words": 20704640
+		    }
+		  ], 
+		  "retCode": 200
+		}
+		失败
+		{
+		  "msg": "args error", 
+		  "result": [], 
+		  "retCode": 400
+		}
+
+根据小说id获取小说
+	GET http://www.ljsb.top:5000/front/book?bookId=14
+	args bookId=14 int
+	Return
+		成功
+		{
+		  "msg": "success", 
+		  "result": {
+		    "authorId": 14, 
+		    "cover": "https://cdn.cnbj0.fds.api.mi-img.com/atlas/f51c2126b472fb3e3beb5cece4df33f0?thumb=1&w=240&h=320", 
+		    "created": 1512524132, 
+		    "enabled": 1, 
+		    "extras": "", 
+		    "id": 14, 
+		    "label": "仙侠", 
+		    "name": "命之途", 
+		    "state": 1, 
+		    "summary": "顺应天命者，悲；逆应天命者，死！\r\n如之可奈何？祈求天地庇佑？\r\n殊不知“天地不仁，以万物为刍狗！”\r\n身世坎坷，且看他如何面对人生！\r\n经历大变，且看他如何渐渐蜕变！\r\n命运降临，且看他如何对抗命运！\r\n持戟弯弓，且看他如何挽破苍穹！\r\n毁天、灭地、戮神、屠魔、诛仙、噬魂、镇妖、斩尸、弑佛！\r\n逆命运，踏天途，一切尽在——《命之途》！\r\n\r\n", 
+		    "updated": 1567497949, 
+		    "words": 13704795
+		  }, 
+		  "retCode": 200
+		}
+		失败
+		{
+		  "msg": "args error", 
+		  "result": [], 
+		  "retCode": 400
+		}
+
+获取榜单列表
+	GET http://www.ljsb.top:5000/front/monthly
+	args
+	Return
+		{
+		  "msg": "success", 
+		  "result": [
+		    {
+		      "id": 1, 
+		      "monthly": "推荐榜"
+		    }, 
+		    {
+		      "id": 2, 
+		      "monthly": "新书榜"
+		    }, 
+		    {
+		      "id": 3, 
+		      "monthly": "人气榜"
+		    }, 
+		    {
+		      "id": 4, 
+		      "monthly": "完本榜"
+		    }, 
+		    {
+		      "id": 5, 
+		      "monthly": "热搜榜"
+		    }, 
+		    {
+		      "id": 6, 
+		      "monthly": "更新榜"
+		    }
+		  ], 
+		  "retCode": 200
+		}
+
+根据榜单id获取小说
+	GET http://www.ljsb.top:5000/front/monthnov?monthly=1
+			args 	monthly=1    //榜单id  
+									男生榜单 1人气榜 2推荐榜 3新书榜 4免费榜 5热搜榜 6更新榜 7完结榜 
+									女生榜单 8 人气榜9 推荐榜10 新书榜11 免费榜12 热搜榜13 更新榜14 完结榜
+			page=1 int     //无此参数默认为1
+			limit=10 int   //无此参数默认为10
+	Return
+		{
+		  "msg": "success", 
+		  "result": [
+		    {
+		      "authorId": 10, 
+		      "cover": "https://cdn.cnbj0.fds.api.mi-img.com/atlas/664fa44a4c5bb43b9cc5a796ca511c20?thumb=1&w=240&h=320", 
+		      "created": 1497399662, 
+		      "enabled": 1, 
+		      "extras": "", 
+		      "id": 10, 
+		      "label": "都市", 
+		      "name": "我的贴身校花", 
+		      "state": 1, 
+		      "summary": "一个普通的高中生，跟随自称是世界顶级杀手的无耻老头子学功夫，无意间又得到一瓶丹药，让他身怀数种异能，从此开始了美妙的生活...", 
+		      "updated": 1568057536, 
+		      "words": 23777730
+		    }
+		    ],
+		    "retCode": 200
+		}
+
+根据小说id num 获取小说章节内容
+	GET http://www.ljsb.top:5000/front/contentv?book=14&num=332
+	args book=14   
+		 num=332	
+	Return
+		成功
+		{
+		  "msg": "success", 
+		  "result": {
+		    "chapterId": 45537, 
+		    "content": "放学铃声响起，静海市云龙高中，数千名学生欢呼着涌出校园，显然比起枯燥 的校园生活来，校外的生活更精彩一些！\t\r可是高三七班的教室中，却一片愁云惨淡！十多名 男男女女正围绕在一名名身穿粉色运动服的少女身前……\t\r少女有着一头乌黑的长发，扎成马尾绑在脑后，一张精美的瓜子脸，嘴唇微薄，鼻子微挺，眼睛不是太大，但却非常的亮，那是一种只有在婴儿眼中才能够看到的清澈光芒——明亮而纯净！\t\r她坐在自己的座位上，看不出身高啊，但发育的很好，即便外面套着一件粉红色的运动装，依旧难以掩盖那挺拔的胸脯……\t\r她叫谭笑笑，是高三七班的班长，之所以放学之后还有这么多人留在这里，是因为班上的一名叫赵孟的同学保护班里的一名叫莉莉的女同学得罪了校园霸王之一的张龙，如今张龙正带着人在校门口守候，扬言要给他一点教训。\t\r莉莉是谭笑笑的好友，赵孟是为了她才得罪了张龙，而自己本身又身为一班之长，自然不可能眼睁睁的看着自己的同学被欺负！\t\r可惜高三七班并不是铁板一块，至少很多人并不愿意为了一个赵孟得罪有着市政委老爸的张龙，也因此放学之后，只有十几个留下来！\t\r“笑笑，罗军那混蛋说今天他老爹生曰，来不了……”\t\r“笑笑，李凯那家伙说他老妈感冒了，正赶去医院，也来不了……”\t\r“笑笑，李东明手机关机……”\t\r……\t\r一个又一个男生站在谭笑笑的身前，满脸愤慨的说道！\t\r他们在学校也有些地位，平曰里也结交了一些其他班的学生，以前在外面打架斗殴的时候都是一起上，谁知道这一次遇上了麻烦，竟然一个人都找不到……\t\r“没用的，张龙已经放出话来，谁帮我们，就是和他为敌，他们是不会得罪张龙的……”看到叽叽喳喳的众人，谭笑笑轻声叹息了一声……\t\r因为张龙老爸的原因，就算是学校里的老师，也不愿得罪他，况且这件事本来就是学生之间的事情，要是告诉了老师，以后他们也没脸在学校继续混下去了！\t\r“那我们怎么办？难道真的要把赵孟交出去不成？”又一名男生不满的说道！\t\r这人叫花小蝶，说实话，他心里倒是希望将赵孟交出去，张龙何许人也，校园霸王之一，老爸是市政委，没有人愿意得罪他？要不是自己在追求谭笑笑，他才不愿趟这趟浑水！\t\r其实不仅是他，除了赵孟外，班上的其他男生同样是看在谭笑笑的面子上才留下来的！", 
+		    "created": 1489230093, 
+		    "number": null, 
+		    "state": 0, 
+		    "title": "第一章 我可以帮你们", 
+		    "updated": 1489230093, 
+		    "words": 927
+		  }, 
+		  "retCode": 200
+		}
+
+		失败
+		{
+		  "msg": "args error", 
+		  "result": [], 
+		  "retCode": 400
+		}
+
+安卓 请求获取版本 下载链接
+	GET http://www.ljsb.top:5000/front/versions
+	return
+		{
+	  "msg": "success", 
+	  "result": {
+	    "url": "https://orzppu.oss-cn-shenzhen.aliyuncs.com/%E6%8E%A8%E5%B9%BF/book.apk", 
+	    "version": "1"
+	  }, 
+	  "retCode": 200
+	}
+
+获取小说发现banner
+	GET http://www.ljsb.top:5000/front/banner
+	Return
+	{
+	  "msg": "success", 
+	  "result": [
+	    {
+	      "bookId": 74, 
+	      "imgurl": "https://cdn.cnbj0.fds.api.mi-img.com/atlas/b1fb2c6c919dc463bc2ebae880f4c873?thumb=1&w=240&h=320", 
+	      "rank": 1
+	    }, 
+	    {
+	      "bookId": 73, 
+	      "imgurl": "https://ts.market.mi-img.com/download/Browser/096ff565e35b3ded8975fee0f7da5f4c4cb43d414", 
+	      "rank": 2
+	    }, 
+	    {
+	      "bookId": 72, 
+	      "imgurl": "https://cdn.cnbj0.fds.api.mi-img.com/atlas/9e1ca13fbe991f1ad3d60f2747f1cd5a?thumb=1&w=240&h=320", 
+	      "rank": 3
+	    }, 
+	    {
+	      "bookId": 71, 
+	      "imgurl": "https://cdn.cnbj0.fds.api.mi-img.com/atlas/790d2985f22e92ffbc4b032c9412d99c?thumb=1&w=240&h=320", 
+	      "rank": 4
+	    }
+	  ], 
+	  "retCode": 200
+	}
+
+获取小说热搜关键词
+	GET http://www.ljsb.top:5000/front/topsearch
+	{
+	  "msg": "success", 
+	  "result": [
+	    "末日进化", 
+	    "冰霜王座", 
+	    "进化", 
+	    "冰爽王座", 
+	    "三爷你"
+	  ], 
+	  "retCode": 200
+	}
+
+
+===============用户相关=========================================================================================================
+获取验证码
+	POST http://www.ljsb.top:5000/common/getcode
+	form-data phone 17839192462
+	Return 
+		成功
+		{
+		    "msg": "success",
+		    "result": [],
+		    "retCode": 200
+		}
+		失败
+		{
+		    "msg": "args error",
+		    "result": [],
+		    "retCode": 400
+		}
+
+用户注册
+	POST http://www.ljsb.top:5000/common/register
+	form-data 
+		phone 17839192462
+		code 123456
+		password 123456
+		gender 1           //1男 0女
+	Return
+		成功   analysis参数 用户身份标识
+		{
+		    "msg": "success",
+		    "result": {
+		        "analysis": "w378cdro3ynjfqbby1bu53uc387gb4jh"
+		    },
+		    "retCode": 200
+		}
+		用户已注册
+		{
+		    "msg": "用户已注册",
+		    "result": {"analysis": ""},
+		    "retCode": 400
+		}
+		验证码错误
+		{
+		    "msg": "验证码错误",
+		    "result": {"analysis": ""},
+		    "retCode": 400
+		}
+		失败
+		{
+		    "msg": "参数错误",
+		    "result": {"analysis": ""},
+		    "retCode": 400
+		}
+
+用户账号密码登录
+	POST http://www.ljsb.top:5000/common/login
+	form-data
+		username 17839192462
+		password 123456
+
+	Return
+		成功
+		{
+		    "msg": "success",
+		    "result": {
+		        "analysis": "3aau288lm6ua4j4hsh03raspw58cdqg0"
+		    },
+		    "retCode": 200
+		}
+		失败
+		{
+		    "msg": "账号或密码错误",
+		    "result": {"analysis": ""},
+		    "retCode": 400
+		}
+
+用户收藏
+	GET http://www.ljsb.top:5000/common/collect?analysis=3aau288lm6ua4j4hsh03raspw58cdqg0&bookId=50000
+	args
+		analysis   //用户标识
+		bookId     //小说id
+	Return
+		成功
+		{
+		    "msg": "收藏成功",
+		    "result": {},
+		    "retCode": 200
+		}
+		小说不存在
+		{
+		    "msg": "小说不存在",
+		    "result": {},
+		    "retCode": 400
+		}
+		失败
+		{
+		    "msg": "认证失败",
+		    "result": {},
+		    "retCode": 400
+		}
+
+用户取消收藏
+	GET http://www.ljsb.top:5000/common/uncollect?analysis=3aau288lm6ua4j4hsh03raspw58cdqg0&bookId=50000
+	args
+		analysis   //用户标识
+		bookId     //小说id
+	Return
+		成功
+		{
+		    "msg": "取消收藏成功",
+		    "result": {},
+		    "retCode": 200
+		}
+		小说不存在
+		{
+		    "msg": "小说不存在",
+		    "result": {},
+		    "retCode": 400
+		}
+		失败
+		{
+		    "msg": "认证失败",
+		    "result": {},
+		    "retCode": 400
+		}
+
+批量取消收藏
+	GET http://www.ljsb.top:5000/common/uncollectmany?analysis=wlgd43t3o1jgbefesoojb2d71drudr5l&bookIds=10,11,12
+	args 
+		analysis     //用户标识
+		bookIds     书籍id以英文逗号分隔
+	Return
+		成功
+		{
+		    "msg": "取消收藏成功",
+		    "result": {},
+		    "retCode": 200
+		}
+		失败
+		{
+		    "msg": "认证失败",
+		    "result": {},
+		    "retCode": 400
+		}
+
+获取用户收藏
+	GET http://www.ljsb.top:5000/common/getcollect?analysis=3aau288lm6ua4j4hsh03raspw58cdqg0
+	args
+		analysis   //用户标识
+	Return
+		成功     //如果没有收藏 result参数为空数组
+		{
+		    "msg": "success",
+		    "result": [
+		        {
+		            "author": "小金宝",
+		            "authorId": 49,
+		            "countchapter": 162,
+		            "cover": "https://cdn.cnbj0.fds.api.mi-img.com/atlas/1782beb30b43f03cdbb8295a050f080a?thumb=1&w=240&h=320",
+		            "created": 1523610762,
+		            "enabled": 1,
+		            "extras": "",
+		            "id": 50,
+		            "label": "古代言情",
+		            "name": "冥王的金牌宠妃",
+		            "state": 2,
+		            "summary": "当腹黑、狡诈的现代赏金猎人，重生在胆小、怯懦的花痴嫡女身上，她誓将伪装进行到底。萌呆小茉莉，冷傲雪莲花，惹火红玫瑰……各种角色信手练来。佛曰：辱我者，砍之！他们人面兽心，她自然要以牙还牙，以眼还眼。只是，某只妖孽，你为何一边陪我演戏，一边伪装成忠犬，掐断我的朵朵桃花——",
+		            "updated": 1523731673,
+		            "words": 4720621,
+		            "isread": 1
+		        }
+		    ],
+		    "retCode": 200
+		}
+		失败
+		{
+		    "msg": "认证失败",
+		    "result": [],
+		    "retCode": 400
+		}
+
+用户性别重选
+	GET http://www.ljsb.top:5000/common/resetgender?analysis=3aau288lm6ua4j4hsh03raspw58cdqg0&gender=0
+	args 
+		analysis   //用户标识
+		gender	//1男 0女
+	Return
+		成功
+		{
+		  "msg": "修改成功", 
+		  "result": {}, 
+		  "retCode": 200
+		}
+		失败
+		{
+		    "msg": "认证失败",
+		    "result": {},
+		    "retCode": 400
+		}
+		
+根据用户性别推荐小说
+	GET  http://www.ljsb.top:5000/front/recommend?gender=1
+	args gender   //1男 0女
+	Return
+		成功
+		{
+		    "msg": "success",
+		    "result": [
+		        {
+		            "author": "虐心不知心",
+		            "authorId": 97,
+		            "countchapter": 3807,
+		            "cover": "https://cdn.cnbj0.fds.api.mi-img.com/atlas/8e52f94e4f20dd712da06751448936e8?thumb=1&w=240&h=320",
+		            "created": 1562203444,
+		            "enabled": 1,
+		            "extras": "",
+		            "id": 98,
+		            "label": "玄幻",
+		            "name": "神冥屠虐",
+		            "state": 1,
+		            "summary": "　　一片纯武者元力的大陆，一个落入凡尘负有使命的少年，一把饮尽亿万神魔之血的凶刃。介于人，冥，神之中的他手持嗜血神兵又该如何抉择，世间万物一念之间便可倾覆。他的道，全随一心，我命由我不由天，天负我，我便负了这个天！\n\n",
+		            "updated": 1564601574,
+		            "words": 8853484
+		        },
+		        {
+		            "author": "文字控",
+		            "authorId": 127,
+		            "countchapter": 1133,
+		            "cover": "https://ts.market.mi-img.com/download/Browser/0506f45f6ec6b5e1d2541f3fcda85f6e874405a66",
+		            "created": 1523262795,
+		            "enabled": 1,
+		            "extras": "",
+		            "id": 126,
+		            "label": "仙侠",
+		            "name": "九婴邪仙",
+		            "state": 2,
+		            "summary": "故老相传，超脱于修真界之外，有一个浩瀚的仙界，百族林立，有莫大的机遇，有无尽的天材地宝，更有无尽的修炼福地。龙颜，身怀九个元婴的怪才，一步步踏上修仙之路，他该如何求仙证道，斩尽九天十地，成就无上仙路。",
+		            "updated": 1522151479,
+		            "words": 2384549
+		        }
+		    ],
+		    "retCode": 200
+		}
+
+		失败
+		{
+		    "msg": "args error",
+		    "result": [],
+		    "retCode": 400
+		}
+
+修改密码
+	POST  http://www.ljsb.top:5000/common/resetpwd
+	data-form
+		analysis   //用户标识
+		oldpwd     //旧密码
+		newpwd     //新密码
+		newpwd2    //再次输入新密码
+	Return
+		成功
+		{"retCode": 200, "msg": "修改密码成功", "result": {"analysis": "3aau288lm6ua4j4hsh03raspw58cdqg0"}}
+		失败
+		{"retCode": 400, "msg": "该用户不存在", "result": {"analysis": ""}}
+		{"retCode": 400, "msg": "用户名或密码错误", "result": {"analysis": ""}}
+
+忘记密码
+	POST  http://www.ljsb.top:5000/common/forgetpwd
+	data-form
+		phone    
+		code      //短信验证码
+		password
+		password2   //再次输入密码
+	Return
+		成功
+		{"retCode": 200, "msg": "success", "result": {"analysis": "3aau288lm6ua4j4hsh03raspw58cdqg0"}}
+		失败
+		{"retCode": 400, "msg": "该用户不存在", "result": {"analysis": ""}}
+		验证码错误
+		{"retCode": 400, "msg": "验证码错误", "result": {"analysis": ""}}
+
+用户书籍已读未读
+	GET http://www.ljsb.top:5000/common/isread?analysis=wlgd43t3o1jgbefesoojb2d71drudl&bookId=11
+	args 
+		analysis   //用户标识
+		bookId     书籍id
+	Return
+		成功
+		{
+		  "msg": "修改成功", 
+		  "result": {}, 
+		  "retCode": 200
+		}
+		失败
+		{
+		  "msg": "认证失败", 
+		  "result": {}, 
+		  "retCode": 400
+		}
+		{
+		  "msg": "收藏不存在", 
+		  "result": {}, 
+		  "retCode": 400
+		}
+
+
+===============用户相关 end============================================
+
+
+-------------------------------第二版新增接口----start----------------------------------------
+精选页面接口
+	GET http://www.ljsb.top:5000/front/handpick?type=today
+	args type =  
+				 today(获取女生分类中 热搜榜 古代言情)
+		    	 must(今日必读 女生分类 热榜现代言情)
+		    	 god(男生热搜 4本)
+		    	 recommend(人气榜单 8本)
+		    	 over(完本榜单5本)
+		    	 new(新书5本)
+		    	 weeksearch(热搜榜8本)
+		    	 weekupdate(更新榜4本)
+		    	 like(完本榜5本)
+   	return
+   		成功
+   			{"retCode": 200, "msg": "success", "result": [ 
+	   			{"id":4418,
+	            "name":"恰似寒光遇骄阳",
+	            "cover":"https://www.xinxs.la/BookFiles/BookImages/qiasihanguangyujiaoyang.jpg",
+	            "summary":"“这家伙，口味是有多重，这都下得去口？”",
+	            "label":"现言",
+	            "state":1,
+	            "enabled":1,
+	            "words":0,
+	            "created":0,
+	            "updated":1546808355,
+	            "authorId":2296,
+	            "author":"囧囧有妖",
+	            "extras":"",
+	            "countchapter":2533},
+            ]}
+
+精选页面全部数据
+	GET http://www.ljsb.top:5000/front/handpickall
+	return
+		成功
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":{
+			        "today":Array[5],
+			        "must":Array[4],
+			        "god":Array[4],
+			        "recommend":Array[8],
+			        "over":Array[5],
+			        "new":Array[5],
+			        "weeksearch":Array[8],
+			        "weekupdate":Array[4],
+			        "like":Array[5]
+			    }
+			}
+
+精选页面样式+数据
+	GET http://ljsb.top:5000/front/handpickalls
+	return
+		返回数据说明
+		'''
+			{
+		    "retCode":200,
+		    "msg":"success",
+		    "result":[
+	                {"style":1,"type":"today","title":"今日精选","data":Array[5],"other":{"mode":0,"head":""}},
+	                {"style":2,"type":"must","title":"今日必读","data":Array[4],"other":{"mode":1,"head":"换一换"}},
+	                {"style":3,"god":"today","title":"大神再看","data":Array[4],"other":{"mode":0,"head":""}},
+	                {"style":4,"recommend":"today","title":"小编推荐","data":Array[8],"other":{"mode":0,"head":""}},
+	                {"style":1,"type":"over","title":"完本畅读","data":Array[5],"other":{"mode":0,"head":""}},
+	                {"style":1,"type":"new","title":"新书推荐","data":Array[5],"other":{"mode":0,"head":""}},
+	                {"style":4,"type":"weeksearch","title":"一周热搜榜","data":Array[8],"other":{"mode":2,"head":"换一换"}},
+	                {"style":3,"type":"weekupdate","title":"一周更新榜","data":Array[4],"other":{"mode":0,"head":""}},
+	                {"style":1,"type":"like","title":"猜你喜欢","data":Array[5],"other":{"mode":0,"head":""}},
+	            ]
+	    	}
+	    '''
+	    style:  
+	    	1: 5本，2行，1本在上，4本在下
+	    	2: 4本，1行4列
+	    	3: 4本，4行1列
+	    	4: 8本，2行4列 
+
+	    mode:
+	    	0: 无文本
+	    	1: 换一换 左侧 
+	    	2: 换一换 下侧 
+
+女生页面接口
+	GET http://www.ljsb.top:5000/front/girl?type=over
+	args type = 
+				recommend(推荐女生热搜榜单数据 8本 换一换) 
+				new(女生新书榜单5本) 
+				must(都市 浪漫青春 各两本)
+				over(女生完本)
+			    //仙剑奇缘23 科幻16 灵异7 二次元15 古言10 现言9 玄幻言情12 浪漫青春11 轻小说18 (请求分类数据)
+			    //http://www.ljsb.top:5000/front/classify?classify=3
+				args 	classify=3 int 
+						page=1 int     //无此参数默认为1
+						limit=10 int   //无此参数默认为10
+	return 
+		成功
+			{"retCode": 200, "msg": "success", "result": [ 
+	   			{"id":4418,
+	            "name":"恰似寒光遇骄阳",
+	            "cover":"https://www.xinxs.la/BookFiles/BookImages/qiasihanguangyujiaoyang.jpg",
+	            "summary":"“这家伙，口味是有多重，这都下得去口？”",
+	            "label":"现言",
+	            "state":1,
+	            "enabled":1,
+	            "words":0,
+	            "created":0,
+	            "updated":1546808355,
+	            "authorId":2296,
+	            "author":"囧囧有妖",
+	            "extras":"",
+	            "countchapter":2533},
+            ]}
+
+女生页面全部数据
+	GET http://www.ljsb.top:5000/front/girlall
+		return	
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":{
+			        "recommend":Array[8],
+			        "new":Array[5],
+			        "must":Array[4],
+			        "over":Array[8]
+			    }
+			}		    
+
+女生页面全部样式+数据
+	GET http://www.ljsb.top:5000/front/girlalls
+	return
+		'''
+		{
+	    "retCode":200,
+	    "msg":"success",
+	    "result":[
+	        {"style":4,"type":"recommend","title":"小编推荐","data":Array[8],"other":{"mode":2,"head":"换一换"}},
+	        {"style":1,"type":"new","title":"畅销新书","data":Array[5],"other":{"mode":0,"head":""}},
+	        {"style":3,"type":"must","title":"今日必看","data":Array[4],"other":{"mode":0,"head":""}},
+	        {"style":5,"classify":[
+	                {"title":"仙剑奇缘","classifyId":"23"},
+	                {"title":"科幻","classifyId":"16"},
+	                {"title":"灵异","classifyId":"7"},
+	                {"title":"二次元","classifyId":"15"}
+	            ]},
+	        {"style":6,"classify":[
+	                {"title":"古言","classifyId":"10"},
+	                {"title":"现言","classifyId":"9"},
+	                {"title":"玄幻言情","classifyId":"12"},
+	                {"title":"浪漫青春","classifyId":"11"}
+	            ]},
+	        {"style":4,"type":"wbjxg","title":"完本精选","data":Array[8],"other":{"mode":3,"head":"完本专区"}},
+	        {"style":7,"type":"18","title":"轻小说","data":Array[4],"other":{"mode":3,"head":"更多"}}
+	    ]
+		}
+		'''
+		style:  
+	    	1: 5本，2行，1本在上，4本在下
+	    	2: 4本，1行4列
+	    	3: 4本，4行1列
+	    	4: 8本，2行4列 
+	    	5: 需要特殊处理
+	    	6: 需要特殊处理
+	    	7: 单个分类的小说 type为 18 就是classifyId为18
+
+	    mode:
+	    	0: 无文本
+	    	1: 换一换 右侧 
+	    	2: 换一换 下侧 
+	    	3: 跳转   右侧
+
+男生页面接口
+	GET http://www.ljsb.top:5000/front/boy?type=over
+	args type = 
+				recommend(推荐男生热搜榜单数据 8本 换一换) 
+				new(男生新书榜单5本) 
+				must(人气 完结 各两本)
+				over(男生完本)
+			    //玄幻4 奇幻20 仙侠5 武侠19 都市3 科幻8 二次元14 体育22 游戏竞技21 轻小说18(请求分类数据)
+			    //http://www.ljsb.top:5000/front/classify?classify=3
+					args 	classify=3 int 
+							page=1 int     //无此参数默认为1
+							limit=10 int   //无此参数默认为10
+    return 
+		成功
+			{"retCode": 200, "msg": "success", "result": [ 
+	   			{"id":4418,
+	            "name":"恰似寒光遇骄阳",
+	            "cover":"https://www.xinxs.la/BookFiles/BookImages/qiasihanguangyujiaoyang.jpg",
+	            "summary":"“这家伙，口味是有多重，这都下得去口？”",
+	            "label":"现言",
+	            "state":1,
+	            "enabled":1,
+	            "words":0,
+	            "created":0,
+	            "updated":1546808355,
+	            "authorId":2296,
+	            "author":"囧囧有妖",
+	            "extras":"",
+	            "countchapter":2533},
+            ]}
+
+男生页面全部数据
+	GET http://www.ljsb.top:5000/front/boyall
+	return 
+		{
+		    "retCode":200,
+		    "msg":"success",
+		    "result":{
+		        "recommend":Array[6],
+		        "new":Array[5],
+		        "must":Array[4],
+		        "over":Array[8]
+		    }
+		}
+
+男生页面全部样式+数据
+	GET http://www.ljsb.top:5000/front/boyalls
+	return
+		'''
+		{
+	    "retCode":200,
+	    "msg":"success",
+	    "result":[
+	        {"style":4,"type":"recommend","title":"小编推荐","data":Array[8],"other":{"mode":2,"head":"换一换"}},
+	        {"style":1,"type":"new","title":"畅销新书","data":Array[5],"other":{"mode":0,"head":""}},
+	        {"style":3,"type":"must","title":"今日必看","data":Array[4],"other":{"mode":0,"head":""}},
+	        {"style":5,"classify":[
+	                {"title":"仙剑奇缘","classifyId":"23"},
+	                {"title":"科幻","classifyId":"16"},
+	                {"title":"灵异","classifyId":"7"},
+	                {"title":"二次元","classifyId":"15"}
+	            ]},
+	        {"style":6,"classify":[
+	                {"title":"古言","classifyId":"10"},
+	                {"title":"现言","classifyId":"9"},
+	                {"title":"玄幻言情","classifyId":"12"},
+	                {"title":"浪漫青春","classifyId":"11"}
+	            ]},
+	        {"style":4,"type":"wbjxb","title":"完本精选","data":Array[8],"other":{"mode":3,"head":"完本专区"}},
+	        {"style":7,"type":"18","title":"轻小说","data":Array[4],"other":{"mode":3,"head":"更多"}}
+	    ]
+		}
+		'''
+		style:  
+	    	1: 5本，2行，1本在上，4本在下
+	    	2: 4本，1行4列
+	    	3: 4本，4行1列
+	    	4: 8本，2行4列 
+	    	5: 需要特殊处理
+	    	6: 需要特殊处理
+	    	7: 单个分类的小说 type为 18 就是classifyId为18
+
+	    mode:
+	    	0: 无文本
+	    	1: 换一换 右侧 
+	    	2: 换一换 下侧 
+	    	3: 跳转   右侧
+
+
+
+---------------------小说分类页面-start--------------  
+分类页面 小编推荐接口
+	GET http://ljsb.top:5000/front/typerecommend?type=8
+	args type
+			//男生分类 玄幻4 奇幻20 仙侠5 武侠19 都市3 科幻8 二次元14 体育22 游戏竞技21 完本精选wbjxb 轻小说18
+		    //女生分类 仙侠奇缘23 科幻16 灵异7 二次元14 古言10 现言9 玄幻言情12 浪漫青春11 完本精选wbjxg 轻小说18
+	return
+		成功
+			{"retCode": 200, "msg": "success", "result": [ 
+	   			{"id":4418,
+	            "name":"恰似寒光遇骄阳",
+	            "cover":"https://www.xinxs.la/BookFiles/BookImages/qiasihanguangyujiaoyang.jpg",
+	            "summary":"“这家伙，口味是有多重，这都下得去口？”",
+	            "label":"现言",
+	            "state":1,
+	            "enabled":1,
+	            "words":0,
+	            "created":0,
+	            "updated":1546808355,
+	            "authorId":2296,
+	            "author":"囧囧有妖",
+	            "extras":"",
+	            "countchapter":2533},
+            ]}	    
+
+分类页面 精选最新接口
+	GET  http://ljsb.top:5000/front/typenew?type=8&page=1&limit=10
+	arge
+			type 
+				//男生分类 玄幻4 奇幻20 仙侠5 武侠19 都市3 科幻8 二次元14 体育22 游戏竞技21 完本精选wbjxb 轻小说18
+		    	//女生分类 仙侠奇缘23 科幻16 灵异7 二次元14 古言10 现言9 玄幻言情12 浪漫青春11 完本精选wbjxg 轻小说18
+			page (不加默认为1)
+			limit (不加默认为1)
+	return
+		成功
+			{"retCode": 200, "msg": "success", "result": [ 
+	   			{"id":4418,
+	            "name":"恰似寒光遇骄阳",
+	            "cover":"https://www.xinxs.la/BookFiles/BookImages/qiasihanguangyujiaoyang.jpg",
+	            "summary":"“这家伙，口味是有多重，这都下得去口？”",
+	            "label":"现言",
+	            "state":1,
+	            "enabled":1,
+	            "words":0,
+	            "created":0,
+	            "updated":1546808355,
+	            "authorId":2296,
+	            "author":"囧囧有妖",
+	            "extras":"",
+	            "countchapter":2533},
+            ]}	 
+
+分类页面 免费畅读
+	GET  http://ljsb.top:5000/front/typefree?type=8&page=1&limit=10
+	arge
+			type 
+				//男生分类 玄幻4 奇幻20 仙侠5 武侠19 都市3 科幻8 二次元14 体育22 游戏竞技21 完本精选wbjxb 轻小说18
+		    	//女生分类 仙侠奇缘23 科幻16 灵异7 二次元14 古言10 现言9 玄幻言情12 浪漫青春11 完本精选wbjxg 轻小说18
+			page (不加默认为1)
+			limit (不加默认为1)
+	return
+		成功
+			{"retCode": 200, "msg": "success", "result": [ 
+	   			{"id":4418,
+	            "name":"恰似寒光遇骄阳",
+	            "cover":"https://www.xinxs.la/BookFiles/BookImages/qiasihanguangyujiaoyang.jpg",
+	            "summary":"“这家伙，口味是有多重，这都下得去口？”",
+	            "label":"现言",
+	            "state":1,
+	            "enabled":1,
+	            "words":0,
+	            "created":0,
+	            "updated":1546808355,
+	            "authorId":2296,
+	            "author":"囧囧有妖",
+	            "extras":"",
+	            "countchapter":2533},
+            ]}	 
+
+根据小说分类id获取分类页面  样式+数据
+	GET http://www.ljsb.top:5000/front/types?type=5
+	args  type
+		//男生分类 玄幻4 奇幻20 仙侠5 武侠19 都市3 科幻8 二次元14 体育22 游戏竞技21 完本精选wbjxb 轻小说18
+		//女生分类 仙侠奇缘23 科幻16 灵异7 二次元14 古言10 现言9 玄幻言情12 浪漫青春11 完本精选wbjxg 轻小说18
+	return 
+		{
+		    "retCode":200,
+		    "msg":"success",
+		    "result":[
+		        {"style":2,"type":"recommend","title":"小编力荐","data":Array[4],"other":{"mode":2,"head":"换一换"}},
+		        {"style":1,"type":"new","title":"精选最新","data":Array[5],"other":{"mode":3,"head":"更多"}},
+		        {"style":3,"type":"free","title":"免费畅读","data":Array[4],"other":{"mode":0,"head":""}}
+		    ]
+		}
+
+		style:  
+	    	1: 5本，2行，1本在上，4本在下
+	    	2: 4本，1行4列
+	    	3: 4本，4行1列
+	    	4: 8本，2行4列 
+	    	5: 需要特殊处理
+	    	6: 需要特殊处理
+	    	7: 单个分类的小说 type为 18 就是classifyId为18
+
+	    mode:
+	    	0: 无文本
+	    	1: 换一换 左侧 
+	    	2: 换一换 下侧 
+	    	3: 跳转   左侧            
+
+分类页面 更多
+	GET http://ljsb.top:5000/front/typepage?typepage=new&type=wbjxg&page=3&limit=10
+	args
+		typepage
+			//如果有更多按钮 根据上一个接口（根据小说分类id获取分类页面  样式+数据）返回的 type中的参数 获取
+		type
+			//小说分类id
+		page
+			//页码（可不写） 默认为1
+		limit
+			//每一页返回的条数（可不写） 默认为10
+	return
+		成功
+			{"retCode": 200, "msg": "success", "result": [ 
+	   			{"id":4418,
+	            "name":"恰似寒光遇骄阳",
+	            "cover":"https://www.xinxs.la/BookFiles/BookImages/qiasihanguangyujiaoyang.jpg",
+	            "summary":"“这家伙，口味是有多重，这都下得去口？”",
+	            "label":"现言",
+	            "state":1,
+	            "enabled":1,
+	            "words":0,
+	            "created":0,
+	            "updated":1546808355,
+	            "authorId":2296,
+	            "author":"囧囧有妖",
+	            "extras":"",
+	            "countchapter":2533},
+            ]}
+---------------------小说分类页面-end---------------- 
+
+
+
+
+小说详情页下面推荐接口（大家在看）
+	（换一换，继续请求这个接口）
+	GET http://www.ljsb.top:5000/front/handpick?type=weeksearch
+	return
+   		成功
+   			{"retCode": 200, "msg": "success", "result": [ 
+	   			{"id":4418,
+	            "name":"恰似寒光遇骄阳",
+	            "cover":"https://www.xinxs.la/BookFiles/BookImages/qiasihanguangyujiaoyang.jpg",
+	            "summary":"“这家伙，口味是有多重，这都下得去口？”",
+	            "label":"现言",
+	            "state":1,
+	            "enabled":1,
+	            "words":0,
+	            "created":0,
+	            "updated":1546808355,
+	            "authorId":2296,
+	            "author":"囧囧有妖",
+	            "extras":"",
+	            "countchapter":2533},
+            ],}
+
+不同页面获取不同的banner
+	GET http://www.ljsb.top:5000/front/banners?type=7
+	args
+		玄幻4 奇幻20 仙侠5 武侠19 都市3 科幻8 二次元14 体育22 游戏竞技21 
+		仙剑奇缘23 科幻16 灵异7 古言10 现言9 玄幻言情12 浪漫青春11 轻小说18 完本精选男wbjxb 完本精选女wbjxg
+		女生页面girl 男生页面boy 精选页面handpick
+	return
+		{"retCode": 200, "msg": "success", "result": 
+			[{"imgurl": "http://127.0.0.1:5000/static/images/banner/bannerf1.png", "rank": 1, "bookId": 73}, 
+			{"imgurl": "http://127.0.0.1:5000/static/images/banner/bannerf2.png", "rank": 2, "bookId": 74}]
+		}
+
+
+
+---------------------书库-start---------------------
+根据性别获取小说分类
+	GET http://www.ljsb.top:5000/front/classification?gender=1
+	args 
+		gender  1男 0女
+	return
+		{
+		    "retCode":200,
+		    "msg":"success",
+		    "result":[
+			        {"id":7,"type":"仙侠奇缘","cover":"http://127.0.0.1:5000","gender":0,"count":65},
+			        {"id":9,"type":"现言","cover":"http://127.0.0.1:5000/static/images/female/xiandaiyanqing.png","gender":0,"count":65},
+			        {"id":10,"type":"古言","cover":"http://127.0.0.1:5000/static/images/female/gudaiyanqing.png","gender":0,"count":65},
+			        { "id":11,"type":"浪漫青春","cover":"http://127.0.0.1:5000/static/images/female/langmanqingchun.png","gender":0,"count":65},
+		   		]
+		}
+
+根据性别获取榜单分类
+	GET http://www.ljsb.top:5000/front/monthlyv?gender=0	
+	args  
+		gender  0女 1男
+	return
+		{
+		    "retCode":200,
+		    "msg":"success",
+		    "result":[
+		        {"id":8,"monthly":"人气榜"},
+		        {"id":9,"monthly":"推荐榜"},
+		        {"id":10,"monthly":"新书榜"},
+		        {"id":11,"monthly":"免费榜"},
+		        {"id":12,"monthly":"热搜榜"},
+		        {"id":13,"monthly":"更新榜"},
+		        {"id":14,"monthly":"完结榜"}
+		    ]
+		}
+
+根据榜单id获取小说列表
+	GET http://www.ljsb.top:5000/front/monthnov?monthly=1
+			args 	monthly=1    //榜单id  
+									男生榜单 1人气榜 2推荐榜 3新书榜 4免费榜 5热搜榜 6更新榜 7完结榜 
+									女生榜单 8人气榜 9推荐榜 10新书榜 11免费榜 12热搜榜 13更新榜 14完结榜
+			page=1 int     //无此参数默认为1
+			limit=10 int   //无此参数默认为10
+	Return
+		{
+		  "msg": "success", 
+		  "result": [
+		    {
+		      "authorId": 10, 
+		      "cover": "https://cdn.cnbj0.fds.api.mi-img.com/atlas/664fa44a4c5bb43b9cc5a796ca511c20?thumb=1&w=240&h=320", 
+		      "created": 1497399662, 
+		      "enabled": 1, 
+		      "extras": "", 
+		      "id": 10, 
+		      "label": "都市", 
+		      "name": "我的贴身校花", 
+		      "state": 1, 
+		      "summary": "一个普通的高中生，跟随自称是世界顶级杀手的无耻老头子学功夫，无意间又得到一瓶丹药，让他身怀数种异能，从此开始了美妙的生活...", 
+		      "updated": 1568057536, 
+		      "words": 23777730,
+		      "clickc":2082
+		    }
+		    ],
+		    "retCode": 200
+		}
+---------------------书库-end-----------------------
+
+
+
+---------------------书架-start-----------------------
+第一次进来推荐9本小说
+	GET http://www.ljsb.top:5000/front/firsttime
+	return 
+		{
+		    "retCode":200,
+		    "msg":"success",
+		    "result":Array[9]
+		} 
+
+用户登录后收藏小说（新增小说阅读进度）
+	GET http://www.ljsb.top:5000/common/collects?analysis=4gs6hshn4alwssc7edggahtsyqjpt2qw&bookId=15&progress=30&read=1	
+	args 	
+		analysis //用户token
+		bookId  //小说id
+		progress  //阅读进度（可以不填 默认为0）
+		read     //1已读  0未读
+
+	return
+		成功
+			{"msg": "收藏成功", "result": {}, "retCode": 200}
+		失败
+			{"msg": "小说已在收藏夹", "result": {}, "retCode": 403}
+			{"msg": "小说不存在", "result": {}, "retCode": 402}
+			{"msg": "认证失败", "result": {}, "retCode": 401}
+
+批量收藏小说
+	GET http://www.ljsb.top:5000/common/collectb?analysis=1f4ukrqrdj1smpplboqgd02dpw2sd6pn&books=33,34&progress=3,0&read=1,0
+	args
+		analysis  //用户标识
+		books    33,34   //书籍id 以英文逗号分隔
+		progress 3,0    //与书籍id对应的阅读进度 以英文逗号分隔 书籍未读为0
+		read   1,0     //与书籍id对应的阅读进度 以英文逗号分隔 书籍未读为0, 已读为1
+	return 
+		成功 
+			{"retCode": 200, "msg": "收藏成功", "result": {}}
+		失败
+			{"retCode": 403, "msg": "小说已在收藏夹", "result": {}}
+			{"retCode": 402, "msg": "小说不存在", "result": {}}
+			{"retCode": 401, "msg": "认证失败", "result": {}}
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+
+更新用户小说的阅读进度
+	GET http://www.ljsb.top:5000/common/upprogress?analysis=4gs6hshn4alwssc7edggahtsyqjpt2qw&bookId=122&progress=50
+	args 	
+		analysis //用户token
+		bookId  //小说id
+		progress  //阅读进度
+	return
+		成功
+			{"msg": "更新成功", "result": {}, "retCode": 200}
+		失败
+			{"msg": "认证失败", "result": {}, "retCode": 401}
+			{"msg": "参数错误", "result": {}, "retCode": 404}
+			{"msg": "小说不存在", "result": {}, "retCode": 402}
+
+更新用户本周阅读分钟
+	GET http://www.ljsb.top:5000/common/uptime?analysis=4gs6hshn4alwssc7edggahtsyqjpt2qw&readt=30
+	args 	
+		analysis //用户token
+		readt  //一周阅读时间
+	return
+		成功
+			{"msg": "更新成功", "result": {}, "retCode": 200}
+		失败
+			{"msg": "认证失败", "result": {}, "retCode": 401}
+			{"msg": "参数错误", "result": {}, "retCode": 404}
+
+获取用户收藏 返回书本 阅读进度 本周阅读分钟数
+	GET http://www.ljsb.top:5000/common/getcollects?analysis=4gs6hshn4alwssc7edggahtsyqjpt2qw
+	return
+		成功
+			{
+			    "msg":"success",
+			    "result":{
+			        "data":[{
+			                "author":"带玉",
+			                "authorId":10,
+			                "countchapter":10331,
+			                "cover":"https://cdn.cnbj0.fds.api.mi-img.com/atlas/664fa44a4c5bb43b9cc5a796ca511c20?thumb=1&w=240&h=320",
+			                "created":1497399662,
+			                "enabled":1,
+			                "extras":"",
+			                "id":10,
+			                "isread":1,
+			                "label":"都市",
+			                "name":"我的贴身校花",
+			                "read_progress":0,
+			                "state":1,
+			                "summary":"一个普通的高中生，跟随自称是世界顶级杀手的无耻老头子学功夫，无意间又得到一瓶丹药，让他身怀数种异能，从此开始了美妙的生活...",
+			                "updated":1568057536,
+			                "words":23777730
+	            },],
+			        "read_time":30
+			    },
+			    "retCode":200
+			}
+			参数说明
+				read_time  //一周阅读时间
+				read_progress //该本小说阅读进度
+				isread  // 1已读  0未读
+		失败
+			{"msg": "认证失败", "result": {}, "retCode": 401}
+---------------------书架-end-------------------------
+
+
+
+
+---------------------小说评论-start----------------------
+评论小说
+	POST http://www.ljsb.top:5000/common/comment
+	form-data
+		comment     //评论
+		analysis    //用户标识  若用户未登录 填为0
+		bookId     //小说id
+		star       //评论的星星数 int   最大为5
+	Return
+		成功
+			{"retCode": 200, "msg": "评论成功", "result": {}}
+		失败
+			{"retCode": 405, "msg": "小说不存在", "result": {}}
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+
+评论用户的评论
+	POST http://www.ljsb.top:5000/common/comments
+	form-data
+		comment    //评论
+		analysis   //用户标识  若用户未登录 填为0
+		bookId     //小说id
+		commentId  //评论id
+	return
+		成功
+			{"retCode": 200, "msg": "评论成功", "result": {}}
+		失败
+			{"retCode": 405, "msg": "评论不存在", "result": {}}
+			{"retCode": 405, "msg": "小说不存在", "result": {}}
+
+获取小说的评论
+	GET http://www.ljsb.top:5000/common/getcomment?bookId=14
+	args bookId    //小说id
+	return
+		成功
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":[
+			        {
+			            "id":2,
+			            "comment":"这本小说可以",
+			            "username":"游客01",
+			            "addtime":"2019-11-22 17:11:58",
+			            "icon":"http://127.0.0.1:5000/static/images/icon/default.png",
+			            "praise":0,
+			            "star":5
+			            "count":3
+			        },
+			        {
+			            "id":1,
+			            "comment":"这本小说可以",
+			            "username":"12",
+			            "addtime":"2019-11-22 17:09:40",
+			            "icon":"http://127.0.0.1:5000/static/images/icon/default.png",
+			            "praise":0,
+			            "star":5
+			            "count":0
+			        }
+			    ]
+			}
+			参数说明
+				id  评论的id
+				praise 该条评论的点赞数
+				count   评论这条评论的数目
+				star    用户评论时候的星星数
+		失败
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+
+获取评论的评论
+	GET http://www.ljsb.top:5000/common/commentcom?bookId=14&commentId=2
+	args
+		bookId     //小说的id
+		commentId  //评论的id
+	return
+		成功
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":[
+			        {
+			            "id":15,
+			            "comment":"这本小说可以",
+			            "username":"游客20191126",
+			            "addtime":"2019-11-26 15:46:41",
+			            "icon":"http://127.0.0.1:5000/static/images/icon/default.png",
+			            "praise":0,
+			            "count":0
+			        },
+			        {
+			            "id":14,
+			            "comment":"这本小说可以",
+			            "username":"大飞鞋",
+			            "addtime":"2019-11-26 15:45:51",
+			            "icon":"http://127.0.0.1:5000/static/images/icon/zso9ynmmjvzllrkwz5n10uh38re7grc2.jpg",
+			            "praise":0,
+			            "count":0
+			        }
+			        
+			    ]
+			}
+		失败
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+			{"retCode": 405, "msg": "评论不存在", "result": {}}
+
+点赞评论
+	GET http://www.ljsb.top:5000/common/compraise?commentId=16&bookId=14
+	args 
+		commentId   //评论id
+		bookId     //小说id
+	return
+		成功 
+			{"retCode": 200, "msg": "success", "result": {}}
+		失败
+			{"retCode": 405, "msg": "您已赞过了", "result": {}}   根据用户的ip限制用户一天只能赞一次这个评论
+			{"retCode": 405, "msg": "评论不存在", "result": {}}
+
+---------------------小说评论-end------------------------
+
+
+
+---------------------用户页面-start------------------------
+用户验证码登录
+	POST http://www.ljsb.top:5000/common/logincode
+		form-data
+			phone 17839192462
+			code 123456
+
+		Return
+			成功
+			{
+			    "msg": "success",
+			    "result": {
+			        "analysis": "3aau288lm6ua4j4hsh03raspw58cdqg0"
+			        "username": "TinLin", 
+					"icon": "http://127.0.0.1:5000/static/images/icon/sc84qaf69v1mee3zh5tju1pdaa5a6fjb.png"}}	
+			    },
+			    "retCode": 200
+			}
+			失败
+			{
+			    "msg": "验证码错误",
+			    "result": {"analysis": ""},
+			    "retCode": 400
+			}
+
+用户微信登录
+	GET http://www.ljsb.top:5000/common/wechat_login?code=011PFwPg2HeRpC0tUhOg2DGLPg2PFwPv		
+	args code  //移动端用户授权后获取的code
+	return
+		成功
+			{"retCode": 200, "msg": "success", "result": {
+			"analysis": "b5oawuas8fwv2da3go7fgesr241y5ggf", 
+			"username": "TinLin", 
+			"icon": "http://127.0.0.1:5000/static/images/icon/sc84qaf69v1mee3zh5tju1pdaa5a6fjb.png"}}	
+		失败
+			{"retCode": 401, "msg": "认证失败", "result": {"analysis": ""}}
+
+获取用户信息
+	GET http://www.ljsb.top:5000/common/userinfo?analysis=y5ctgdrthkp563j6a95lf186oya6b28t
+	args
+		analysis  // 用户标识
+	return
+		成功
+			{
+			    "msg": "success",
+			    "result": {
+			        "gender": 0,
+			        "icon": "http://127.0.0.1:5000/static/images/icon/zso9ynmmjvzllrkwz5n10uh38re7grc2.jpg",
+			        "signer": "",
+			        "username": "20191121_2461"
+			    },
+			    "retCode": 200
+			}
+			参数说明
+				gender    //性别 1男 0女
+				icon   //头像
+				signer  //签名
+				username  //用户昵称
+		失败
+			{
+			  "msg": "认证失败", 
+			  "result": {}, 
+			  "retCode": 401
+			}
+
+修改用户头像
+	POST http://www.ljsb.top:5000/common/icon
+	data-form
+		photo     //图片  图片格式只能为 png jpg PNG JPG
+		analysis  //用户标识
+	return
+		成功
+			{"msg": "修改成功","result": {},"retCode": 200}
+		失败
+			{"msg": "认证失败","result": {},"retCode": 401}
+			{"msg": "图片格式不正确","result": {},"retCode": 405}
+
+修改用户昵称 性别 签名 
+	POST http://www.ljsb.top:5000/common/upinfo
+	data-form
+		type      //修改的类别  参数只能为 username gender signer
+		analysis  //用户标识
+		data      //修改的文本  type为gender只能为0或者1
+	return
+		成功
+			{"msg": "修改成功","result": {},"retCode": 200}
+		失败
+			{"retCode": 405, "msg": "昵称过长", "result": {}}
+			{"retCode": 405, "msg": "性别只能为男或女", "result": {}}
+			{"retCode": 405, "msg": "签名过长", "result": {}}
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+			{"retCode": 401, "msg": "认证失败", "result": {}}
+
+意见反馈
+	POST http://www.ljsb.top:5000/common/suggest
+	data-form
+		advise    //建议
+		phone	  //联系方式  不填为空
+	return
+		成功
+			{"retCode": 200, "msg": "反馈成功", "result": {}}
+		失败
+			{"retCode": 405, "msg": "请填写建议", "result": {}}
+
+新增用户浏览记录
+	GET http://www.ljsb.top:5000/common/history?analysis=b5oawuas8fwv2da3go7fgesr241y5ggf&bookId=35
+	args 
+		analysis   //用户标识
+		bookId     //小说id
+	return
+		成功
+			{"retCode": 200, "msg": "success", "result": {}}
+		失败
+			{"retCode": 405, "msg": "小说不存在", "result": {}}
+			{"retCode": 401, "msg": "认证失败", "result": {}}
+
+批量增加用户浏览记录
+	GET http://www.ljsb.top:5000/common/historys?analysis=4gs6hshn4alwssc7edggahtsyqjpt2qw&bookIds=66,67&timees=2019-10-18 01:04:56,2019-10-18 01:04:56
+	args
+		analysis   //用户标识
+		bookIds    //小说用英文逗号分隔
+		timees    // 与小说对应日期 用英文逗号分隔
+	return
+		成功
+			{"retCode": 200, "msg": "success", "result": {}}
+		失败
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+			{"retCode": 401, "msg": "认证失败", "result": {}}
+
+获取用户浏览记录
+	GET http://www.ljsb.top:5000/common/gethistory?analysis=b5oawuas8fwv2da3go7fgesr241y5ggf
+	args 
+		analysis
+	return
+		成功
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":[
+			        {
+			            "id":35,
+			            "name":"末日进化",
+			            "cover":"https://cdn.cnbj0.fds.api.mi-img.com/atlas/2ac5f04d8e634eb3b542e72f20562889?thumb=1&w=240&h=320",
+			            "summary":" 末世来临，一切的秩序都被打破。
+			 原本美丽青春、高不可攀的校花，为了活命、只好委屈求全。
+			 原本高贵典雅、被奉为女神的音乐老师，只好甘当奴隶。
+			 原本被人看不起的屌丝却可以凭此次机会，完成了一个屌丝不可能完成的逆袭任务！
+			 故事也就此展开，带点金戈铁马、带点风花雪月，绝对不容错过。
+			",
+			            "label":"二次元",
+			            "state":2,
+			            "enabled":1,
+			            "words":1717440,
+			            "created":1518509813,
+			            "updated":1517303623,
+			            "authorId":29,
+			            "author":"花与剑",
+			            "extras":"",
+			            "countchapter":148,
+			            "iscollect":1,
+			            "timee": "2019-10-18 01:04:56"
+			        }
+			    ]
+			}
+			参数说明
+				iscollect   该本小说是否在用户收藏夹   1是  0否
+		失败
+			{"retCode": 401, "msg": "认证失败", "result": {}}
+
+清空用户浏览记录	
+	GET http://www.ljsb.top:5000/common/clearhis?analysis=b5oawuas8fwv2da3go7fgesr241y5ggf
+	args
+		analysis
+	return
+		成功
+			{"retCode": 200, "msg": "success", "result": {}}
+		失败
+			{"retCode": 401, "msg": "认证失败", "result": {}}
+
+
+---------------------用户页面-end--------------------------
+根据性别和页面获取分类
+	GET http://www.ljsb.top:5000/front/gendertype?gender=1&type=cheng
+	args 
+		gender  1男  0女
+		type    cheng书城的  ku 书库的   （书城图片的大小和书库图片的大小不一样）
+	return
+		成功
+			{
+			    "retCode":200,
+			    "msg":"success",
+			    "result":[
+			        {
+			            "id":7,
+			            "type":"灵异",
+			            "cover":"http://127.0.0.1:5000/static/images/girl/chenglingyi.png",
+			            "channelId":0
+			        },
+			        {
+			            "id":9,
+			            "type":"现言",
+			            "cover":"http://127.0.0.1:5000/static/images/girl/chengxianyan.png",
+			            "channelId":0
+			        }]
+			}
+		失败
+			json.dumps({"retCode": 400, "msg": "args error", "result": []}, ensure_ascii=False)
+
+-------------------------------第二版新增接口----end----------------------------------------

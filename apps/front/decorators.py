@@ -2,7 +2,7 @@
 from flask import request
 from functools import wraps
 
-from apps.common.models import NovelType, Author, Cartoon, CartoonType
+from apps.common.models import NovelType, Author, Cartoon, CartoonType, CartoonChapter
 from exts import redis_store
 
 
@@ -16,12 +16,29 @@ def search_counter(func):
             return func(*args, **kwargs)
     return inner
 
+# 漫画搜索关键词装饰器
+def cartoon_search_counter(func):
+    @wraps(func)
+    def inner(*args, **kwargs):
+        keyword = request.args.get('keyword')
+        if keyword:
+            redis_store.zincrby('CartoonHotSearch', keyword)
+            return func(*args, **kwargs)
+    return inner
 
 # 取出前几条热搜
 def get_top_n(num):
     '''获取排行前 N 的数据'''
 
     ori_data = redis_store.zrevrange('HotSearch', 0, num - 1, withscores=True)
+    cleaned = [[post_id.decode(), int(count)] for post_id, count in ori_data]
+    return cleaned
+
+# 取出漫画前几条热搜
+def cartoon_get_top_n(num):
+    '''获取排行前 N 的数据'''
+
+    ori_data = redis_store.zrevrange('CartoonHotSearch', 0, num - 1, withscores=True)
     cleaned = [[post_id.decode(), int(count)] for post_id, count in ori_data]
     return cleaned
 
@@ -55,7 +72,8 @@ def novelOb_novelList(novels):
             "author": author.name,
             "extras": "",
             "countchapter": countchapter,
-            "clickc": clickc
+            "clickc": clickc,
+            "type": 1
         })
     return novel_list
 
@@ -76,6 +94,12 @@ def cartoonOb_cartoonList(cartoons, host):
                     label_arr.append(cartoon_type.type)
             # 获取封面链接
             cover_href = '%s/static/cartoon/%s/%s' % (host, cartoon.id, cartoon.cover)
+            # 获取最新一话的名称
+            newest = CartoonChapter.query.filter_by(cid=cartoon.id, chapterId=cartoon.chaptercount).first()
+            if not newest:
+                newest_chapter = '第%s话' % cartoon.chaptercount
+            else:
+                newest_chapter = newest.name
             cartoon_dict = {
                 'id': cartoon.id,
                 'name': cartoon.name,
@@ -85,6 +109,7 @@ def cartoonOb_cartoonList(cartoons, host):
                 'hotcount': cartoon.hotcount,
                 'subcount': cartoon.subcount,
                 'info': cartoon.info,
+                'newest': newest_chapter,
                 'chaptercount': cartoon.chaptercount,
                 'updatetime': str(cartoon.updatetime),
                 'cover': cover_href}

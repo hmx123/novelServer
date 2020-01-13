@@ -9,7 +9,7 @@ MySQLPassword = os.environ.get('MySQLPassword')
 WECHAT_APPID = os.environ.get('WECHAT_APPID')
 WECHAT_SECRET = os.environ.get('WECHAT_SECRET')
 
-DB_URI = "mysql+pymysql://%s:%s@127.0.0.1:3306/novels?charset=utf8" % (MySQLUser, MySQLPassword)
+DB_URI = "mysql+pymysql://%s:%s@127.0.0.1:3306/novels?charset=utf8mb4" % (MySQLUser, MySQLPassword)
 SQLALCHEMY_DATABASE_URI = DB_URI
 SQLALCHEMY_TRACK_MODIFICATIONS =False
 
@@ -25,38 +25,40 @@ UPLOADED_PHOTOS_DEST = os.path.join(base_dir, 'static/images/icon')
 
 # 定时任务
 
-# SCHEDULER_API_ENABLED = True
-# JOBS = [
-#         {
-#             'id': 'xbqg_1h_data',
-#             'func': xbqg_1h_data,
-#             'args': '',
-#             'trigger': 'interval',
-#             'hours': 1
-#         },
-#         {
-#             'id': 'qb5_1h_data',
-#             'func': qb5_1h_data,
-#             'args': '',
-#             'trigger': 'interval',
-#             'hours': 1
-#         },
-#         {
-#             'id': 'ever_week_monday',
-#             'func': ever_week_monday,
-#             'args': '',
-#             'trigger': 'cron',
-#             'day_of_week': 0,
-#             'hour': 0,
-#             'minute': 0,
-#             'second': 0
-#         },
-#         {
-#             'id': 'cartoon_spider',
-#             'func': cartoon_spider,
-#             'args': '',
-#             'trigger': 'interval',
-#             'hours': 12
-#         }
-# ]
+SCHEDULER_API_ENABLED = True
+JOBS = [
+        {
+            'id': 'xbqg_1h_data',
+            'func': xbqg_1h_data,
+            'args': '',
+            'trigger': 'interval',
+            'hours': 1
+        },
+        {
+            'id': 'qb5_1h_data',
+            'func': qb5_1h_data,
+            'args': '',
+            'trigger': 'interval',
+            'hours': 1
+        },
+        {
+            'id': 'ever_week_monday',
+            'func': ever_week_monday,
+            'args': '',
+            'trigger': 'cron',
+            'day_of_week': 0,
+            'hour': 0,
+            'minute': 0,
+            'second': 0
+        },
+        {
+            'id': 'cartoon_spider',
+            'func': cartoon_spider,
+            'args': '',
+            'trigger': 'cron',
+            'hour': 10,
+            'minute': 0,
+            'second': 0
+        }
+]
 
