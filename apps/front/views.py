@@ -441,13 +441,15 @@ def handpick():
         novelId_list = []
         for monthly in Monthly_list:
             novelId_list.append(monthly.novelId)
-        novels = Novels.query.filter(Novels.id.in_(novelId_list), Novels.label == 10).limit(5).all()
+        # novels = Novels.query.filter(Novels.id.in_(novelId_list), Novels.label == 10).limit(5).all()
+        novels = Novels.query.filter(Novels.id.in_(novelId_list)).limit(5).all()
     elif type == 'must':
         Monthly_list = MonthlyNovel.query.filter_by(monthlyId=12).all()
         novelId_list = []
         for monthly in Monthly_list:
             novelId_list.append(monthly.novelId)
-        novels = Novels.query.filter(Novels.id.in_(novelId_list), Novels.label == 9).all()
+        # novels = Novels.query.filter(Novels.id.in_(novelId_list), Novels.label == 9).all()
+        novels = Novels.query.filter(Novels.id.in_(novelId_list)).all()
         # 随机获取4本
         novels = random.sample(novels, 4)
     elif type == 'god':
@@ -538,7 +540,8 @@ def handpickall():
     novelId_list = []
     for monthly in Monthly_list:
         novelId_list.append(monthly.novelId)
-    novels = Novels.query.filter(Novels.id.in_(novelId_list), Novels.label == 10).limit(5).all()
+    # novels = Novels.query.filter(Novels.id.in_(novelId_list), Novels.label == 10).limit(5).all()
+    novels = Novels.query.filter(Novels.id.in_(novelId_list)).limit(5).all()
     novel_list = novelOb_novelList(novels)
     novel_dict['today'] = novel_list
 
@@ -547,7 +550,8 @@ def handpickall():
     novelId_list = []
     for monthly in Monthly_list:
         novelId_list.append(monthly.novelId)
-    novels = Novels.query.filter(Novels.id.in_(novelId_list), Novels.label == 9).all()
+    # novels = Novels.query.filter(Novels.id.in_(novelId_list), Novels.label == 9).all()
+    novels = Novels.query.filter(Novels.id.in_(novelId_list)).all()
     # 随机获取4本
     novels = random.sample(novels, 4)
     novel_list = novelOb_novelList(novels)
@@ -733,8 +737,9 @@ def handpickalls():
             if compose_page.girllabel:
                 # 判断是否要换一换
                 if compose_page.mode == 1 or compose_page.mode == 2:
-                    novels = Novels.query.filter(Novels.id.in_(novelId_list),
-                                                     Novels.label == compose_page.girllabel).all()
+                    #novels = Novels.query.filter(Novels.id.in_(novelId_list),
+                    #                                Novels.label == compose_page.girllabel).all()
+                    novels = Novels.query.filter(Novels.id.in_(novelId_list)).all()
                     novels = random.sample(novels, compose_page.girlcount)
                 else:
                     novels = Novels.query.filter(Novels.id.in_(novelId_list),
@@ -1905,7 +1910,7 @@ def comicmore():
     offset = (int(page) - 1) * int(limit)
     if typee in {'recommend', 'new', 'boy', 'girl', 'over', 'free', 'like'}:
         if typee == 'recommend' or typee == 'like':
-            cartoonId_list = CartoonMonthlyNovel.query.order_by(-CartoonMonthlyNovel.hotcount).limit(limit).offset(offset).all()
+            cartoonId_list = CartoonMonthlyNovel.query.order_by(-CartoonMonthlyNovel.hotcount).filter_by(monthlyId=1).limit(limit).offset(offset).all()
         elif typee == 'new':
             cartoonId_list = CartoonMonthlyNovel.query.order_by(-CartoonMonthlyNovel.hotcount).filter_by(monthlyId=4).limit(limit).offset(offset).all()
         elif typee == 'boy':
@@ -2084,7 +2089,7 @@ def comic():
      "other": [{"mode": 4, "head": "查看更多戳这里"}]})
     # 更新必看
     cartoonId_list = CartoonMonthlyNovel.query.order_by(-CartoonMonthlyNovel.hotcount).filter_by(monthlyId=4).all()
-    cartoonId_list = cartoonId_list[:3]
+    cartoonId_list = cartoonId_list[:6]
     cartoon_list = cartoonOb_cartoonList(cartoonId_list, host)
     style_cartoon.append({"style": 11, "type": "must", "title": "更新必看", "data": cartoon_list,
      "other": [{"mode": 4, "head": "查看更多戳这里"}]})

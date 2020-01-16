@@ -8,7 +8,7 @@ from flask import Blueprint, request
 import config
 from apps.common.forms import RegisterForm, LoginForm, ResetpwdForm, ForgetPassword
 from apps.common.models import User, BookCollect, Novels, NovelType, Author, Chapters, NovelComment, Feedback, \
-    NovelHistory, CartoonComment, Cartoon
+    NovelHistory, CartoonComment, Cartoon, UserPraise
 from apps.common.wyyapi import sendcode, checkcode
 from apps.front.decorators import novelOb_novelList
 from exts import db, photos
@@ -416,7 +416,7 @@ def getcollects():
     user = User.query.filter_by(token=token).first()
     if user:
         # 根据用户id获取阅读书籍
-        book_collect = BookCollect.query.filter_by(userId=user.id, type=1).all()
+        book_collect = BookCollect.query.filter_by(userId=user.id, type=1).order_by(-BookCollect.addtime).all()
         # 用户本周阅读分钟数
         read_time = user.read_time
         # 根据bookId获取小说详情
@@ -487,7 +487,7 @@ def comment():
         # username = '游客%s' % ip
         # icon = 'default.png'
         # userId = 0
-        return json.dumps({"retCode": 405, "msg": "请登录后评论", "result": {}}, ensure_ascii=False)
+        return json.dumps({"retCode": 405, "msg": "登录后可以评论更多书籍哦~", "result": {}}, ensure_ascii=False)
     # 新增用户评论
     comm = NovelComment(novelId=bookId, userId=userId, comment=comment, username=username, icon=icon, commentId=0, star = star)
     db.session.add(comm)
@@ -529,11 +529,11 @@ def comments():
         # username = '游客%s' % ip
         # icon = 'default.png'
         # userId = 0
-        return json.dumps({"retCode": 405, "msg": "请登录后评论", "result": {}}, ensure_ascii=False)
+        return json.dumps({"retCode": 405, "msg": "登录后可以评论更多书籍哦~", "result": {}}, ensure_ascii=False)
     # 判断用户是否对相同的评论评论过了
     nc = NovelComment.query.filter_by(novelId=bookId, userId=userId, commentId=commentId).first()
     if nc:
-        return json.dumps({"retCode": 405, "msg": "您已评论过了", "result": {}}, ensure_ascii=False)
+        return json.dumps({"retCode": 405, "msg": "Hi，您已评论过哦~", "result": {}}, ensure_ascii=False)
     # 新增用户评论
     comm = NovelComment(novelId=bookId, userId=userId, comment=comment, username=username, icon=icon, commentId=commentId)
     db.session.add(comm)
@@ -545,23 +545,41 @@ def comments():
 def compraise():
     # 获取评论id
     commentId = request.args.get('commentId')
-    #
+    # 获取用户标识
+    token = request.args.get('analysis')
     if not commentId or not commentId.isdigit():
-        commentId = 0
+        return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
     bookId = request.args.get('bookId')
     if not bookId or not bookId.isdigit():
-        bookId = 0
+        return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+    user = User.query.filter_by(token=token).first()
+    if user:
+        # 获取用户id
+        userId = user.id
+        # 判断用户是否点赞
+        up = UserPraise.query.filter_by(uId=userId, commentId=commentId, type=1).first()
+        if up:
+            return json.dumps({"retCode": 405, "msg": "您已赞过了", "result": {}}, ensure_ascii=False)
+        else:
+            # 添加到点赞
+            up = UserPraise(uId=userId, commentId=commentId, type=1)
+            db.session.add(up)
+    else:
+        # 用户登录
+        return json.dumps({"retCode": 405, "msg": "请登录后点赞", "result": {}}, ensure_ascii=False)
+
     # 判断被评论的评论是否存在
     novel_comment = NovelComment.query.get(commentId)
     if not novel_comment or str(novel_comment.novelId) != bookId:
         return json.dumps({"retCode": 405, "msg": "评论不存在", "result": {}}, ensure_ascii=False)
-    # 获取请求头的ip
-    ip = request.headers['X-Real-Ip']
-    comment = zlcache.get(ip)
-    if comment and commentId == comment.decode():
-        return json.dumps({"retCode": 405, "msg": "您已赞过了", "result": {}}, ensure_ascii=False)
-    # 把这个ip加入到redis中
-    zlcache.set(ip, commentId, 86400)   # 1天
+    # # 获取请求头的ip
+    # ip = request.headers['X-Real-Ip']
+    # comment = zlcache.get(ip)
+    # if comment and commentId == comment.decode():
+    #     return json.dumps({"retCode": 405, "msg": "您已赞过了", "result": {}}, ensure_ascii=False)
+    # # 把这个ip加入到redis中
+    # zlcache.set(ip, commentId, 86400)   # 1天
+
     praise = novel_comment.praise
     novel_comment.praise = praise+1
     db.session.add(novel_comment)
@@ -989,10 +1007,11 @@ def carcomment():
         icon = user.icon
         userId = user.id
     else:
-        ip = time.strftime("%Y%m%d", time.localtime(time.time()))
-        username = '游客%s' % ip
-        icon = 'default.png'
-        userId = 0
+        # ip = time.strftime("%Y%m%d", time.localtime(time.time()))
+        # username = '游客%s' % ip
+        # icon = 'default.png'
+        # userId = 0
+        return json.dumps({"retCode": 405, "msg": "登录后可以评论更多书籍哦~", "result": {}}, ensure_ascii=False)
     # 新增用户评论
     comm = CartoonComment(novelId=bookId, userId=userId, comment=comment, username=username, icon=icon, commentId=0, star = star)
     db.session.add(comm)
@@ -1010,6 +1029,7 @@ def carcomments():
         bookId = 0
     token = request.form.get('analysis')
     comment = request.form.get('comment')
+
     # 判断被评论的评论是否存在
     novel_comment = CartoonComment.query.get(commentId)
     if not novel_comment or str(novel_comment.novelId) != bookId:
@@ -1029,11 +1049,16 @@ def carcomments():
         username = user.username
         icon = user.icon
         userId = user.id
+        # 判断用户是否对相同的评论评论过了
+        nc = CartoonComment.query.filter_by(novelId=bookId, userId=userId, commentId=commentId).first()
+        if nc:
+            return json.dumps({"retCode": 405, "msg": "Hi，您已评论过哦~", "result": {}}, ensure_ascii=False)
     else:
-        ip = time.strftime("%Y%m%d", time.localtime(time.time()))
-        username = '游客%s' % ip
-        icon = 'default.png'
-        userId = 0
+        # ip = time.strftime("%Y%m%d", time.localtime(time.time()))
+        # username = '游客%s' % ip
+        # icon = 'default.png'
+        # userId = 0
+        return json.dumps({"retCode": 405, "msg": "登录后可以评论更多书籍哦~", "result": {}}, ensure_ascii=False)
     # 新增用户评论
     comm = CartoonComment(novelId=bookId, userId=userId, comment=comment, username=username, icon=icon, commentId=commentId)
     db.session.add(comm)
@@ -1050,17 +1075,33 @@ def carcompraise():
     bookId = request.args.get('cartoonId')
     if not bookId or not bookId.isdigit():
         bookId = 0
+    token = request.args.get('analysis')
+    user = User.query.filter_by(token=token).first()
+    if user:
+        # 获取用户id
+        userId = user.id
+        # 判断用户是否点赞
+        up = UserPraise.query.filter_by(uId=userId, commentId=commentId, type=2).first()
+        if up:
+            return json.dumps({"retCode": 405, "msg": "您已赞过了", "result": {}}, ensure_ascii=False)
+        else:
+            # 添加到点赞
+            up = UserPraise(uId=userId, commentId=commentId, type=2)
+            db.session.add(up)
+    else:
+        # 用户登录
+        return json.dumps({"retCode": 405, "msg": "请登录后点赞", "result": {}}, ensure_ascii=False)
     # 判断被评论的评论是否存在
     novel_comment = CartoonComment.query.get(commentId)
     if not novel_comment or str(novel_comment.novelId) != bookId:
         return json.dumps({"retCode": 405, "msg": "评论不存在", "result": {}}, ensure_ascii=False)
     # 获取请求头的ip
-    ip = request.headers['X-Real-Ip'] + 'cartoon'
-    comment = zlcache.get(ip)
-    if comment and commentId == comment.decode():
-        return json.dumps({"retCode": 405, "msg": "您已赞过了", "result": {}}, ensure_ascii=False)
-    # 把这个ip加入到redis中
-    zlcache.set(ip, commentId, 86400)   # 1天
+    # ip = request.headers['X-Real-Ip'] + 'cartoon'
+    # comment = zlcache.get(ip)
+    # if comment and commentId == comment.decode():
+    #     return json.dumps({"retCode": 405, "msg": "您已赞过了", "result": {}}, ensure_ascii=False)
+    # # 把这个ip加入到redis中
+    # zlcache.set(ip, commentId, 86400)   # 1天
     praise = novel_comment.praise
     novel_comment.praise = praise+1
     db.session.add(novel_comment)
@@ -1414,7 +1455,7 @@ def cargetcollects():
     user = User.query.filter_by(token=token).first()
     if user:
         # 根据用户id获取阅读书籍
-        book_collect = BookCollect.query.filter_by(userId=user.id).all()
+        book_collect = BookCollect.query.filter_by(userId=user.id).order_by(-BookCollect.addtime).all()
         # 用户本周阅读分钟数
         read_time = user.read_time
         # 根据bookId获取小说详情

@@ -621,7 +621,7 @@
 		    "result": {},
 		    "retCode": 400
 		}
-		
+
 根据用户性别推荐小说
 	GET  http://www.ljsb.top:5000/front/recommend?gender=1
 	args gender   //1男 0女
@@ -1354,7 +1354,7 @@
 	POST http://www.ljsb.top:5000/common/comment
 	form-data
 		comment     //评论
-		analysis    //用户标识  若用户未登录 填为0
+		analysis    //用户标识  若用户未登录 不能评论
 		bookId     //小说id
 		star       //评论的星星数 int   最大为5
 	Return
@@ -1362,13 +1362,14 @@
 			{"retCode": 200, "msg": "评论成功", "result": {}}
 		失败
 			{"retCode": 405, "msg": "小说不存在", "result": {}}
+			{"retCode": 405, "msg": "登录后可以评论更多书籍哦~", "result": {}}
 			{"retCode": 404, "msg": "参数错误", "result": {}}
 
 评论用户的评论
 	POST http://www.ljsb.top:5000/common/comments
 	form-data
 		comment    //评论
-		analysis   //用户标识  若用户未登录 填为0
+		analysis   //用户标识  若用户未登录 不能评论
 		bookId     //小说id
 		commentId  //评论id
 	return
@@ -1376,6 +1377,8 @@
 			{"retCode": 200, "msg": "评论成功", "result": {}}
 		失败
 			{"retCode": 405, "msg": "评论不存在", "result": {}}
+			{"retCode": 405, "msg": "登录后可以评论更多书籍哦~", "result": {}}
+			{"retCode": 405, "msg": "Hi，您已评论过哦~", "result": {}}
 			{"retCode": 405, "msg": "小说不存在", "result": {}}
 
 获取小说的评论
@@ -1458,11 +1461,13 @@
 	args 
 		commentId   //评论id
 		bookId     //小说id
+		analysis	  //  用户标识 未登录 不能点赞
 	return
 		成功 
 			{"retCode": 200, "msg": "success", "result": {}}
 		失败
-			{"retCode": 405, "msg": "您已赞过了", "result": {}}   根据用户的ip限制用户一天只能赞一次这个评论
+			{"retCode": 405, "msg": "您已赞过了", "result": {}}
+			{"retCode": 405, "msg": "请登录后点赞", "result": {}}   
 			{"retCode": 405, "msg": "评论不存在", "result": {}}
 
 ---------------------小说评论-end------------------------

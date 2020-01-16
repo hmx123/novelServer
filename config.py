@@ -24,7 +24,7 @@ MAX_CONTENT_LENGTH = 3 * 1024 * 1024
 UPLOADED_PHOTOS_DEST = os.path.join(base_dir, 'static/images/icon')
 
 # 定时任务
-
+'''
 SCHEDULER_API_ENABLED = True
 JOBS = [
         {
@@ -61,4 +61,4 @@ JOBS = [
             'second': 0
         }
 ]
-
+'''

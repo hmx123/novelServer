@@ -666,7 +666,7 @@
 	POST http://www.ljsb.top:5000/common/carcomment
 	form-data
 		comment       //评论（不少于5个字符）
-		analysis	  //  用户标识 未登录 为0
+		analysis	  //  用户标识 未登录 不能评论
 		cartoonId	  //漫画id
 		start         //星星数量 最多5个 不可不填
 	return
@@ -674,6 +674,7 @@
 			{"retCode": 200, "msg": "评论成功", "result": {}}
 		失败
 			{"retCode": 405, "msg": "字数不能少于5个字", "result": {}}
+			{"retCode": 405, "msg": "请登录后评论", "result": {}}
 			{"retCode": 404, "msg": "参数错误", "result": {}}
 			{"retCode": 405, "msg": "漫画不存在", "result": {}}
 			
@@ -681,7 +682,7 @@
 	POST http://www.ljsb.top:5000/common/carcomments
 	form-data
 		comment    //评论
-		analysis   //用户标识  若用户未登录 填为0
+		analysis	  //  用户标识 未登录 不能评论
 		cartoonId     //漫画id
 		commentId  //评论id
 	return
@@ -690,6 +691,8 @@
 		失败
 			{"retCode": 405, "msg": "评论不存在", "result": {}}
 			{"retCode": 405, "msg": "漫画不存在", "result": {}}
+			{"retCode": 405, "msg": "Hi，您已评论过哦~", "result": {}}
+			{"retCode": 405, "msg": "登录后可以评论更多书籍哦~", "result": {}}
 
 获取漫画的评论
 	GET http://www.ljsb.top:5000/common/cargetcomment?cartoonId=14
@@ -771,11 +774,14 @@
 	args 
 		commentId   //评论id
 		cartoonId     //漫画id
+		analysis	  //  用户标识 未登录 不能点赞
+
 	return
 		成功 
 			{"retCode": 200, "msg": "success", "result": {}}
 		失败
-			{"retCode": 405, "msg": "您已赞过了", "result": {}}   根据用户的ip限制用户一天只能赞一次这个评论
+			{"retCode": 405, "msg": "您已赞过了", "result": {}}  
+			{"retCode": 405, "msg": "请登录后点赞", "result": {}}
 			{"retCode": 405, "msg": "评论不存在", "result": {}}
 
 漫画搜索

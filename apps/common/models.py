@@ -307,4 +307,12 @@ class BookcityBanner(db.Model):
     rank = db.Column(db.Integer)
     book = db.Column(db.Integer)
     version = db.Column(db.Integer)
+
+class UserPraise(db.Model):
+    __tablename__ = 'user_praise'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    uId = db.Column(db.Integer)
+    commentId = db.Column(db.Integer)
+    type = db.Column(db.Integer)
+
 # -------------第三版本新增漫画end---------------
