@@ -10,7 +10,7 @@ from flask import Blueprint, request
 
 from apps.common.models import NovelType, Novels, Chapters, Contents, Author, Monthly, MonthlyNovel, AppVersions, \
     NovelBanner, NovelGroup, GroupidNovelid, ComposePage, Cartoon, CartoonType, CartoonChapter, CartoonidTypeid, \
-    CartoonMonthly, CartoonMonthlyNovel, BookcityBanner
+    CartoonMonthly, CartoonMonthlyNovel, BookcityBanner, CartoonCount
 from apps.front.decorators import search_counter, get_top_n, novelOb_novelList, cartoonOb_cartoonList, \
     cartoon_search_counter, cartoon_get_top_n
 
@@ -538,10 +538,11 @@ def handpickall():
     #  获取今日推荐的 'today':
     Monthly_list = MonthlyNovel.query.filter_by(monthlyId=12).all()
     novelId_list = []
-    for monthly in Monthly_list:
-        novelId_list.append(monthly.novelId)
+    novels = []
+    for monthly in Monthly_list[:5]:
+        novels.append(Novels.query.get(monthly.novelId))
     # novels = Novels.query.filter(Novels.id.in_(novelId_list), Novels.label == 10).limit(5).all()
-    novels = Novels.query.filter(Novels.id.in_(novelId_list)).limit(5).all()
+    # novels = Novels.query.filter(Novels.id.in_(novelId_list)).limit(5).all()
     novel_list = novelOb_novelList(novels)
     novel_dict['today'] = novel_list
 
@@ -685,9 +686,9 @@ def handpickalls():
                     novels = random.sample(novels, book_count)
                 else:
                     novels_boy = Novels.query.filter(Novels.id.in_(novelId_list_boy),
-                                                     Novels.label == compose_page.boylabel).limit(compose_page.boycount).all()
+                                                     Novels.label == compose_page.boylabel).order_by(-Novels.id).all()[:compose_page.boycount]
                     novels_girl = Novels.query.filter(Novels.id.in_(novelId_list_girl),
-                                                      Novels.label == compose_page.girllabel).limit(compose_page.girlcount).all()
+                                                      Novels.label == compose_page.girllabel).order_by(-Novels.id).all()[:compose_page.girlcount]
                     novels = novels_boy + novels_girl
 
             elif compose_page.boylabel:
@@ -699,8 +700,8 @@ def handpickalls():
                     novels = random.sample(novels, book_count)
                 else:
                     novels_boy = Novels.query.filter(Novels.id.in_(novelId_list_boy),
-                         Novels.label == compose_page.boylabel).limit(compose_page.boycount).all()
-                    novels_girl = Novels.query.filter(Novels.id.in_(novelId_list_girl)).limit(compose_page.girlcount).all()
+                         Novels.label == compose_page.boylabel).order_by(-Novels.id).all()[:compose_page.boycount]
+                    novels_girl = Novels.query.filter(Novels.id.in_(novelId_list_girl)).order_by(-Novels.id).all()[:compose_page.girlcount]
                     novels = novels_boy + novels_girl
             elif compose_page.girllabel:
                 # 判断是否要换一换
@@ -711,10 +712,9 @@ def handpickalls():
                     novels = novels_boy + novels_girl
                     novels = random.sample(novels, book_count)
                 else:
-                    novels_boy = Novels.query.filter(
-                        (Novels.id.in_(novelId_list_boy)).limit(compose_page.boycount)).all()
+                    novels_boy = Novels.query.filter(Novels.id.in_(novelId_list_boy)).order_by(-Novels.id).all()[:compose_page.boycount]
                     novels_girl = Novels.query.filter(Novels.id.in_(novelId_list_girl),
-                         Novels.label == compose_page.girllabel).limit(compose_page.girlcount).all()
+                         Novels.label == compose_page.girllabel).order_by(-Novels.id).all()[:compose_page.girlcount]
                     novels = novels_boy + novels_girl
             else:
                 # 判断是否要换一换
@@ -724,8 +724,8 @@ def handpickalls():
                     novels = novels_boy + novels_girl
                     novels = random.sample(novels, book_count)
                 else:
-                    novels_boy = Novels.query.filter(Novels.id.in_(novelId_list_boy)).limit(compose_page.boycount).all()
-                    novels_girl = Novels.query.filter(Novels.id.in_(novelId_list_girl)).limit(compose_page.girlcount).all()
+                    novels_boy = Novels.query.filter(Novels.id.in_(novelId_list_boy)).order_by(-Novels.id).all()[:compose_page.boycount]
+                    novels_girl = Novels.query.filter(Novels.id.in_(novelId_list_girl)).order_by(-Novels.id).all()[:compose_page.girlcount]
                     novels = novels_boy + novels_girl
 
         elif compose_page.girlmonthly:
@@ -743,14 +743,14 @@ def handpickalls():
                     novels = random.sample(novels, compose_page.girlcount)
                 else:
                     novels = Novels.query.filter(Novels.id.in_(novelId_list),
-                                                 Novels.label == compose_page.girllabel).limit(compose_page.girlcount).all()
+                                                 Novels.label == compose_page.girllabel).order_by(-Novels.id).all()[:compose_page.girlcount]
             else:
                 # 判断是否要换一换
                 if compose_page.mode == 1 or compose_page.mode == 2:
                     novels = Novels.query.filter(Novels.id.in_(novelId_list)).all()
                     novels = random.sample(novels, compose_page.girlcount)
                 else:
-                    novels = Novels.query.filter(Novels.id.in_(novelId_list)).limit(compose_page.girlcount).all()
+                    novels = Novels.query.filter(Novels.id.in_(novelId_list)).order_by(-Novels.id).all()[:compose_page.girlcount]
 
         elif compose_page.boymonthly:
             Monthly_list = MonthlyNovel.query.filter_by(monthlyId=compose_page.boymonthly).all()
@@ -766,15 +766,14 @@ def handpickalls():
                     novels = random.sample(novels, compose_page.boycount)
                 else:
                     novels = Novels.query.filter(Novels.id.in_(novelId_list),
-                                                 Novels.label == compose_page.boylabel).limit(
-                        compose_page.boycount).all()
+                                                 Novels.label == compose_page.boylabel).order_by(-Novels.id).all()[:compose_page.boycount]
             else:
                 # 判断是否要换一换
                 if compose_page.mode == 1 or compose_page.mode == 2:
                     novels = Novels.query.filter(Novels.id.in_(novelId_list)).all()
                     novels = random.sample(novels, compose_page.boycount)
                 else:
-                    novels = Novels.query.filter(Novels.id.in_(novelId_list)).limit(compose_page.boycount).all()
+                    novels = Novels.query.filter(Novels.id.in_(novelId_list)).order_by(-Novels.id).all()[:compose_page.boycount]
 
         else:
             return json.dumps({"retCode": 200, "msg": "success", "result": []}, ensure_ascii=False)
@@ -899,7 +898,7 @@ def girlalls():
                     {"title": "仙剑奇缘", "classifyId": "23"},
                     {"title": "科幻", "classifyId": "16"},
                     {"title": "灵异", "classifyId": "7"},
-                    {"title": "二次元", "classifyId": "15"}
+                    {"title": "二次元", "classifyId": "14"}
                 ]
             }
         elif compose_page.style == 6:
@@ -1741,6 +1740,7 @@ def cartoon():
         else:
             newest_chapter = newest.name
         cartoon_dict = {
+            'id': cartoonId,
             'name': cartoon.name,
             'author': cartoon.author,
             'statu': cartoon.statu,
@@ -2307,6 +2307,24 @@ def cartoonnew():
         cartoon_list.append(cartoon_dict)
     return json.dumps({"retCode": 200, "msg": "success", "result": cartoon_list}, ensure_ascii=False)
 
+# 发现页漫画分类
+@bp.route('/findcartype')
+def findcartype():
+    host = 'http://%s' % request.host
+    types = CartoonType.query.filter_by(version=2).all()
+    type_list = []
+    cts = CartoonidTypeid.query.count()
+    lastcount = CartoonCount.query.get(1).count
+    target = 'cheng'
+    for type in types:
+        count = CartoonidTypeid.query.filter_by(typeId=type.id-18).count()
+        type_list.append({
+            'id': type.id-18,
+            'type': type.type,
+            'img': '%s/static/images/cartoon/%s/%s' % (host, target, type.img),
+            'count': count
+        })
+    return json.dumps({"retCode": 200, "msg": "success", "result": {'data': type_list, 'inall': cts, 'week': cts-lastcount}}, ensure_ascii=False)
 
 # -------------------------------------------------第三版小说新增漫画接口end'-------------------------------------
 

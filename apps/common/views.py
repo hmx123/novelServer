@@ -1,4 +1,5 @@
 import os, json
+import re
 import time
 from datetime import datetime
 
@@ -8,7 +9,8 @@ from flask import Blueprint, request
 import config
 from apps.common.forms import RegisterForm, LoginForm, ResetpwdForm, ForgetPassword
 from apps.common.models import User, BookCollect, Novels, NovelType, Author, Chapters, NovelComment, Feedback, \
-    NovelHistory, CartoonComment, Cartoon, UserPraise
+    NovelHistory, CartoonComment, Cartoon, UserPraise, NovelReadingRecord, Contents, CartoonReadingRecord, \
+    CartoonChapter, CommentReport
 from apps.common.wyyapi import sendcode, checkcode
 from apps.front.decorators import novelOb_novelList
 from exts import db, photos
@@ -34,15 +36,20 @@ def index():
 def getcode():
     # 获取手机号码
     phone = request.form.get('phone')
+    if not phone:
+        return json.dumps({"retCode": 400, "msg": "获取失败，请检查手机号是否正确", "result": {}}, ensure_ascii=False)
+    ret = re.match(r"^1[35678]\d{9}$", phone)
+    if not ret:
+        return json.dumps({"retCode": 400, "msg": "获取失败，请检查手机号是否正确", "result": {}}, ensure_ascii=False)
     user_ip = request.remote_addr
     uu = '%s-%s' % (user_ip, phone)
     if zlcache.get(uu):
-        return json.dumps({"retCode": 400, "msg": "Try again in 60 seconds", "result": {}}, ensure_ascii=False)
+        return json.dumps({"retCode": 400, "msg": "获取失败，请不要重复获取验证码", "result": {}}, ensure_ascii=False)
     zlcache.set(uu, phone, 30)
     if sendcode(phone):
-        return json.dumps({"retCode": 200, "msg": "success", "result": {}}, ensure_ascii=False)
+        return json.dumps({"retCode": 200, "msg": "发送成功", "result": {}}, ensure_ascii=False)
     else:
-        return json.dumps({"retCode": 400, "msg": "args error", "result": {}}, ensure_ascii=False)
+        return json.dumps({"retCode": 400, "msg": "获取失败，请不要重复获取验证码", "result": {}}, ensure_ascii=False)
 
 # 生成用户token
 def rand_string(length=32):
@@ -457,8 +464,8 @@ def getcollects():
 def comment():
     # 获取用户评论 获取用户token 获取小说id
     comment = request.form.get('comment')
-    if len(comment) < 5:
-        return json.dumps({"retCode": 405, "msg": "字数不能少于5个字", "result": {}}, ensure_ascii=False)
+    # if len(comment) < 5:
+    #     return json.dumps({"retCode": 405, "msg": "字数不能少于5个字", "result": {}}, ensure_ascii=False)
     token = request.form.get('analysis')
     bookId = request.form.get('bookId')
     star = request.form.get('star')
@@ -602,16 +609,34 @@ def getcomment():
         if novel_comment.commentId == 0:
             # 获取这条评论的评论数量
             count = NovelComment.query.filter_by(novelId=bookId, commentId=novel_comment.id).all()
-            comment_dict = {
-                'id': novel_comment.id,
-                'comment': novel_comment.comment,
-                'username': novel_comment.username,
-                'addtime': str(novel_comment.addtime),
-                'icon': '%s/static/images/icon/%s' % (host, novel_comment.icon),
-                'praise': novel_comment.praise,
-                'count': len(count),
-                'star': novel_comment.star
-            }
+            # 判断用户userId是否是游客
+            userId = novel_comment.userId
+            if userId != 0:
+                # 通过userId关联用户名，用户头像
+                u = User.query.get(userId)
+                username = u.username
+                icon = u.icon
+                comment_dict = {
+                    'id': novel_comment.id,
+                    'comment': novel_comment.comment,
+                    'username': username,
+                    'addtime': str(novel_comment.addtime),
+                    'icon': '%s/static/images/icon/%s' % (host, icon),
+                    'praise': novel_comment.praise,
+                    'count': len(count),
+                    'star': novel_comment.star
+                }
+            else:
+                comment_dict = {
+                    'id': novel_comment.id,
+                    'comment': novel_comment.comment,
+                    'username': novel_comment.username,
+                    'addtime': str(novel_comment.addtime),
+                    'icon': '%s/static/images/icon/%s' % (host, novel_comment.icon),
+                    'praise': novel_comment.praise,
+                    'count': len(count),
+                    'star': novel_comment.star
+                }
             comment_list.append(comment_dict)
     return json.dumps({"retCode": 200, "msg": "success", "result": comment_list}, ensure_ascii=False)
 
@@ -633,15 +658,35 @@ def commentcom():
         for novel_comment in novel_comment[::-1]:
             # 获取这条评论的评论数量
             count = NovelComment.query.filter_by(novelId=bookId, commentId=novel_comment.id).all()
-            comment_dict = {
-                'id': novel_comment.id,
-                'comment': novel_comment.comment,
-                'username': novel_comment.username,
-                'addtime': str(novel_comment.addtime),
-                'icon': '%s/static/images/icon/%s' % (host, novel_comment.icon),
-                'praise': novel_comment.praise,
-                'count': len(count)
-            }
+            # 判断用户userId是否是游客
+            userId = novel_comment.userId
+            if userId != 0:
+                # 通过userId关联用户名，用户头像
+                u = User.query.get(userId)
+                username = u.username
+                icon = u.icon
+                comment_dict = {
+                    'id': novel_comment.id,
+                    'comment': novel_comment.comment,
+                    'username': username,
+                    'addtime': str(novel_comment.addtime),
+                    'icon': '%s/static/images/icon/%s' % (host, icon),
+                    'praise': novel_comment.praise,
+                    'count': len(count),
+                    'star': novel_comment.star
+                }
+            else:
+                comment_dict = {
+                    'id': novel_comment.id,
+                    'comment': novel_comment.comment,
+                    'username': novel_comment.username,
+                    'addtime': str(novel_comment.addtime),
+                    'icon': '%s/static/images/icon/%s' % (host, novel_comment.icon),
+                    'praise': novel_comment.praise,
+                    'count': len(count),
+                    'star': novel_comment.star
+                }
+
             comment_list.append(comment_dict)
     else:
         return json.dumps({"retCode": 405, "msg": "评论不存在", "result": []}, ensure_ascii=False)
@@ -981,8 +1026,8 @@ def clearhis():
 def carcomment():
     # 获取用户评论 获取用户token 获取小说id
     comment = request.form.get('comment')
-    if len(comment) < 5:
-        return json.dumps({"retCode": 405, "msg": "字数不能少于5个字", "result": {}}, ensure_ascii=False)
+    # if len(comment) < 5:
+    #     return json.dumps({"retCode": 405, "msg": "字数不能少于5个字", "result": {}}, ensure_ascii=False)
     token = request.form.get('analysis')
     bookId = request.form.get('cartoonId')
     star = request.form.get('star')
@@ -1122,16 +1167,35 @@ def cargetcomment():
         if novel_comment.commentId == 0:
             # 获取这条评论的评论数量
             count = CartoonComment.query.filter_by(novelId=bookId, commentId=novel_comment.id).all()
-            comment_dict = {
-                'id': novel_comment.id,
-                'comment': novel_comment.comment,
-                'username': novel_comment.username,
-                'addtime': str(novel_comment.addtime),
-                'icon': '%s/static/images/icon/%s' % (host, novel_comment.icon),
-                'praise': novel_comment.praise,
-                'count': len(count),
-                'star': novel_comment.star
-            }
+            # 判断用户userId是否是游客
+            userId = novel_comment.userId
+            if userId != 0:
+                # 通过userId关联用户名，用户头像
+                u = User.query.get(userId)
+                username = u.username
+                icon = u.icon
+                comment_dict = {
+                    'id': novel_comment.id,
+                    'comment': novel_comment.comment,
+                    'username': username,
+                    'addtime': str(novel_comment.addtime),
+                    'icon': '%s/static/images/icon/%s' % (host, icon),
+                    'praise': novel_comment.praise,
+                    'count': len(count),
+                    'star': novel_comment.star
+                }
+            else:
+                comment_dict = {
+                    'id': novel_comment.id,
+                    'comment': novel_comment.comment,
+                    'username': novel_comment.username,
+                    'addtime': str(novel_comment.addtime),
+                    'icon': '%s/static/images/icon/%s' % (host, novel_comment.icon),
+                    'praise': novel_comment.praise,
+                    'count': len(count),
+                    'star': novel_comment.star
+                }
+
             comment_list.append(comment_dict)
     return json.dumps({"retCode": 200, "msg": "success", "result": comment_list}, ensure_ascii=False)
 
@@ -1153,15 +1217,35 @@ def carcommentcom():
         for novel_comment in novel_comment[::-1]:
             # 获取这条评论的评论数量
             count = NovelComment.query.filter_by(novelId=bookId, commentId=novel_comment.id).all()
-            comment_dict = {
-                'id': novel_comment.id,
-                'comment': novel_comment.comment,
-                'username': novel_comment.username,
-                'addtime': str(novel_comment.addtime),
-                'icon': '%s/static/images/icon/%s' % (host, novel_comment.icon),
-                'praise': novel_comment.praise,
-                'count': len(count)
-            }
+            # 判断用户userId是否是游客
+            userId = novel_comment.userId
+            if userId != 0:
+                # 通过userId关联用户名，用户头像
+                u = User.query.get(userId)
+                username = u.username
+                icon = u.icon
+                comment_dict = {
+                    'id': novel_comment.id,
+                    'comment': novel_comment.comment,
+                    'username': username,
+                    'addtime': str(novel_comment.addtime),
+                    'icon': '%s/static/images/icon/%s' % (host, icon),
+                    'praise': novel_comment.praise,
+                    'count': len(count),
+                    'star': novel_comment.star
+                }
+            else:
+                comment_dict = {
+                    'id': novel_comment.id,
+                    'comment': novel_comment.comment,
+                    'username': novel_comment.username,
+                    'addtime': str(novel_comment.addtime),
+                    'icon': '%s/static/images/icon/%s' % (host, novel_comment.icon),
+                    'praise': novel_comment.praise,
+                    'count': len(count),
+                    'star': novel_comment.star
+                }
+
             comment_list.append(comment_dict)
     else:
         return json.dumps({"retCode": 405, "msg": "评论不存在", "result": []}, ensure_ascii=False)
@@ -1461,30 +1545,43 @@ def cargetcollects():
         # 根据bookId获取小说详情
         novel_list = []
         for collect in book_collect:
-            if collect.type == 1:
-                novel = Novels.query.get(collect.bookId)
-            else:
-                novel = Cartoon.query.get(collect.bookId)
             is_read = collect.isread
             read_progress = collect.read_progress
             if collect.type == 1:
+                novel = Novels.query.get(collect.bookId)
+                # 根据分类id获取分类
+                novel_type = NovelType.query.get(novel.label)
                 # 根据作者id获取作者
                 authorId = novel.authorId
                 author = Author.query.get(authorId)
                 author = author.name
                 cover = novel.cover
+                novel_list.append({
+                    "id": novel.id,
+                    "name": novel.name,
+                    "cover": cover,
+                    "author": author,
+                    "isread": is_read,
+                    "summary": novel.summary,
+                    "label": novel_type.type,
+                    "countchapter": novel.chaptercount,
+                    "read_progress": read_progress,
+                    "type": collect.type
+                })
             else:
-                author = novel.author
-                cover = '%s/static/cartoon/%s/%s' % (host, novel.id, novel.cover)
-            novel_list.append({
-                "id": novel.id,
-                "name": novel.name,
-                "cover": cover,
-                "author": author,
-                "isread": is_read,
-                "read_progress": read_progress,
-                "type": collect.type
-            })
+                novel = Cartoon.query.get(collect.bookId)
+                if novel:
+                    author = novel.author
+                    cover = '%s/static/cartoon/%s/%s' % (host, novel.id, novel.cover)
+                    novel_list.append({
+                        "id": novel.id,
+                        "name": novel.name,
+                        "cover": cover,
+                        "author": author,
+                        "isread": is_read,
+                        "read_progress": read_progress,
+                        "type": collect.type
+                    })
         return json.dumps({"retCode": 200, "msg": "success", "result": {"data": novel_list, "read_time": read_time}}, ensure_ascii=False)
     return json.dumps({"retCode": 401, "msg": "认证失败", "result": {}}, ensure_ascii=False)
 
@@ -1558,6 +1655,315 @@ def iscollect():
             return json.dumps({"retCode": 200, "msg": "", "result": 1}, ensure_ascii=False)
         return json.dumps({"retCode": 200, "msg": "", "result": 0}, ensure_ascii=False)
     return json.dumps({"retCode": 400, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+
+
+# 小说记录用户阅读记录
+@bp.route('/reading', methods=['POST'])
+def reading():
+    token = request.form.get('analysis')
+    user = User.query.filter_by(token=token).first()
+    if user:
+        bookId = request.form.get('novelId')
+        if not bookId or not bookId.isdigit():
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        chapterId = request.form.get('chapter')
+        if not chapterId or not chapterId.isdigit() or chapterId == '0':
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        place = request.form.get('place')
+        if not place or not place.isdigit():
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        # 判断是否更新该用户该书籍
+        nr = NovelReadingRecord.query.filter_by(uid=user.id, bookId=bookId).first()
+        if nr:
+            # 更新
+            nr.chapterId = chapterId
+            nr.place = place
+        else:
+            nr = NovelReadingRecord(uid=user.id, bookId=bookId, chapterId=chapterId, place=place)
+        db.session.add(nr)
+        db.session.commit()
+        return json.dumps({"retCode": 200, "msg": "success", "result": {}}, ensure_ascii=False)
+    return json.dumps({"retCode": 400, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+
+# 小说获取用户当前书籍的阅读记录
+@bp.route('/getreading')
+def getreading():
+    token = request.args.get('analysis')
+    user = User.query.filter_by(token=token).first()
+    if user:
+        bookId = request.args.get('novelId')
+        if not bookId or not bookId.isdigit():
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        nr = NovelReadingRecord.query.filter_by(uid=user.id, bookId=bookId).first()
+        if not nr:
+            # 返回该本书的第一章
+            chapter = Chapters.query.filter_by(novelId=bookId).order_by(Chapters.chapterId).first()
+            # chapter = Chapters.query.filter_by(novelId=bookId, chapterId=1).first()
+            if not chapter:
+                return json.dumps({"retCode": 404, "msg": "参数错误2", "result": {}}, ensure_ascii=False)
+            content = Contents.query.filter_by(novelId=bookId, chapterId=chapter.id).first()
+            if content:
+                content_detail = {
+                    'title': content.title,
+                    "content": content.content,
+                    "state": content.state,
+                    "created": content.created,
+                    "updated": content.updated,
+                    "words": content.words,
+                    "chapterId": content.chapterId
+                }
+                return json.dumps({"retCode": 200, "msg": "success", "result": content_detail, "place": 0, "num": 1},
+                                  ensure_ascii=False)
+            else:
+                return json.dumps({"retCode": 404, "msg": "参数错误3", "result": {}}, ensure_ascii=False)
+
+        # 判断用户收藏是否存在
+        chapter = Chapters.query.filter_by(novelId=bookId, chapterId=nr.chapterId).first()
+        if not chapter:
+            return json.dumps({"retCode": 404, "msg": "参数错误4", "result": {}}, ensure_ascii=False)
+        content = Contents.query.filter_by(novelId=bookId, chapterId=chapter.id).first()
+        if content:
+            content_detail = {
+                'title': content.title,
+                "content": content.content,
+                "state": content.state,
+                "created": content.created,
+                "updated": content.updated,
+                "words": content.words,
+                "chapterId": content.chapterId
+            }
+            place = nr.place
+            num = nr.chapterId
+            return json.dumps({"retCode": 200, "msg": "success", "result": content_detail, "place": place, "num": num},
+                              ensure_ascii=False)
+        else:
+            # 返回该本书的第一章
+            chapter = Chapters.query.filter_by(novelId=bookId).order_by(Chapters.chapterId).first()
+            if not chapter:
+                return json.dumps({"retCode": 404, "msg": "参数错误5", "result": {}}, ensure_ascii=False)
+            content = Contents.query.filter_by(novelId=bookId, chapterId=chapter.id).first()
+            if content:
+                content_detail = {
+                    'title': content.title,
+                    "content": content.content,
+                    "state": content.state,
+                    "created": content.created,
+                    "updated": content.updated,
+                    "words": content.words,
+                    "chapterId": content.chapterId
+                }
+                return json.dumps({"retCode": 200, "msg": "success", "result": content_detail, "place": 0, "num": 1},
+                                  ensure_ascii=False)
+            else:
+                return json.dumps({"retCode": 404, "msg": "参数错误6", "result": {}}, ensure_ascii=False)
+    return json.dumps({"retCode": 400, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+
+# 漫画记录用户阅读记录
+@bp.route('/readingc', methods=['POST'])
+def readingc():
+    token = request.form.get('analysis')
+    user = User.query.filter_by(token=token).first()
+    if user:
+        bookId = request.form.get('cartoonId')
+        if not bookId or not bookId.isdigit():
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        chapterId = request.form.get('chapter')
+        if not chapterId or not chapterId.isdigit():
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        place = request.form.get('place')
+        if not place or not place.isdigit():
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        # 判断是否更新该用户该书籍
+        nr = CartoonReadingRecord.query.filter_by(uid=user.id, cartoonId=bookId).first()
+        if nr:
+            # 更新
+            nr.chapterId = chapterId
+            nr.place = place
+        else:
+            nr = CartoonReadingRecord(uid=user.id, cartoonId=bookId, chapterId=chapterId, place=place)
+        db.session.add(nr)
+        db.session.commit()
+        return json.dumps({"retCode": 200, "msg": "success", "result": {}}, ensure_ascii=False)
+    return json.dumps({"retCode": 400, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+
+# 漫画获取用户阅读记录
+@bp.route('/getreadingc')
+def getreadingc():
+    host = 'http://%s' % request.host
+    token = request.args.get('analysis')
+    user = User.query.filter_by(token=token).first()
+    if user:
+        bookId = request.args.get('cartoonId')
+        if not bookId or not bookId.isdigit():
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        nr = CartoonReadingRecord.query.filter_by(uid=user.id, cartoonId=bookId).first()
+        if not nr:
+            # 返回该本漫画的第一章
+            cartoon_chapter = CartoonChapter.query.filter_by(cid=bookId, chapterId=1).first()
+            image_list = []
+            chapter_name = ''
+            if cartoon_chapter:
+                base_dir = os.getcwd()
+                startnum = cartoon_chapter.startnum
+                endnum = cartoon_chapter.endnum
+                chapter_name = cartoon_chapter.name
+                # {'image': 'http://ljsb.top:5000/static/cartoon/24/1/1.jpg', 'h': 300, 'w':200}
+                for x in range(startnum, endnum + 1):
+                    img_path = '/static/cartoon/%s/%s/%s.jpg' % (bookId, '1', x)
+                    img_dir = '%s%s' % (base_dir, img_path)
+                    # 获取图片的宽高
+                    # 判断这个文件是否存在
+                    if os.path.exists(img_dir):
+                        im = Image.open(img_dir)
+                        w = im.width  # 图片的宽
+                        h = im.height
+                        image_list.append({
+                            'image': '%s%s' % (host, img_path), 'h': h, 'w': w, 'index': x
+                        })
+            return json.dumps({"retCode": 200, "msg": "success", "result": image_list, "place": 0, "num": 1,
+                                   "chaptername": chapter_name},
+                                  ensure_ascii=False)
+
+
+        # 判断章节是否存在
+        cartoon_chapter = CartoonChapter.query.filter_by(cid=bookId, chapterId=nr.chapterId).first()
+        if cartoon_chapter:
+            image_list = []
+            chapter_name = ''
+            if cartoon_chapter:
+                base_dir = os.getcwd()
+                startnum = cartoon_chapter.startnum
+                endnum = cartoon_chapter.endnum
+                chapter_name = cartoon_chapter.name
+                # {'image': 'http://ljsb.top:5000/static/cartoon/24/1/1.jpg', 'h': 300, 'w':200}
+                for x in range(startnum, endnum + 1):
+                    img_path = '/static/cartoon/%s/%s/%s.jpg' % (bookId, '1', x)
+                    img_dir = '%s%s' % (base_dir, img_path)
+                    # 获取图片的宽高
+                    # 判断这个文件是否存在
+                    if os.path.exists(img_dir):
+                        im = Image.open(img_dir)
+                        w = im.width  # 图片的宽
+                        h = im.height
+                        image_list.append({
+                            'image': '%s%s' % (host, img_path), 'h': h, 'w': w, 'index': x
+                        })
+            return json.dumps({"retCode": 200, "msg": "success", "result": image_list, "place": nr.place, "num": nr.chapterId,
+                               "chaptername": chapter_name},
+                              ensure_ascii=False)
+        else:
+            # 返回该本漫画的第一章
+            cartoon_chapter = CartoonChapter.query.filter_by(cid=bookId, chapterId=1).first()
+            image_list = []
+            chapter_name = ''
+            if cartoon_chapter:
+                base_dir = os.getcwd()
+                startnum = cartoon_chapter.startnum
+                endnum = cartoon_chapter.endnum
+                chapter_name = cartoon_chapter.name
+                # {'image': 'http://ljsb.top:5000/static/cartoon/24/1/1.jpg', 'h': 300, 'w':200}
+                for x in range(startnum, endnum + 1):
+                    img_path = '/static/cartoon/%s/%s/%s.jpg' % (bookId, '1', x)
+                    img_dir = '%s%s' % (base_dir, img_path)
+                    # 获取图片的宽高
+                    # 判断这个文件是否存在
+                    if os.path.exists(img_dir):
+                        im = Image.open(img_dir)
+                        w = im.width  # 图片的宽
+                        h = im.height
+                        image_list.append({
+                            'image': '%s%s' % (host, img_path), 'h': h, 'w': w, 'index': x
+                        })
+            return json.dumps({"retCode": 200, "msg": "success", "result": image_list, "place": 0, "num": 1,
+                               "chaptername": chapter_name},
+                              ensure_ascii=False)
+    return json.dumps({"retCode": 400, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+
+
+# 批量判断评论是否是自己的
+@bp.route('/commentis', methods=['POST'])
+def commentis():
+    token = request.form.get('analysis')
+    user = User.query.filter_by(token=token).first()
+    type = request.form.get('type')  # 0小说 1漫画
+    if user:
+        commentIds = request.form.get('commentIds')
+        if not commentIds:
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        try:
+            commentIds_list = commentIds.split(',')
+        except:
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        result = []
+        if type == '0':
+            for commentId in commentIds_list:
+                if commentId and commentId.isdigit():
+                    nc = NovelComment.query.filter_by(id=commentId, userId=user.id).first()
+                    if nc:
+                        result.append(1)
+                    else:
+                        result.append(0)
+        elif type == '1':
+            for commentId in commentIds_list:
+                if commentId and commentId.isdigit():
+                    nc = CartoonComment.query.filter_by(id=commentId, userId=user.id).first()
+                    if nc:
+                        result.append(1)
+                    else:
+                        result.append(0)
+        else:
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        return json.dumps({"retCode": 200, "msg": "success", "result": {'data': result}}, ensure_ascii=False)
+    return json.dumps({"retCode": 400, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+
+# 删除评论
+@bp.route('/delcomment', methods=['POST'])
+def delcomment():
+    token = request.form.get('analysis')
+    user = User.query.filter_by(token=token).first()
+    type = request.form.get('type')  # 0小说 1漫画
+    if user:
+        commentId = request.form.get('commentId')
+        if not commentId:
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        if type == '0':
+            if commentId and commentId.isdigit():
+                nc = NovelComment.query.filter_by(id=commentId, userId=user.id).first()
+                if nc:
+                    db.session.delete(nc)
+                    db.session.commit()
+                else:
+                    return json.dumps({"retCode": 400, "msg": "评论不存在", "result": {}}, ensure_ascii=False)
+        elif type == '1':
+            if commentId and commentId.isdigit():
+                nc = CartoonComment.query.filter_by(id=commentId, userId=user.id).first()
+                if nc:
+                    db.session.delete(nc)
+                    db.session.commit()
+                else:
+                    return json.dumps({"retCode": 400, "msg": "评论不存在", "result": {}}, ensure_ascii=False)
+        else:
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        return json.dumps({"retCode": 200, "msg": "success", "result": {}}, ensure_ascii=False)
+    return json.dumps({"retCode": 400, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+
+# 举报评论
+@bp.route('/reportcom', methods=['POST'])
+def reportcom():
+    type = request.form.get('type')  # 0小说 1漫画
+    if type == '1' or type == '0':
+        commentId = request.form.get('commentId')
+        cause = request.form.get('cause')
+        if not commentId or not commentId.isdigit():
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        cr = CommentReport(type=type, commentId=commentId, cause=cause)
+        db.session.add(cr)
+        db.session.commit()
+        return json.dumps({"retCode": 200, "msg": "success", "result": {}}, ensure_ascii=False)
+    else:
+        return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+
+
 # -----------------------------------用户接口-end-------------------------------
 
 

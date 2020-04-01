@@ -37,6 +37,7 @@ def sendcode(mobile):
 		except ValueError:
 			jsonData = None
 	return None
+
 # 验证码校验
 def checkcode(mobile, code):
 	body = ('mobile=%s&code=%s' % (mobile, code)).encode("utf-8")
@@ -58,4 +59,5 @@ def checkcode(mobile, code):
 		except ValueError:
 			jsonData = None
 	return None
+
 

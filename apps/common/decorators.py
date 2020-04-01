@@ -70,13 +70,18 @@ def qb5_1h_data():
     cursor.close()
     conn.close()
 
-# 每周一凌晨清空阅读分钟数
+# 每周一凌晨清空阅读分钟数 更新漫画上周总数
 def ever_week_monday():
     conn = pymysql.connect(host='localhost', user='%s' % MySQLUser, passwd='%s' % MySQLPassword, db='novels',
                            charset='utf8')
     cursor = conn.cursor()
     sql = "update user set read_time=0;"
     cursor.execute(sql)
+    sql2 = "select count(id) from cartoonid_typeid;"
+    cursor.execute(sql2)
+    count = cursor.fetchone()[0]
+    sql3 = "update cartoon_count set count='%s' where id=1;"
+    cursor.execute(sql3 % count)
     conn.commit()
     cursor.close()
     conn.close()

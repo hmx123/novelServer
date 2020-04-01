@@ -1137,5 +1137,190 @@
 
 ---------------------------用户相关-end------------------------
 
+添加用户小说阅读记录
+	POST http://www.ljsb.top:5000/common/reading
+	data-form
+		analysis   //用户token 32d522caur7hz7ctosogyts1s50r1q7t
+		novelId    //小说id    10
+		chapter    //小说章节  3
+		place      //当前章节阅读页码 4
+	return
+		{"retCode": 200, "msg": "success", "result": {}}
+
+获取用户小说阅读记录
+	GET http://www.ljsb.top:5000/common/getreading?analysis=32d522caur7hz7ctosogyts1s50r1q7t&novelId=10
+	args  
+		analysis   //用户token
+		novelId    //小说id
+	return
+		{
+		    "retCode": 200,
+		    "msg": "success",
+		    "result": {
+		        "title": "第一章 你到底是谁",
+		        "content": "“你到底是谁？”\t\r“不知道。”\t\r“你从哪里来？”\t\r“不知道。”\t\r“你真的很有钱？”\t\r“我说过一万遍了，在瑞士银行。”\t\r“有多少？”\t\r“一组长长的数字，具体我也不清楚。”\t\r“喂，拜托，我真的没钱再养你了，你去取点来好不好呀。”\t\r“户口被冻结了。”\t\r“你……”\t\r唐宇气急败坏的看着正在啃鸡腿的老头子，很是无语。现在他手头紧的很，老头子说他很有钱，又不能提出来用，这又让他很郁闷。不过唐宇又不能赶他走，因为他教会了唐宇一身的本领，唐宇只要负责供他吃喝玩乐。\t\r看着老头子吃的不亦乐乎，一只百味鸡，现在只剩下了几根骨头，连唐宇自己都没舍得吃呀。\t\r“咯！”老头子站了起来，拍了拍微凸的肚皮，打了个饱嗝，“这鸡不错，下次带两只来。”\t\r“我带你妹！”唐宇禁不住的骂了一声，他一天的工钱才五十，买下一只百味鸡也剩不了几块钱，还要一次性带两只！\t\r老头子听到唐宇的抱怨，很是鄙夷的斜瞥了一眼：“臭小子，我这一年半来教你的功夫够你受用一辈子，怎么。吃你几只鸡就不行了？我还没有让你找鸡给我玩呢！能值几个钱呀，整天抱怨来抱怨去的。你难道没有听说过，钱能解决的问题都不是什么大问题？”\t\r“关键是我没钱呀！”唐宇摆摆双手。\t\r“额……”老头子也一阵默然，然后抬起那种皱纹满布的老脸：“我在瑞士银行的钱不会一直冻结的，等解冻了，你就成为世界首富了。”\t\r“去死吧，谁信呀！不跟你废话了，我还得去工作呢。”唐宇愤恨的瞪了一眼老头，转身离去。\t\r“等等，我的片子呢。”老头子突然喊了一声。\t\r“擦！”唐宇从口袋里掏出两张片子扔给了老头子。\t\r“……”唐宇无语，离开了地下室。\t\r这是一间居民楼的地下室，是唐宇租下来专门给老头子住的。\t\r关于老头子，唐宇只能说悲喜交加。当初自己被十几个痞子围着打的时候，是他出手救了自己，然后说要教自己武功，但条件是必须养他。\t\r时光荏苒，一年半的光阴飞逝，一年之中，唐宇也被老头子训练成了一个高手，老头子对他的评价是：武学天才，但尚不熟稔，因为不是从小练起，速度和反应有些迟钝，遇到真正的高手，难以招架。",
+		        "state": 0,
+		        "created": 1489253303,
+		        "updated": 1489253303,
+		        "words": 867,
+		        "chapterId": 45506
+		    },
+		    "place": 1,
+		    "num": 1
+		}
+
+		参数说明
+			place  当前章节第几页
+			num    章节
+ 
+
+添加用户漫画阅读记录
+	POST http://www.ljsb.top:5000/common/readingc
+	data-form
+		analysis   //用户token 32d522caur7hz7ctosogyts1s50r1q7t
+		cartoonId    //漫画id    10
+		chapter    //漫画章节  3
+		place      //当前章节阅读页码 4
+	return
+		{"retCode": 200, "msg": "success", "result": {}}
+
+获取用户漫画阅读记录
+	GET http://www.ljsb.top:5000/common/getreadingc?analysis=32d522caur7hz7ctosogyts1s50r1q7t&cartoonId=10
+	args  
+		analysis   //用户token
+		cartoonId    //漫画id
+	return
+		{
+		    "retCode": 200,
+		    "msg": "success",
+		    "result": [
+		        {
+		            "image": "http://www.ljsb.top:5000/static/cartoon/237/1/1.jpg",
+		            "h": 1453,
+		            "w": 800,
+		            "index": 1
+		        },
+		        {
+		            "image": "http://www.ljsb.top:5000/static/cartoon/237/1/2.jpg",
+		            "h": 2041,
+		            "w": 800,
+		            "index": 2
+		        },
+		        {
+		            "image": "http://www.ljsb.top:5000/static/cartoon/237/1/3.jpg",
+		            "h": 1512,
+		            "w": 800,
+		            "index": 3
+		        },
+		        {
+		            "image": "http://www.ljsb.top:5000/static/cartoon/237/1/4.jpg",
+		            "h": 1223,
+		            "w": 800,
+		            "index": 4
+		        },
+		        {
+		            "image": "http://www.ljsb.top:5000/static/cartoon/237/1/5.jpg",
+		            "h": 1863,
+		            "w": 800,
+		            "index": 5
+		        },
+		        {
+		            "image": "http://www.ljsb.top:5000/static/cartoon/237/1/6.jpg",
+		            "h": 1676,
+		            "w": 800,
+		            "index": 6
+		        },
+		        {
+		            "image": "http://www.ljsb.top:5000/static/cartoon/237/1/7.jpg",
+		            "h": 1444,
+		            "w": 800,
+		            "index": 7
+		        }
+		    ],
+		    "place": 4,
+		    "num": 3,
+		    "chaptername": "第0话3"
+		}
+
+		参数说明
+			place  当前章节第几页
+			num    章节
+			chaptername  章节名称
+
+
+批量判断评论是否是自己的
+	POST http://www.ljsb.top:5000/common/commentis
+	form-data
+		analysis    //用户标识 32d522caur7hz7ctosogyts1s50r1q7t
+		type        //0小说 1漫画
+		commentIds  //11,12,56 以英文逗号分隔评论id
+	return
+		成功
+			{"retCode": 200, "msg": "success", "result": {"data": [1, 1, 0]}}
+			//按照请求的顺序返回  1是自己的评论 0不是
+		失败
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+			{"retCode": 400, "msg": "认证失败", "result": {}}
+
+删除评论
+	POST http://www.ljsb.top:5000/common/delcomment
+	form-data
+		analysis     //用户标识 32d522caur7hz7ctosogyts1s50r1q7t
+		type         //0小说 1漫画
+		commentId    //评论id
+	return
+		成功
+			{"retCode": 200, "msg": "success", "result": {}}
+		失败
+			{"retCode": 400, "msg": "认证失败", "result": {}}
+			{"retCode": 400, "msg": "评论不存在", "result": {}}
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+
+举报评论
+	POST http://www.ljsb.top:5000/common/reportcom
+	form-data
+		type        // 0小说 1漫画
+		commentId   //评论id
+		cause       //原因 例如 欺诈广告
+	return
+		{"retCode": 200, "msg": "success", "result": {}}
+		{"retCode": 404, "msg": "参数错误", "result": {}}
+
+发现页漫画分类
+	GET http://www.ljsb.top:5000/front/findcartype
+	return
+		{
+		    "retCode": 200,
+		    "msg": "success",
+		    "result": {
+		        "data": [
+		            {
+		                "id": 1,
+		                "type": "新作",
+		                "img": "http://www.ljsb.top:5000/static/images/cartoon/cheng/xinzuo.jpg",
+		                "count": 83
+		            },
+		            {
+		                "id": 2,
+		                "type": "热血",
+		                "img": "http://www.ljsb.top:5000/static/images/cartoon/cheng/rexue.jpg",
+		                "count": 397
+		            },
+		            {
+		                "id": 3,
+		                "type": "恋爱",
+		                "img": "http://www.ljsb.top:5000/static/images/cartoon/cheng/lianai.jpg",
+		                "count": 239
+		            }
+		        ],
+		        "inall": 2760,
+		        "week": 20
+		    }
+		}
+
+		//参数说明
+			inall  总共漫画册数
+			week   本周新增漫画册数
+			count  分类漫画册数
 
 

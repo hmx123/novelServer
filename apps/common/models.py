@@ -214,6 +214,8 @@ class NovelComment(db.Model):
     praise = db.Column(db.Integer, default=0)
     star = db.Column(db.Integer, default=5)
 
+
+
 class Feedback(db.Model):
     __tablename__ = 'feedback'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -314,5 +316,39 @@ class UserPraise(db.Model):
     uId = db.Column(db.Integer)
     commentId = db.Column(db.Integer)
     type = db.Column(db.Integer)
+
+class NovelReadingRecord(db.Model):
+    __tablename__ = 'novel_reading_record'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    uid = db.Column(db.Integer)
+    bookId = db.Column(db.Integer)
+    chapterId = db.Column(db.Integer)
+    place = db.Column(db.Integer)
+
+
+
+class CartoonReadingRecord(db.Model):
+    __tablename__ = 'cartoon_reading_record'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    uid = db.Column(db.Integer)
+    cartoonId = db.Column(db.Integer)
+    chapterId = db.Column(db.Integer)
+    place = db.Column(db.Integer)
+
+class CommentReport(db.Model):
+    __tablename__ = 'comment_report'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    type = db.Column(db.Integer)
+    commentId = db.Column(db.Integer)
+    cause = db.Column(db.String(50))
+    addtime = db.Column(db.DateTime, default=datetime.now)
+
+class CartoonCount(db.Model):
+    __tablename__ = 'cartoon_count'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    count = db.Column(db.Integer)
+
+
+
 
 # -------------第三版本新增漫画end---------------
