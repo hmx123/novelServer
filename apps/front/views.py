@@ -7,10 +7,11 @@ import time
 from PIL import Image
 from elasticsearch import Elasticsearch
 from flask import Blueprint, request
+from sqlalchemy import or_, func
 
 from apps.common.models import NovelType, Novels, Chapters, Contents, Author, Monthly, MonthlyNovel, AppVersions, \
     NovelBanner, NovelGroup, GroupidNovelid, ComposePage, Cartoon, CartoonType, CartoonChapter, CartoonidTypeid, \
-    CartoonMonthly, CartoonMonthlyNovel, BookcityBanner, CartoonCount
+    CartoonMonthly, CartoonMonthlyNovel, BookcityBanner, CartoonCount, BookRecommend
 from apps.front.decorators import search_counter, get_top_n, novelOb_novelList, cartoonOb_cartoonList, \
     cartoon_search_counter, cartoon_get_top_n
 
@@ -70,24 +71,27 @@ def classify():
         author = Author.query.get(authorId)
         # 根据小说id获取章节总数
         countchapter = novel.chaptercount
-        novel_list.append(
-            {
-                "id": novel.id,
-                "name": novel.name,
-                "cover": novel.cover,
-                "summary": novel.summary,
-                "label": novel_type.type,
-                "state": novel.state,
-                "enabled": novel.enabled,
-                "words": novel.words,
-                "created": novel.created,
-                "updated": novel.updated,
-                "authorId": authorId,
-                "author": author.name,
-                "extras": "",
-                "countchapter": countchapter
-             }
-        )
+        chapter = Chapters.query.filter_by(novelId=novel.id).order_by(Chapters.chapterId).first()
+        if chapter:
+            novel_list.append(
+                {
+                    "id": novel.id,
+                    "name": novel.name,
+                    "cover": novel.cover,
+                    "summary": novel.summary,
+                    "label": novel_type.type,
+                    "state": novel.state,
+                    "enabled": novel.enabled,
+                    "words": novel.words,
+                    "created": novel.created,
+                    "updated": novel.updated,
+                    "authorId": authorId,
+                    "author": author.name,
+                    "extras": "",
+                    "countchapter": countchapter,
+                    "firstnum": chapter.chapterId
+                 }
+            )
     return json.dumps({"retCode": 200, "msg": "success", "result": novel_list, "page": page, "limit": limit}, ensure_ascii=False)
 
 @bp.route('/author')
@@ -216,22 +220,25 @@ def search():
                 author = Author.query.get(authorId)
                 # 根据小说id获取章节总数
                 countchapter = novel.chaptercount
-                novel_list.append({
-                    "id": novel.id,
-                    "name": novel.name,
-                    "cover": novel.cover,
-                    "summary": novel.summary,
-                    "label": novel_type.type,
-                    "state": novel.state,
-                    "enabled": novel.enabled,
-                    "words": novel.words,
-                    "created": novel.created,
-                    "updated": novel.updated,
-                    "authorId": authorId,
-                    "author": author.name,
-                    "extras": "",
-                    "countchapter": countchapter
-                })
+                chapter = Chapters.query.filter_by(novelId=novel.id).order_by(Chapters.chapterId).first()
+                if chapter:
+                    novel_list.append({
+                        "id": novel.id,
+                        "name": novel.name,
+                        "cover": novel.cover,
+                        "summary": novel.summary,
+                        "label": novel_type.type,
+                        "state": novel.state,
+                        "enabled": novel.enabled,
+                        "words": novel.words,
+                        "created": novel.created,
+                        "updated": novel.updated,
+                        "authorId": authorId,
+                        "author": author.name,
+                        "extras": "",
+                        "countchapter": countchapter,
+                        "firstnum": chapter.chapterId
+                    })
         return json.dumps({"retCode": 200, "msg": "success", "result": novel_list, "page": page, "limit": limit}, ensure_ascii=False)
     else:
         return json.dumps({"retCode": 400, "msg": "args error", "result": []}, ensure_ascii=False)
@@ -288,6 +295,7 @@ def book():
         author = Author.query.get(authorId)
         # 根据小说id获取章节总数
         countchapter = novel.chaptercount
+        chapter = Chapters.query.filter_by(novelId=novel.id).order_by(Chapters.chapterId).first()
         novel_dict = {
             "id": novel.id,
             "name": novel.name,
@@ -302,7 +310,8 @@ def book():
             "authorId": authorId,
             "author": author.name,
             "extras": "",
-            "countchapter": countchapter
+            "countchapter": countchapter,
+            "firstnum": chapter.chapterId
         }
         return json.dumps({"retCode": 200, "msg": "success", "result": novel_dict}, ensure_ascii=False)
     return json.dumps({"retCode": 400, "msg": "小说不存在", "result": {}}, ensure_ascii=False)
@@ -1766,11 +1775,13 @@ def carchapter():
     cartoon_chap_list = CartoonChapter.query.filter_by(cid=cartoonId).order_by(CartoonChapter.chapterId).all()
     chapter_list = []
     for cartoon_chap in cartoon_chap_list:
-        chapter_list.append({
-             'cartoonId': cartoon_chap.cid,
-             'name': cartoon_chap.name,
-             'chapterId': cartoon_chap.chapterId
-         })
+        # 判断漫画章节是否有内容
+        if cartoon_chap.endnum > 1:
+            chapter_list.append({
+                 'cartoonId': cartoon_chap.cid,
+                 'name': cartoon_chap.name,
+                 'chapterId': cartoon_chap.chapterId
+             })
     return json.dumps({"retCode": 200, "msg": "success", "result": chapter_list}, ensure_ascii=False)
 
 # 根据漫画id章节id获取漫画详情
@@ -2312,6 +2323,7 @@ def cartoonnew():
 def findcartype():
     host = 'http://%s' % request.host
     types = CartoonType.query.filter_by(version=2).all()
+    types_up = CartoonType.query.filter_by(version=3).all()
     type_list = []
     cts = CartoonidTypeid.query.count()
     lastcount = CartoonCount.query.get(1).count
@@ -2324,7 +2336,225 @@ def findcartype():
             'img': '%s/static/images/cartoon/%s/%s' % (host, target, type.img),
             'count': count
         })
-    return json.dumps({"retCode": 200, "msg": "success", "result": {'data': type_list, 'inall': cts, 'week': cts-lastcount}}, ensure_ascii=False)
+    type_list2 = []
+    for type in types_up:
+        if type.type == '日漫':
+            typeid = type.id
+        else:
+            typeid = type.id-18
+        type_list2.append({
+            'id': typeid,
+            'type': type.type,
+            'img': '%s/static/images/cartoon/%s/%s' % (host, target, type.img)
+        })
+    return json.dumps({"retCode": 200, "msg": "success", "result": {'data': type_list, 'data2': type_list2,
+                                                                    'inall': cts, 'week': cts-lastcount}}, ensure_ascii=False)
+
+# 书城小说男生女生分类
+@bp.route('/chengtype')
+def chengtype():
+    host = 'http://%s' % request.host
+    gender = request.args.get('gender')
+    if gender == '1':
+        gender = 1
+        gg = 'boy'
+    elif gender == '0':
+        gender = 0
+        gg = 'girl'
+    else:
+        return json.dumps({"retCode": 400, "msg": "args error", "result": []}, ensure_ascii=False)
+
+    novel_type_list = NovelType.query.filter_by(version=4, gender=gender).all()
+    type_list = []
+    for novel_type in novel_type_list:
+        if not novel_type.cover:
+            cover_str = ""
+        else:
+            cover_str = novel_type.cover
+            cover_str = '/static/images/%s/cheng/%s' % (gg, cover_str)
+        cover = host + cover_str
+        if novel_type.id == 72:
+            type_list.append(
+                # {'id': 'wbjxb', 'type': novel_type.type, 'cover': cover, 'channelId': gender}
+                {'id': 47, 'type': novel_type.type, 'cover': cover, 'channelId': gender, 'count': novel_type.type_count}
+            )
+        elif novel_type.id == 71:
+            type_list.append(
+                # {'id': 'wbjxg', 'type': novel_type.type, 'cover': cover, 'channelId': gender}
+                {'id': 48, 'type': novel_type.type, 'cover': cover, 'channelId': gender, 'count': novel_type.type_count}
+            )
+        else:
+            if novel_type.id == 61:
+                type_id = 14
+            elif novel_type.id == 70:
+                type_id = 18
+            else:
+                type_id = novel_type.id-46
+            type_list.append(
+                {'id': type_id, 'type': novel_type.type, 'cover': cover, 'channelId': gender, 'count': novel_type.type_count}
+            )
+    return json.dumps({"retCode": 200, "msg": "success", "result": type_list}, ensure_ascii=False)
+
+# 书城漫画分类
+@bp.route('/chengcartype')
+def chengcartype():
+    host = 'http://%s' % request.host
+    types = CartoonType.query.filter(or_(CartoonType.version==2, CartoonType.version==3)).all()
+    # types_up = CartoonType.query.filter_by(version=3).all()
+    type_list = []
+    target = 'cheng'
+    type_list2 = []
+    for type in types:
+        count = CartoonidTypeid.query.filter_by(typeId=type.id-18).count()
+        if type.type == '日漫' or type.type == '穿越':
+            if type.type == '日漫':
+                typeid = type.id
+            else:
+                typeid = type.id - 18
+            type_list2.append(
+                {
+                    'id': typeid,
+                    'type': type.type,
+                    'img': '%s/static/images/cartoon/%s/%s' % (host, target, type.img)
+                }
+            )
+        else:
+            if type.type == '新作' or type.type =='搞笑':
+                img = '%s/static/images/cartoon/%s/%s.jpg' % (host, target, type.img.split('.')[0])
+            else:
+                img = '%s/static/images/cartoon/%s/%s' % (host, target, type.img)
+            type_list.append({
+                'id': type.id-18,
+                'type': type.type,
+                'img': img,
+                'count': count
+            })
+
+    return json.dumps({"retCode": 200, "msg": "success", "result": {'data': type_list, 'data2': type_list2}}, ensure_ascii=False)
+
+# -----------------开屏页接口-start-------------------
+
+# 用户第一次选择分类推荐小说
+@bp.route('/recommendt')
+def recommendt():
+    # 5 2 | 4 2 | 3 3 | 2 5 | 1 10
+    types = request.args.get('types')
+    booktypes = request.args.get('booktypes')
+    try:
+        type_list = types.split(',')
+        booktype_list = booktypes.split(',')
+    except:
+        return json.dumps({"retCode": 400, "msg": "args error1", "result": []}, ensure_ascii=False)
+    if len(type_list) == len(booktype_list):
+        results = []
+        length = len(type_list)
+        if length == 5 or length == 4:
+            type_num = 2
+        elif length == 3:
+            type_num = 3
+        elif length == 2:
+            type_num = 5
+        elif length == 1:
+            type_num = 10
+        else:
+            return json.dumps({"retCode": 400, "msg": "args error2", "result": []}, ensure_ascii=False)
+
+        for x in range(len(type_list)):
+            if type_list[x] == '1':
+                type = 1
+            elif type_list[x] == '2':
+                type = 2
+            else:
+                return json.dumps({"retCode": 400, "msg": "args error3", "result": []}, ensure_ascii=False)
+            booktype_set = {'3', '4', '9', '14', '37'}
+            if booktype_list[x] not in booktype_set:
+                return json.dumps({"retCode": 400, "msg": "args error4", "result": []}, ensure_ascii=False)
+            if type == 1:
+                recommends = BookRecommend.query.filter_by(noveltype=booktype_list[x], type=1).order_by(func.rand()).limit(type_num).all()
+                novel_list = []
+                for recommend in recommends:
+                    novel = Novels.query.get(recommend.bookId)
+                    if novel:
+                        novel_list.append(novel)
+                novels = novelOb_novelList(novel_list)
+                results += novels
+            else:
+                recommends = BookRecommend.query.filter_by(noveltype=booktype_list[x], type=2).order_by(
+                    func.rand()).limit(type_num).all()
+                for recommend in recommends:
+                    novel = Cartoon.query.get(recommend.bookId)
+                    if novel:
+                        cover = '%s/static/cartoon/%s/%s' % (host, novel.id, novel.cover)
+                        results.append({
+                            "id": novel.id,
+                            "cover": cover,
+                            "isread": 0,
+                            "read_progress": 0,
+                            "type": 2
+                        })
+        return json.dumps({"retCode": 200, "msg": "success", "result": results}, ensure_ascii=False)
+
+# 根据性别选择分类
+@bp.route('/noveltype')
+def noveltype():
+    type = request.args.get('type')
+    if type == '1':
+        results = [
+            {'id': 3, 'type': '都市'},
+            {'id': 21, 'type': '游戏'},
+            {'id': 5, 'type': '仙侠'},
+            {'id': 8, 'type': '科幻'},
+            {'id': 19, 'type': '武侠'},
+            {'id': 14, 'type': '二次元'},
+            {'id': 22, 'type': '体育'},
+            {'id': 12, 'type': '玄幻言情'},
+                   ]
+        return json.dumps({"retCode": 200, "msg": "success", "result": results}, ensure_ascii=False)
+    elif type == '0':
+        results = [
+            {'id': 10, 'type': '古代言情'},
+            {'id': 9, 'type': '现代言情'},
+            {'id': 11, 'type': '浪漫青春'},
+            {'id': 12, 'type': '玄幻言情'},
+            {'id': 23, 'type': '仙侠奇缘'},
+            {'id': 14, 'type': '二次元'},
+            {'id': 18, 'type': '轻小说'},
+            {'id': 8, 'type': '科幻'},
+        ]
+        return json.dumps({"retCode": 200, "msg": "success", "result": results}, ensure_ascii=False)
+    else:
+        return json.dumps({"retCode": 400, "msg": "args error", "result": []}, ensure_ascii=False)
+
+# 根据用户选择分类推荐小说
+@bp.route('/recommendf')
+def recommendf():
+    types = request.args.get('types')
+    try:
+        type_list = types.split(',')
+    except:
+        return json.dumps({"retCode": 400, "msg": "args error", "result": []}, ensure_ascii=False)
+    results = []
+    length = len(type_list)
+    if length == 5 or length == 4:
+        type_num = 2
+    elif length == 3:
+        type_num = 3
+    elif length == 2:
+        type_num = 5
+    elif length == 1:
+        type_num = 10
+    else:
+        return json.dumps({"retCode": 400, "msg": "args error2", "result": []}, ensure_ascii=False)
+
+    for type in type_list:
+        novels_list = Novels.query.filter_by(label=type).order_by(-Novels.id).limit(20).all()
+        novels_list_sample = random.sample(novels_list, type_num)
+        novels = novelOb_novelList(novels_list_sample)
+        results += novels
+    return json.dumps({"retCode": 200, "msg": "success", "result": results}, ensure_ascii=False)
+
+# -----------------开屏页接口-end---------------------
+
 
 # -------------------------------------------------第三版小说新增漫画接口end'-------------------------------------
 

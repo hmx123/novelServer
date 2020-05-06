@@ -32,14 +32,14 @@ JOBS = [
             'func': xbqg_1h_data,
             'args': '',
             'trigger': 'interval',
-            'hours': 1
+            'minutes': 30
         },
         {
             'id': 'qb5_1h_data',
             'func': qb5_1h_data,
             'args': '',
             'trigger': 'interval',
-            'hours': 1
+            'minutes': 21
         },
         {
             'id': 'ever_week_monday',

@@ -1,0 +1,61 @@
+搜索
+	GET http://www.ljsb.top:5000/front/search?keyword=小说
+根据小说id获取小说
+	GET http://www.ljsb.top:5000/front/book?bookId=14
+根据榜单id获取小说
+	GET http://www.ljsb.top:5000/front/monthnov?monthly=1
+获取用户收藏
+	GET http://www.ljsb.top:5000/common/getcollect?analysis=3aau288lm6ua4j4hsh03raspw58cdqg0
+根据用户性别推荐小说
+	GET  http://www.ljsb.top:5000/front/recommend?gender=1
+精选页面接口
+	GET http://www.ljsb.top:5000/front/handpick?type=today
+精选页面全部数据
+	GET http://www.ljsb.top:5000/front/handpickall
+精选页面样式+数据
+	GET http://ljsb.top:5000/front/handpickalls
+女生页面接口
+	GET http://www.ljsb.top:5000/front/girl?type=over
+女生页面全部数据
+	GET http://www.ljsb.top:5000/front/girlall
+
+女生页面全部样式+数据
+	GET http://www.ljsb.top:5000/front/girlalls
+男生页面接口
+	GET http://www.ljsb.top:5000/front/boy?type=over
+男生页面全部数据
+	GET http://www.ljsb.top:5000/front/boyall
+男生页面全部样式+数据
+	GET http://www.ljsb.top:5000/front/boyalls
+分类页面 小编推荐接口
+	GET http://ljsb.top:5000/front/typerecommend?type=8
+
+分类页面 精选最新接口
+	GET  http://ljsb.top:5000/front/typenew?type=8&page=1&limit=10
+分类页面 免费畅读
+	GET  http://ljsb.top:5000/front/typefree?type=8&page=1&limit=10
+根据小说分类id获取分类页面  样式+数据
+	GET http://www.ljsb.top:5000/front/types?type=5
+分类页面 更多
+	GET http://ljsb.top:5000/front/typepage?typepage=new&type=wbjxg&page=3&limit=10
+小说详情页下面推荐接口（大家在看）
+	（换一换，继续请求这个接口）
+	GET http://www.ljsb.top:5000/front/handpick?type=weeksearch
+根据榜单id获取小说列表
+	GET http://www.ljsb.top:5000/front/monthnov?monthly=1
+
+第一次进来推荐9本小说
+	GET http://www.ljsb.top:5000/front/firsttime
+获取用户收藏 返回书本 阅读进度 本周阅读分钟数
+	GET http://www.ljsb.top:5000/common/getcollects?analysis=4gs6hshn4alwssc7edggahtsyqjpt2qw
+获取用户浏览记录
+	GET http://www.ljsb.top:5000/common/gethistory?analysis=b5oawuas8fwv2da3go7fgesr241y5ggf
+
+用户第一次进来推荐6本小说 3本漫画
+	GET http://ljsb.top:5000/front/recomment
+
+
+
+
+
+

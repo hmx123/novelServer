@@ -106,6 +106,7 @@ class User(db.Model):
     read_time = db.Column(db.Integer, default=0)
     icon = db.Column(db.String(128), default='default.png')
     signer = db.Column(db.Text, default='')
+    login_time = db.Column(db.DATETIME, default=datetime.now)
 
     def __init__(self, username, password, phone, token, gender, icon, signer):
         self.username = username
@@ -137,6 +138,8 @@ class BookCollect(db.Model):
     isread = db.Column(db.Integer, default=0)
     read_progress = db.Column(db.Integer, default=0)
     type = db.Column(db.Integer)
+    update_time = db.Column(db.DATETIME, default=datetime.now)
+    # readtime = db.Column(db.Integer, default=0)
 
 class NovelWeb(db.Model):
     __tablename__ = 'novel_web'
@@ -324,6 +327,7 @@ class NovelReadingRecord(db.Model):
     bookId = db.Column(db.Integer)
     chapterId = db.Column(db.Integer)
     place = db.Column(db.Integer)
+    updatetime = db.Column(db.DATETIME, default=datetime.now)
 
 
 
@@ -334,6 +338,7 @@ class CartoonReadingRecord(db.Model):
     cartoonId = db.Column(db.Integer)
     chapterId = db.Column(db.Integer)
     place = db.Column(db.Integer)
+    updatetime = db.Column(db.DATETIME, default=datetime.now)
 
 class CommentReport(db.Model):
     __tablename__ = 'comment_report'
@@ -347,6 +352,13 @@ class CartoonCount(db.Model):
     __tablename__ = 'cartoon_count'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     count = db.Column(db.Integer)
+
+class BookRecommend(db.Model):
+    __tablename__ = 'book_recommend'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    noveltype = db.Column(db.Integer)
+    bookId = db.Column(db.Integer)
+    type = db.Column(db.Integer)
 
 
 

@@ -1,4 +1,5 @@
 import os, json
+import random
 import re
 import time
 from datetime import datetime
@@ -102,6 +103,7 @@ def resetpwd():
                 newpwd = form.newpwd2.data
                 user.password = newpwd
                 user.token = token
+                user.login_time = datetime.now()
                 db.session.add(user)
                 db.session.commit()
                 return json.dumps({"retCode": 200, "msg": "修改密码成功", "result": {"analysis": token}}, ensure_ascii=False)
@@ -127,6 +129,7 @@ def forgetpwd():
             token = rand_string()
             user.password = password
             user.token = token
+            user.login_time = datetime.now()
             db.session.add(user)
             db.session.commit()
             return json.dumps({"retCode": 200, "msg": "success", "result": {"analysis": token}}, ensure_ascii=False)
@@ -145,6 +148,7 @@ def login():
             # 生成token
             token = rand_string()
             user.token = token
+            user.login_time = datetime.now()
             db.session.commit()
             return json.dumps({"retCode": 200, "msg": "success", "result": {"analysis": token}}, ensure_ascii=False)
         return json.dumps({"retCode": 400, "msg": "账号或密码错误", "result": {"analysis": ""}}, ensure_ascii=False)
@@ -230,23 +234,26 @@ def getcollect():
             author = Author.query.get(authorId)
             # 根据小说id获取章节总数
             countchapter = novel.chaptercount
-            novel_list.append({
-                "id": novel.id,
-                "name": novel.name,
-                "cover": novel.cover,
-                "summary": novel.summary,
-                "label": novel_type.type,
-                "state": novel.state,
-                "enabled": novel.enabled,
-                "words": novel.words,
-                "created": novel.created,
-                "updated": novel.updated,
-                "authorId": authorId,
-                "author": author.name,
-                "extras": "",
-                "countchapter": countchapter,
-                "isread": is_read
-            })
+            chapter = Chapters.query.filter_by(novelId=novel.id).order_by(Chapters.chapterId).first()
+            if chapter:
+                novel_list.append({
+                    "id": novel.id,
+                    "name": novel.name,
+                    "cover": novel.cover,
+                    "summary": novel.summary,
+                    "label": novel_type.type,
+                    "state": novel.state,
+                    "enabled": novel.enabled,
+                    "words": novel.words,
+                    "created": novel.created,
+                    "updated": novel.updated,
+                    "authorId": authorId,
+                    "author": author.name,
+                    "extras": "",
+                    "countchapter": countchapter,
+                    "isread": is_read,
+                    "firstnum": chapter.chapterId
+                })
         return json.dumps({"retCode": 200, "msg": "success", "result": novel_list}, ensure_ascii=False)
     return json.dumps({"retCode": 400, "msg": "认证失败", "result": {}}, ensure_ascii=False)
 
@@ -276,6 +283,7 @@ def isread():
         if collect:
             # 修改已读状态
             collect.isread = 1
+            collect.update_time = datetime.now()
             db.session.commit()
             return json.dumps({"retCode": 200, "msg": "修改成功", "result": {}}, ensure_ascii=False)
         return json.dumps({"retCode": 400, "msg": "收藏不存在", "result": {}}, ensure_ascii=False)
@@ -358,6 +366,7 @@ def collectb():
                     # 收藏过了 更新阅读进度和阅读状态
                     is_collect.read_progress = read_progress
                     is_collect.isread = isread
+                    is_collect.update_time = datetime.now()
                     book_collect_list.append(is_collect)
                     continue
                 novel = Novels.query.get(bookId)
@@ -394,6 +403,7 @@ def upprogress():
         if int(read_progress) > 100:
             read_progress = 100
         book_collect.read_progress = read_progress
+        book_collect.update_time = datetime.now()
         db.session.add(book_collect)
         db.session.commit()
         return json.dumps({"retCode": 200, "msg": "更新成功", "result": {}}, ensure_ascii=False)
@@ -423,7 +433,7 @@ def getcollects():
     user = User.query.filter_by(token=token).first()
     if user:
         # 根据用户id获取阅读书籍
-        book_collect = BookCollect.query.filter_by(userId=user.id, type=1).order_by(-BookCollect.addtime).all()
+        book_collect = BookCollect.query.filter_by(userId=user.id, type=1).order_by(-BookCollect.update_time).all()
         # 用户本周阅读分钟数
         read_time = user.read_time
         # 根据bookId获取小说详情
@@ -438,24 +448,27 @@ def getcollects():
             author = Author.query.get(authorId)
             # 根据小说id获取章节总数
             countchapter = novel.chaptercount
-            novel_list.append({
-                "id": novel.id,
-                "name": novel.name,
-                "cover": novel.cover,
-                "summary": novel.summary,
-                "label": novel_type.type,
-                "state": novel.state,
-                "enabled": novel.enabled,
-                "words": novel.words,
-                "created": novel.created,
-                "updated": novel.updated,
-                "authorId": authorId,
-                "author": author.name,
-                "extras": "",
-                "countchapter": countchapter,
-                "isread": is_read,
-                "read_progress": read_progress
-            })
+            chapter = Chapters.query.filter_by(novelId=novel.id).order_by(Chapters.chapterId).first()
+            if chapter:
+                novel_list.append({
+                    "id": novel.id,
+                    "name": novel.name,
+                    "cover": novel.cover,
+                    "summary": novel.summary,
+                    "label": novel_type.type,
+                    "state": novel.state,
+                    "enabled": novel.enabled,
+                    "words": novel.words,
+                    "created": novel.created,
+                    "updated": novel.updated,
+                    "authorId": authorId,
+                    "author": author.name,
+                    "extras": "",
+                    "countchapter": countchapter,
+                    "isread": is_read,
+                    "read_progress": read_progress,
+                    "firstnum": chapter.chapterId
+                })
         return json.dumps({"retCode": 200, "msg": "success", "result": {"data": novel_list, "read_time": read_time}}, ensure_ascii=False)
     return json.dumps({"retCode": 401, "msg": "认证失败", "result": {}}, ensure_ascii=False)
 
@@ -734,6 +747,7 @@ def logincode():
     # 若用户存在 更新 否则插入新用户
     if u:
         u.token = token
+        u.login_time = datetime.now()
         username = u.username
         icon = u.icon
     else:
@@ -768,6 +782,7 @@ def wechat_login():
     u = User.query.filter_by(phone=unionid).first()
     if u:
         u.token = token
+        u.login_time = datetime.now()
         username = u.username
         icon = u.icon
     else:
@@ -913,6 +928,9 @@ def history():
             #判断用户是否已经添加过浏览记录了
             novel_history = NovelHistory.query.filter_by(userId=user.id, novelId=bookId, type=1).first()
             if novel_history:
+                novel_history.addtime = datetime.now()
+                db.session.add(novel_history)
+                db.session.commit()
                 return json.dumps({"retCode": 200, "msg": "success", "result": {}}, ensure_ascii=False)
             nh = NovelHistory(userId=user.id, novelId=bookId, type=1)
             db.session.add(nh)
@@ -985,24 +1003,27 @@ def gethistory():
                 author = Author.query.get(authorId)
                 # 根据小说id获取章节总数
                 countchapter = novel.chaptercount
-                novel_list.append({
-                    "id": novel.id,
-                    "name": novel.name,
-                    "cover": novel.cover,
-                    "summary": novel.summary,
-                    "label": novel_type.type,
-                    "state": novel.state,
-                    "enabled": novel.enabled,
-                    "words": novel.words,
-                    "created": novel.created,
-                    "updated": novel.updated,
-                    "authorId": authorId,
-                    "author": author.name,
-                    "extras": "",
-                    "countchapter": countchapter,
-                    "iscollect": iscollect,
-                    'timee': str(nh.addtime)
-                })
+                chapter = Chapters.query.filter_by(novelId=novel.id).order_by(Chapters.chapterId).first()
+                if chapter:
+                    novel_list.append({
+                        "id": novel.id,
+                        "name": novel.name,
+                        "cover": novel.cover,
+                        "summary": novel.summary,
+                        "label": novel_type.type,
+                        "state": novel.state,
+                        "enabled": novel.enabled,
+                        "words": novel.words,
+                        "created": novel.created,
+                        "updated": novel.updated,
+                        "authorId": authorId,
+                        "author": author.name,
+                        "extras": "",
+                        "countchapter": countchapter,
+                        "iscollect": iscollect,
+                        'timee': str(nh.addtime),
+                        "firstnum": chapter.chapterId
+                    })
         return json.dumps({"retCode": 200, "msg": "success", "result": novel_list}, ensure_ascii=False)
     return json.dumps({"retCode": 401, "msg": "认证失败", "result": {}}, ensure_ascii=False)
 
@@ -1275,6 +1296,9 @@ def carhistory():
             # 判断用户是否已经添加过浏览记录了
             novel_history = NovelHistory.query.filter_by(userId=user.id, novelId=bookId, type=typee).first()
             if novel_history:
+                novel_history.addtime = datetime.now()
+                db.session.add(novel_history)
+                db.session.commit()
                 return json.dumps({"retCode": 200, "msg": "success", "result": {}}, ensure_ascii=False)
             nh = NovelHistory(userId=user.id, novelId=bookId, type=typee)
             db.session.add(nh)
@@ -1484,6 +1508,7 @@ def carcollectb():
                     # 收藏过了 更新阅读进度和阅读状态
                     is_collect.read_progress = read_progress
                     is_collect.isread = isread
+                    is_collect.update_time = datetime.now()
                     book_collect_list.append(is_collect)
                     continue
                 if typee == 1:
@@ -1524,6 +1549,7 @@ def carupprogress():
             read_progress = 100
         book_collect.read_progress = read_progress
         book_collect.isread = 1
+        book_collect.update_time = datetime.now()
         db.session.add(book_collect)
         db.session.commit()
         return json.dumps({"retCode": 200, "msg": "更新成功", "result": {}}, ensure_ascii=False)
@@ -1539,7 +1565,7 @@ def cargetcollects():
     user = User.query.filter_by(token=token).first()
     if user:
         # 根据用户id获取阅读书籍
-        book_collect = BookCollect.query.filter_by(userId=user.id).order_by(-BookCollect.addtime).all()
+        book_collect = BookCollect.query.filter_by(userId=user.id).order_by(-BookCollect.update_time).all()
         # 用户本周阅读分钟数
         read_time = user.read_time
         # 根据bookId获取小说详情
@@ -1549,25 +1575,29 @@ def cargetcollects():
             read_progress = collect.read_progress
             if collect.type == 1:
                 novel = Novels.query.get(collect.bookId)
-                # 根据分类id获取分类
-                novel_type = NovelType.query.get(novel.label)
-                # 根据作者id获取作者
-                authorId = novel.authorId
-                author = Author.query.get(authorId)
-                author = author.name
-                cover = novel.cover
-                novel_list.append({
-                    "id": novel.id,
-                    "name": novel.name,
-                    "cover": cover,
-                    "author": author,
-                    "isread": is_read,
-                    "summary": novel.summary,
-                    "label": novel_type.type,
-                    "countchapter": novel.chaptercount,
-                    "read_progress": read_progress,
-                    "type": collect.type
-                })
+                if novel:
+                    # 根据分类id获取分类
+                    novel_type = NovelType.query.get(novel.label)
+                    # 根据作者id获取作者
+                    authorId = novel.authorId
+                    author = Author.query.get(authorId)
+                    author = author.name
+                    cover = novel.cover
+                    chapter = Chapters.query.filter_by(novelId=novel.id).order_by(Chapters.chapterId).first()
+                    if chapter:
+                        novel_list.append({
+                            "id": novel.id,
+                            "name": novel.name,
+                            "cover": cover,
+                            "author": author,
+                            "isread": is_read,
+                            "summary": novel.summary,
+                            "label": novel_type.type,
+                            "countchapter": novel.chaptercount,
+                            "read_progress": read_progress,
+                            "type": collect.type,
+                            "firstnum": chapter.chapterId
+                        })
             else:
                 novel = Cartoon.query.get(collect.bookId)
                 if novel:
@@ -1630,6 +1660,7 @@ def carisread():
         if collect:
             # 修改已读状态
             collect.isread = 1
+            collect.update_time = datetime.now()
             db.session.commit()
             return json.dumps({"retCode": 200, "msg": "修改成功", "result": {}}, ensure_ascii=False)
         return json.dumps({"retCode": 400, "msg": "收藏不存在", "result": {}}, ensure_ascii=False)
@@ -1678,6 +1709,7 @@ def reading():
             # 更新
             nr.chapterId = chapterId
             nr.place = place
+            nr.updatetime = datetime.now()
         else:
             nr = NovelReadingRecord(uid=user.id, bookId=bookId, chapterId=chapterId, place=place)
         db.session.add(nr)
@@ -1779,6 +1811,7 @@ def readingc():
             # 更新
             nr.chapterId = chapterId
             nr.place = place
+            nr.updatetime = datetime.now()
         else:
             nr = CartoonReadingRecord(uid=user.id, cartoonId=bookId, chapterId=chapterId, place=place)
         db.session.add(nr)
@@ -1965,6 +1998,213 @@ def reportcom():
 
 
 # -----------------------------------用户接口-end-------------------------------
+
+'''
+# 更新用户收藏本次阅读时间
+@bp.route('/upreadtime', methods=['POST'])
+def upreadtime():
+    token = request.form.get('analysis')
+    user = User.query.filter_by(token=token).first()
+    type = request.form.get('type')  # 0小说 1漫画
+    if type == '1':
+        type = 1
+    elif type == '0':
+        type = 0
+    else:
+        return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+    if user:
+        bookId = request.form.get('bookId')
+        if not bookId or not bookId.isdigit():
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        readtime = request.form.get('readtime')
+        if not readtime or not readtime.isdigit():
+            return json.dumps({"retCode": 404, "msg": "参数错误", "result": {}}, ensure_ascii=False)
+        # 判断用户收藏
+        bc = BookCollect.query.filter_by(userId=user.id, bookId=bookId, type=type).first()
+        if bc:
+            bc.readtime = readtime
+            bc.update_time = datetime.now()
+            db.session.add(bc)
+            db.session.commit()
+            return json.dumps({"retCode": 200, "msg": "success", "result": {}}, ensure_ascii=False)
+        return json.dumps({"retCode": 400, "msg": "收藏不存在", "result": {}}, ensure_ascii=False)
+    return json.dumps({"retCode": 400, "msg": "认证失败", "result": {}}, ensure_ascii=False)
+'''
+
+# 获取用户最近阅读小说
+@bp.route('/recent')
+def recent():
+    host = 'http://%s' % request.host
+    token = request.args.get('analysis')
+    user = User.query.filter_by(token=token).first()
+
+    if user:
+        nrr = NovelReadingRecord.query.filter_by(uid=user.id).order_by(-NovelReadingRecord.updatetime).first()
+        crr = CartoonReadingRecord.query.filter_by(uid=user.id).order_by(-CartoonReadingRecord.updatetime).first()
+
+        if not nrr and not crr:
+            # 获取用户收藏的一本小说返回
+            bc = BookCollect.query.filter_by(userId=user.id, type=1).all()
+            if bc:
+                rd = random.randint(0, len(bc))
+                bookcollect = bc[rd]
+                novel = Novels.query.get(bookcollect.bookId)
+                if not novel:
+                    r = random.randint(5000, 10000)
+                    novel = Novels.query.get(r)
+                    if not novel:
+                        novel = Novels.query.get(19)
+            else:
+                r = random.randint(5000, 10000)
+                novel = Novels.query.get(r)
+                if not novel:
+                    novel = Novels.query.get(19)
+
+            # 根据分类id获取分类
+            novel_type = NovelType.query.get(novel.label)
+            # 根据作者id获取作者
+            authorId = novel.authorId
+            author = Author.query.get(authorId)
+            author = author.name
+            cover = novel.cover
+            chapter = Chapters.query.filter_by(novelId=novel.id).order_by(Chapters.chapterId).first()
+            novel_dict = {}
+            if chapter:
+                novel_dict = {
+                    "id": novel.id,
+                    "name": novel.name,
+                    "cover": cover,
+                    "author": author,
+                    "isread": 0,
+                    "summary": novel.summary,
+                    "label": novel_type.type,
+                    "countchapter": novel.chaptercount,
+                    "read_progress": 0,
+                    "type": 1,
+                    "firstnum": chapter.chapterId
+                }
+            return json.dumps({"retCode": 200, "msg": "success", "result": novel_dict}, ensure_ascii=False)
+
+        elif nrr and crr:
+            ntime = nrr.updatetime
+            ctime = crr.updatetime
+            if ntime > ctime:
+                # 小说
+                novel = Novels.query.get(nrr.bookId)
+                if not novel:
+                    r = random.randint(5000, 10000)
+                    novel = Novels.query.get(r)
+                    if not novel:
+                        novel = Novels.query.get(19)
+                # 根据分类id获取分类
+                novel_type = NovelType.query.get(novel.label)
+                # 根据作者id获取作者
+                authorId = novel.authorId
+                author = Author.query.get(authorId)
+                author = author.name
+                cover = novel.cover
+                chapter = Chapters.query.filter_by(novelId=novel.id).order_by(Chapters.chapterId).first()
+                novel_dict = {}
+                if chapter:
+                    # 计算阅读进度
+                    read_chapterId = nrr.chapterId
+                    firstnum = chapter.chapterId
+                    countchapter = novel.chaptercount
+                    read_progress = int(((read_chapterId-firstnum)/countchapter) * 100)
+                    novel_dict = {
+                        "id": novel.id,
+                        "name": novel.name,
+                        "cover": cover,
+                        "author": author,
+                        "isread": 1,
+                        "summary": novel.summary,
+                        "label": novel_type.type,
+                        "countchapter": countchapter,
+                        "read_progress": read_progress,
+                        "type": 1,
+                        "firstnum": firstnum
+                    }
+                return json.dumps({"retCode": 200, "msg": "success", "result": novel_dict}, ensure_ascii=False)
+            else:
+                novel = Cartoon.query.get(crr.cartoonId)
+                novel_dict = {}
+                if novel:
+                    # 计算阅读进度
+                    read_chapterId = crr.chapterId
+                    firstnum = 1
+                    countchapter = novel.chaptercount
+                    read_progress = int(((read_chapterId - firstnum) / countchapter) * 100)
+                    author = novel.author
+                    cover = '%s/static/cartoon/%s/%s' % (host, novel.id, novel.cover)
+                    novel_dict = {
+                        "id": novel.id,
+                        "name": novel.name,
+                        "cover": cover,
+                        "author": author,
+                        "isread": 1,
+                        "read_progress": read_progress,
+                        "type": 2
+                    }
+                return json.dumps({"retCode": 200, "msg": "success", "result": novel_dict}, ensure_ascii=False)
+        elif nrr:
+            # 小说
+            novel = Novels.query.get(nrr.bookId)
+            if not novel:
+                r = random.randint(5000, 10000)
+                novel = Novels.query.get(r)
+                if not novel:
+                    novel = Novels.query.get(19)
+            # 根据分类id获取分类
+            novel_type = NovelType.query.get(novel.label)
+            # 根据作者id获取作者
+            authorId = novel.authorId
+            author = Author.query.get(authorId)
+            author = author.name
+            cover = novel.cover
+            chapter = Chapters.query.filter_by(novelId=novel.id).order_by(Chapters.chapterId).first()
+            novel_dict = {}
+            if chapter:
+                # 计算阅读进度
+                read_chapterId = nrr.chapterId
+                firstnum = chapter.chapterId
+                countchapter = novel.chaptercount
+                read_progress = int(((read_chapterId - firstnum) / countchapter) * 100)
+                novel_dict = {
+                    "id": novel.id,
+                    "name": novel.name,
+                    "cover": cover,
+                    "author": author,
+                    "isread": 1,
+                    "summary": novel.summary,
+                    "label": novel_type.type,
+                    "countchapter": countchapter,
+                    "read_progress": read_progress,
+                    "type": 1,
+                    "firstnum": firstnum
+                }
+            return json.dumps({"retCode": 200, "msg": "success", "result": novel_dict}, ensure_ascii=False)
+        elif crr:
+            novel = Cartoon.query.get(crr.cartoonId)
+            novel_dict = {}
+            if novel:
+                # 计算阅读进度
+                read_chapterId = crr.chapterId
+                firstnum = 1
+                countchapter = novel.chaptercount
+                read_progress = int(((read_chapterId - firstnum) / countchapter) * 100)
+                author = novel.author
+                cover = '%s/static/cartoon/%s/%s' % (host, novel.id, novel.cover)
+                novel_dict = {
+                    "id": novel.id,
+                    "name": novel.name,
+                    "cover": cover,
+                    "author": author,
+                    "isread": 1,
+                    "read_progress": read_progress,
+                    "type": 2
+                }
+            return json.dumps({"retCode": 200, "msg": "success", "result": novel_dict}, ensure_ascii=False)
+    return json.dumps({"retCode": 400, "msg": "认证失败", "result": {}}, ensure_ascii=False)
 
 
 # ----------------------------------第三版漫画接口-end--------------------------------------------------

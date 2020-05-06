@@ -2,7 +2,7 @@
 from flask import request
 from functools import wraps
 
-from apps.common.models import NovelType, Author, Cartoon, CartoonType, CartoonChapter
+from apps.common.models import NovelType, Author, Cartoon, CartoonType, CartoonChapter, Chapters
 from exts import redis_store
 
 
@@ -53,28 +53,32 @@ def novelOb_novelList(novels):
         author = Author.query.get(authorId)
         # 根据小说id获取章节总数
         countchapter = novel.chaptercount
-        if novel.updated:
-            clickc = int(str(novel.updated)[-5:-1])
-        else:
-            clickc = 1046
-        novel_list.append({
-            "id": novel.id,
-            "name": novel.name,
-            "cover": novel.cover,
-            "summary": novel.summary,
-            "label": novel_type.type,
-            "state": novel.state,
-            "enabled": novel.enabled,
-            "words": novel.words,
-            "created": novel.created,
-            "updated": novel.updated,
-            "authorId": authorId,
-            "author": author.name,
-            "extras": "",
-            "countchapter": countchapter,
-            "clickc": clickc,
-            "type": 1
-        })
+        # 根据小说id获取第一章的num
+        chapter = Chapters.query.filter_by(novelId=novel.id).order_by(Chapters.chapterId).first()
+        if chapter:
+            if novel.updated:
+                clickc = int(str(novel.updated)[-5:-1])
+            else:
+                clickc = 1046
+            novel_list.append({
+                "id": novel.id,
+                "name": novel.name,
+                "cover": novel.cover,
+                "summary": novel.summary,
+                "label": novel_type.type,
+                "state": novel.state,
+                "enabled": novel.enabled,
+                "words": novel.words,
+                "created": novel.created,
+                "updated": novel.updated,
+                "authorId": authorId,
+                "author": author.name,
+                "extras": "",
+                "countchapter": countchapter,
+                "clickc": clickc,
+                "type": 1,
+                "firstnum": chapter.chapterId
+            })
     return novel_list
 
 # 漫画对象解析返回漫画解析好的list

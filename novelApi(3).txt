@@ -1313,14 +1313,252 @@
 		                "count": 239
 		            }
 		        ],
+		        "data2"[
+		        	{
+				        "id": 1,
+				        "type": "新作",
+				        "img": "http://www.ljsb.top:5000/static/images/cartoon/cheng/xinzuo.png"
+				    },
+				    {
+				        "id": 4,
+				        "type": "穿越",
+				        "img": "http://www.ljsb.top:5000/static/images/cartoon/cheng/chuanyue.png"
+				    },
+				    {
+				        "id": 7,
+				        "type": "搞笑",
+				        "img": "http://www.ljsb.top:5000/static/images/cartoon/cheng/gaoxiao.png"
+				    },
+				    {
+				        "id": 37,
+				        "type": "日漫",
+				        "img": "http://www.ljsb.top:5000/static/images/cartoon/cheng/riman.png"
+				    }
+		        ],
 		        "inall": 2760,
 		        "week": 20
 		    }
 		}
 
 		//参数说明
+			data2  分类最上面4个特殊分类
 			inall  总共漫画册数
 			week   本周新增漫画册数
 			count  分类漫画册数
 
+书城小说男生女生分类
+	GET http://www.ljsb.top:5000/front/chengtype?gender=1
+	args gender 1男 0女
+	return
+		{
+		    "retCode": 200,
+		    "msg": "success",
+		    "result": [
+		        {
+		            "id": 3,
+		            "type": "都市",
+		            "cover": "http://www.ljsb.top:5000/static/images/boy/cheng/dushi.jpg",
+		            "channelId": 1,
+		            "count": 2105
+		        },
+		        {
+		            "id": 4,
+		            "type": "玄幻",
+		            "cover": "http://www.ljsb.top:5000/static/images/boy/cheng/xuanhuan.jpg",
+		            "channelId": 1,
+		            "count": 1530
+		        }
+		    ]
+		}
+
+		参数说明
+			inall 小说总数
+
+书城漫画分类
+	GET http://www.ljsb.top:5000/front/chengcartype
+	return
+		{
+		    "retCode": 200,
+		    "msg": "success",
+		    "result": {
+		        "data": [
+		            {
+		                "id": 1,
+		                "type": "新作",
+		                "img": "http://www.ljsb.top:5000/static/images/cartoon/cheng/xinzuo.jpg",
+		                "count": 89
+		            },
+		            {
+		                "id": 2,
+		                "type": "热血",
+		                "img": "http://www.ljsb.top:5000/static/images/cartoon/cheng/rexue.jpg",
+		                "count": 412
+		            }
+		            
+		        ],
+		        "data2": [
+		            {
+		                "id": 4,
+		                "type": "穿越",
+		                "img": "http://www.ljsb.top:5000/static/images/cartoon/cheng/chuanyue.png"
+		            },
+		            {
+		                "id": 37,
+		                "type": "日漫",
+		                "img": "http://www.ljsb.top:5000/static/images/cartoon/cheng/riman.png"
+		            }
+		        ]
+		    }
+		}
+
+		参数说明 
+			data2 为最上面的两个分类
+
+
+更新用户收藏本次阅读时间（废弃）
+	POST http://www.ljsb.top:5000/common/upreadtime
+	form-data
+		analysis   //用户标识
+		type       // 1小说 2漫画
+		bookId     //小说id或者漫画id
+		readtime   //本次阅读时间
+	return
+		成功
+			{"retCode": 200, "msg": "success", "result": {}}
+		失败
+			{"retCode": 404, "msg": "参数错误", "result": {}}
+			{"retCode": 400, "msg": "收藏不存在", "result": {}}
+			{"retCode": 400, "msg": "认证失败", "result": {}}
+
+获取用户最近阅读的一本小说或漫画
+	GET http://ljsb.top:5000/common/recent?analysis=apv8lapzlcfkwa8lg5hayy57b8qm88s8
+	args
+		analysis  //用户标识
+	return
+		小说
+			{
+			    "retCode": 200,
+			    "msg": "success",
+			    "result": {
+			        "id": 8791,
+			        "name": "宇宙之敌",
+			        "cover": "http://www.xbiquge.la/files/article/image/49/49881/49881s.jpg",
+			        "author": "自今",
+			        "isread": 0,
+			        "summary": "    好奇的人类不知疲倦地一代又一代向浩瀚的宇宙发射探测器，寻找外星文明，使自己不孤独，结果，他们来了。",
+			        "label": "科幻",
+			        "countchapter": 72,
+			        "read_progress": 0,
+			        "type": 1,
+			        "firstnum": 1
+			    }
+			}
+		漫画
+			{
+			    "retCode": 200,
+			    "msg": "success",
+			    "result": {
+			        "id": 1033,
+			        "name": "神俑降临",
+			        "cover": "http://ljsb.top:5000/static/cartoon/1033/feec0000c5627e4c433c.jpg",
+			        "author": "莒小暗",
+			        "isread": 0,
+			        "read_progress": 0,
+			        "type": 2
+			    }
+			}
+		失败
+			{
+			    "retCode": 400,
+			    "msg": "认证失败",
+			    "result": {}
+			}
+
+			
+用户第一次选择分类推荐小说
+	GET http://ljsb.top:5000/front/recommendt?types=1,1,1,1,2&booktypes=3,4,9,14,37
+	args
+		types=1,1,1,1,2      //1小说 2漫画
+		booktypes=3,4,9,14,37  //小说id分类（3都市，4玄幻，9言情，14二次元） 或者漫画id分类（37日漫） 
+	return
+		{
+		    "retCode": 200,
+		    "msg": "success",
+		    "result": [
+		        {
+		            "id": 4729,
+		            "name": "金粉",
+		            "cover": "https://www.qb5.tw/files/article/image/113/113540/113540s.jpg",
+		            "summary": "好不容易走上人生巅峰的李南风，万没想到这一生会突然中断在晏衡那黑心竖子的手上，重生之后她准备了长达四十页纸的谋杀攻略，矢志要为己除害……\t\r",
+		            "label": "都市",
+		            "state": 1,
+		            "enabled": 1,
+		            "words": 1260000,
+		            "created": 0,
+		            "updated": 1583910360,
+		            "authorId": 4295,
+		            "author": "青铜穗",
+		            "extras": "",
+		            "countchapter": 482,
+		            "clickc": 1036,
+		            "type": 1,
+		            "firstnum": 1
+		        },
+		        {
+				    "id": 1128,
+				    "cover": "http://www.ljsb.top:5000/static/cartoon/1128/fee00002857dfdc423cf.jpg",
+				    "isread": 0,
+				    "read_progress": 0,
+				    "type": 2
+				}
+		    ]
+		}
+
+开屏页根据性别选择分类
+	GET http://ljsb.top:5000/front/noveltype?type=1
+	args 
+		type  1男0女
+	return
+		{
+		    "retCode": 200,
+		    "msg": "success",
+		    "result": [
+		        {"id": 3, "type": "都市"},
+		        {"id": 21, "type": "游戏"},
+		        {"id": 5, "type": "仙侠"},
+		        {"id": 8, "type": "科幻"},
+		    ]
+		}
+
+
+开屏页根据用户选择分类推荐小说
+	GET http://ljsb.top:5000/front/recommendf?types=3,4
+	args 
+		types 3,4   //分类id 中间用英文逗号分隔
+
+	return
+		{
+		    "retCode": 200,
+		    "msg": "success",
+		    "result": [
+		        {
+		            "id": 18644,
+		            "name": "此生我无法拥有你",
+		            "cover": "http://www.xbiquge.la/files/article/image/44/44722/44722s.jpg",
+		            "summary": "    一段纯爱情缘，简单纯粹的人，简单纯粹的心。我只想为你建造一个简单快乐的世界，这个世界里，只有我和你。    大女主和小忠犬人设，但在最求梦想的道路上，两个各显其能，女主外表冰冷，只对男主温柔。    男主痞帅，只对女主撒娇耍赖泼皮。笑点不少，前面多甜后面多虐，结局是好的！",
+		            "label": "都市",
+		            "state": 1,
+		            "enabled": 1,
+		            "words": 0,
+		            "created": 0,
+		            "updated": 1588119240,
+		            "authorId": 16502,
+		            "author": "稀有物s",
+		            "extras": "",
+		            "countchapter": 154,
+		            "clickc": 1924,
+		            "type": 1,
+		            "firstnum": 1
+		        }]
+		}
 

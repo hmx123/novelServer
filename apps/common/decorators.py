@@ -23,9 +23,12 @@ def xbqg_1h_data():
     response.encoding = 'utf-8'
     html = etree.HTML(response.text)
     # 解析首页的最新更新链接
-    novel_href_list = html.xpath('//div[@id="newscontent"]/div[@class="r"]/ul/li/span/a/@href')
-    novel_name_list = html.xpath('//div[@id="newscontent"]/div[@class="r"]/ul/li/span/a/text()')
-    novel_author_list = html.xpath('//div[@id="newscontent"]/div[@class="r"]/ul/li/span[@class="s5"]/text()')
+    # novel_href_list = html.xpath('//div[@id="newscontent"]/div[@class="r"]/ul/li/span/a/@href')
+    novel_href_list = html.xpath('//div[@id="newscontent"]/div/ul/li/span[@class="s2"]/a/@href')
+    # novel_name_list = html.xpath('//div[@id="newscontent"]/div[@class="r"]/ul/li/span/a/text()')
+    novel_name_list = html.xpath('//div[@id="newscontent"]//ul/li/span[@class="s2"]/a/text()')
+    # novel_author_list = html.xpath('//div[@id="newscontent"]/div[@class="r"]/ul/li/span[@class="s5"]/text()')
+    novel_author_list = html.xpath('//div[@id="newscontent"]/div/ul/li/span[contains(@class,"s4") or contains(@class,"s5")]/text()')
     for x in range(len(novel_href_list)):
         # 获取小说作者id
         sql = "select id from author where name='%s';"
